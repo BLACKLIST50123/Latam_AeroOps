@@ -1,0 +1,8 @@
+build/
+dist/
+nbproject/private/
+local.properties
+.mtj.tmp/
+*.jar
+*.war
+*.ear
