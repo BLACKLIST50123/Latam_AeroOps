@@ -14,11 +14,12 @@ public class VueloOperativoDAO {
     public boolean registrarVueloOperativo(VueloOperativo vo) {
         String sqlVuelo = "INSERT INTO vuelos_operativos (cod_vuelo, id_programacion, fecha_operacion, estado_oooi, estado_vuelo) VALUES (?, ?, ?, ?, ?)";
         String sqlTrip = "INSERT INTO tripulacion_asignada (id_vuelo_operativo, id_empleado, rol_en_vuelo) VALUES (?, ?, ?)";
+        String sqlEstado = "UPDATE empleados SET estado_asignacion = 'ASIGNADO' WHERE id_empleado = ?"; 
         
         Connection con = null;
         try {
             con = ConexionBD.getInstancia().getConexion();
-            con.setAutoCommit(false); // 🔥 Iniciamos la transacción atómica
+            con.setAutoCommit(false); 
             
             // 1. Guardamos el vuelo operativo
             PreparedStatement psVuelo = con.prepareStatement(sqlVuelo, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -29,45 +30,55 @@ public class VueloOperativoDAO {
             psVuelo.setString(5, vo.getEstadoVuelo());
             psVuelo.executeUpdate();
             
-            // Recuperamos el ID autoincremental generado por PostgreSQL
             ResultSet rs = psVuelo.getGeneratedKeys();
             int idVueloOperativo = 0;
             if (rs.next()) {
                 idVueloOperativo = rs.getInt(1);
             }
             
-            // 2. Registramos al Capitán
+            // Preparar el statement para la asignación y el cambio de estado
             PreparedStatement psTrip = con.prepareStatement(sqlTrip);
+            PreparedStatement psEstado = con.prepareStatement(sqlEstado); // 🔥 Preparar el update
+            
+            // 2. Registramos al Capitán y cambiamos su estado
             psTrip.setInt(1, idVueloOperativo);
             psTrip.setInt(2, vo.getCapitan().getIdEmpleado());
             psTrip.setString(3, "Piloto");
             psTrip.executeUpdate();
             
-            // 3. Registramos al Copiloto
+            psEstado.setInt(1, vo.getCapitan().getIdEmpleado()); // 🔥
+            psEstado.executeUpdate();                            // 🔥
+            
+            // 3. Registramos al Copiloto y cambiamos su estado
             psTrip.setInt(2, vo.getPrimerOficial().getIdEmpleado());
             psTrip.setString(3, "Copiloto");
             psTrip.executeUpdate();
             
-            // 4. Registramos a toda la lista de TCPs seleccionados
+            psEstado.setInt(1, vo.getPrimerOficial().getIdEmpleado()); // 🔥
+            psEstado.executeUpdate();                                  // 🔥
+            
+            // 4. Registramos a los TCPs y cambiamos sus estados
             for (int i = 0; i < vo.getTripulacionCabina().size(); i++) {
                 TripulanteCabina tcp = vo.getTripulacionCabina().get(i);
                 psTrip.setInt(2, tcp.getIdEmpleado());
                 
-                // La regla: El primer chip presionado en la GUI es el Jefe
                 if (i == 0) {
                     psTrip.setString(3, "Jefe de Cabina");
                 } else {
                     psTrip.setString(3, "TCP");
                 }
                 psTrip.executeUpdate();
+                
+                psEstado.setInt(1, tcp.getIdEmpleado()); // 🔥
+                psEstado.executeUpdate();                // 🔥
             }
             
-            con.commit(); // Fin de la transacción con éxito
+            con.commit(); // Si todo sale bien, guarda los INSERTS y los UPDATES juntos
             return true;
         } catch (Exception e) {
             System.out.println("Error de transacción: " + e.getMessage());
             try {
-                if (con != null) con.rollback(); // Deshacemos todo ante cualquier fallo
+                if (con != null) con.rollback(); 
             } catch (Exception ex) {}
             return false;
         } finally {
@@ -76,6 +87,7 @@ public class VueloOperativoDAO {
             } catch (Exception ex) {}
         }
     }
+
 // =============================================================================    
 // MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN PENDIENTES A DESPACHO TÉCNICO (W&B)
 // =============================================================================
@@ -113,7 +125,7 @@ public class VueloOperativoDAO {
 // ====================================================================
     public java.util.List<Clases.VueloOperativo> obtenerVuelosDetalladosParaDespacho() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
-        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos " +
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " + 
                      "FROM vuelos_operativos vo " +
                      "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
@@ -126,14 +138,15 @@ public class VueloOperativoDAO {
             while(rs.next()){
                 Clases.VueloOperativo vo = new Clases.VueloOperativo();
                 vo.setCodVuelo(rs.getString("cod_vuelo"));
-
+                
                 Clases.VueloProgramado vp = new Clases.VueloProgramado();
                 vp.setOrigenDestino(rs.getString("origen_destino"));
                 vp.setMatricula(rs.getString("matricula"));
                 vp.setModeloAeronave(rs.getString("modelo"));
                 vp.setCapacidadAsientos(rs.getInt("capacidad_asientos"));
                 vo.setVueloBase(vp);
-
+                vp.setPesoMaximoDespegue(rs.getDouble("peso_maximo_despegue"));
+                
                 // Sub-consulta rápida para traer el nombre del Capitán asignado
                 String sqlCap = "SELECT e.nombre FROM tripulacion_asignada ta JOIN empleados e ON ta.id_empleado = e.id_empleado WHERE ta.id_vuelo_operativo = ? AND ta.rol_en_vuelo = 'Piloto'";
                 java.sql.PreparedStatement psC = con.prepareStatement(sqlCap);
@@ -165,4 +178,42 @@ public class VueloOperativoDAO {
         }
         return lista;
     }
+
+// ====================================================================
+// MÉTODO PARA CANCELAR UN VUELO Y LIBERAR A LA TRIPULACIÓN
+// ====================================================================
+    public boolean cancelarVueloOperativo(String codVuelo) {
+        String sqlCancelarVuelo = "UPDATE vuelos_operativos SET estado_vuelo = 'CANCELADO' WHERE cod_vuelo = ?";
+        
+        // Subconsulta potente: Actualiza a DISPONIBLE solo a los empleados que estaban en este vuelo
+        String sqlLiberarTripulacion = "UPDATE empleados SET estado_asignacion = 'DISPONIBLE' " +
+                                       "WHERE id_empleado IN (SELECT id_empleado FROM tripulacion_asignada WHERE id_vuelo_operativo = " +
+                                       "(SELECT id_vuelo_operativo FROM vuelos_operativos WHERE cod_vuelo = ?))";
+
+        java.sql.Connection con = null;
+        try {
+            con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            con.setAutoCommit(false); // Iniciamos transacción atómica
+
+            // 1. Cancelamos el vuelo
+            java.sql.PreparedStatement psVuelo = con.prepareStatement(sqlCancelarVuelo);
+            psVuelo.setString(1, codVuelo);
+            psVuelo.executeUpdate();
+
+            // 2. Liberamos a la tripulación
+            java.sql.PreparedStatement psTrip = con.prepareStatement(sqlLiberarTripulacion);
+            psTrip.setString(1, codVuelo);
+            psTrip.executeUpdate();
+
+            con.commit(); // Confirmamos todos los cambios
+            return true;
+
+        } catch (Exception e) {
+            System.out.println("Error crítico al cancelar vuelo: " + e.getMessage());
+            try { if (con != null) con.rollback(); } catch (Exception ex) {} // Deshacemos todo si falla
+            return false;
+        } finally {
+            try { if (con != null) con.setAutoCommit(true); } catch (Exception ex) {}
+        }
+    }    
 }

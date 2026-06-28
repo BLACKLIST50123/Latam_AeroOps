@@ -17,9 +17,8 @@ import java.util.List;
 public class OficialOperaciones_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OficialOperaciones_GUI.class.getName());
-    // Límite de peso temporal para pruebas (Luego lo traeremos dinámicamente de PostgreSQL)
-    private double mtowActual = 79000.0;
-
+    private double mtowActual;
+    
     public OficialOperaciones_GUI() {
         initComponents();
         // LISTA GLOBAL PARA GUARDAR A LOS SELECCIONADOS
@@ -76,6 +75,36 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         cargarComboBoxesDespacho();
     // Cargamos los vuelos pendientes de despacho para la vista
         cargarVuelosPendientesDespacho();
+    // Fuerza el color gris claro (puedes ajustar los valores RGB)
+        txtAreaClima.setForeground(new java.awt.Color(204,204,204));
+    // Forzamos el color del perfil
+        lblUsuario.setForeground(new java.awt.Color(204, 204, 204));
+        lblRolSistema.setForeground(new java.awt.Color(204,204,204));
+    // Creamos un Timer que se ejecuta cada 3000 milisegundos (3 segundos)
+        javax.swing.Timer timerReactivo = new javax.swing.Timer(3000, new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                // 1. Refrescamos la lista lateral silenciosamente
+                cargarVuelosPendientesDespacho();
+                pnlListaItemsVuelo.revalidate();
+                pnlListaItemsVuelo.repaint();
+
+                // 2. VALIDACIÓN REACTIVA PARA EL PANEL CENTRAL
+                ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+                int cantidadPendientes = dao.obtenerVuelosPendientesDespacho().size();
+
+                // Asumiendo que tu panel padre del CardLayout se llama pnlContenedorDespacho
+                java.awt.CardLayout card = (java.awt.CardLayout) pnlDespachoCuerpo.getLayout();
+
+                if (cantidadPendientes == 0) {
+                    // Si ya no hay vuelos, forzamos la vista vacía
+                    card.show(pnlDespachoCuerpo, "card2"); // debe ser el nombre (Card Name)
+                } 
+                // Nota: No ponemos un "else" para mostrar el lleno automáticamente, 
+                // para evitar interrumpir al usuario si está navegando en otras pestañas.
+            }
+        });
+        timerReactivo.start(); // Blindamos los campos desde el inicio    
         
     // ACTIVACIÓN DE MATEMÁTICA EN TIEMPO REAL PARA WEIGHT & BALANCE
         javax.swing.event.DocumentListener escuchadorPesos = new javax.swing.event.DocumentListener() {
@@ -1914,7 +1943,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
 
         pnlFondoTxtArea.setBackground(new java.awt.Color(15, 23, 42));
 
-        txtAreaClima.setEditable(false);
         txtAreaClima.setBackground(new java.awt.Color(15, 23, 42));
         txtAreaClima.setColumns(20);
         txtAreaClima.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
@@ -2007,6 +2035,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         lblPesoMaximo.setForeground(new java.awt.Color(148, 163, 175));
         lblPesoMaximo.setText("00.000 KG");
 
+        barraMTOW.setBackground(new java.awt.Color(30, 41, 59));
         barraMTOW.setForeground(new java.awt.Color(34, 197, 94));
         barraMTOW.setString("");
 
@@ -2023,7 +2052,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         pnlFondoAprobado.setLayout(pnlFondoAprobadoLayout);
         pnlFondoAprobadoLayout.setHorizontalGroup(
             pnlFondoAprobadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblAprobado, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(lblAprobado, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
         );
         pnlFondoAprobadoLayout.setVerticalGroup(
             pnlFondoAprobadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2031,7 +2060,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         );
 
         lblPorcentajeMTOW.setForeground(new java.awt.Color(148, 163, 175));
-        lblPorcentajeMTOW.setText("00% MTOW");
+        lblPorcentajeMTOW.setText("00% del MTOW");
 
         javax.swing.GroupLayout pnlFondoCalculoMTOWLayout = new javax.swing.GroupLayout(pnlFondoCalculoMTOW);
         pnlFondoCalculoMTOW.setLayout(pnlFondoCalculoMTOWLayout);
@@ -2042,16 +2071,16 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addGroup(pnlFondoCalculoMTOWLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(barraMTOW, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlFondoCalculoMTOWLayout.createSequentialGroup()
-                        .addComponent(lblSumaTotal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblSumaTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 81, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblSlash, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(lblSlash, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblPesoMaximo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(213, 213, 213)
-                        .addComponent(pnlFondoAprobado, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(lblPesoMaximo, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                        .addGap(191, 191, 191)
+                        .addComponent(pnlFondoAprobado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(pnlFondoCalculoMTOWLayout.createSequentialGroup()
-                        .addComponent(lblPorcentajeMTOW, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(349, 349, 349)))
+                        .addComponent(lblPorcentajeMTOW, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addGap(18, 18, 18))
         );
         pnlFondoCalculoMTOWLayout.setVerticalGroup(
@@ -2136,6 +2165,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnCancelarVuelo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnCancelarVuelo.setText("Cancelar Vuelo");
         btnCancelarVuelo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCancelarVuelo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnCancelarVueloMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnCancelarVueloLayout = new javax.swing.GroupLayout(fondoBtnCancelarVuelo);
         fondoBtnCancelarVuelo.setLayout(fondoBtnCancelarVueloLayout);
@@ -2152,6 +2186,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         cbxVuelosDespacho.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         cbxVuelosDespacho.setForeground(new java.awt.Color(255, 255, 255));
         cbxVuelosDespacho.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "LA801 | OB-1995" }));
+        cbxVuelosDespacho.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         cbxVuelosDespacho.addActionListener(this::cbxVuelosDespachoActionPerformed);
 
         javax.swing.GroupLayout pnlContenidoDespachoLayout = new javax.swing.GroupLayout(pnlContenidoDespacho);
@@ -2163,13 +2198,13 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                         .addComponent(lblDespachoTecnico, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
-                        .addGap(574, 574, 574)
-                        .addComponent(cbxVuelosDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(554, 554, 554)
+                        .addComponent(cbxVuelosDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(pnlFondoResumenRuta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                         .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                                .addComponent(lblRequerimientosTecnicos, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                                .addComponent(lblRequerimientosTecnicos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGap(277, 277, 277))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
                                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -3350,50 +3385,109 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCrearVueloMouseClicked
 
     private void cbxVuelosDespachoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxVuelosDespachoActionPerformed
-        if (cbxVuelosDespacho.getSelectedIndex() <= 0 || cbxVuelosDespacho.getSelectedItem() instanceof String) {
-            // Si regresa a la opción por defecto, limpiamos los campos del formulario
+        // 1. LIMPIAR TODO ANTES DE HACER NADA
+        limpiarCampos();
+
+        // 2. Si el usuario seleccionó la opción por defecto (índice 0)
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
             lblResumenRuta.setText("<html><font color='#94a3b8'>Seleccione un vuelo operativo para cargar los requerimientos de despacho.</font></html>");
-            txtAreaClima.setText("");
-            txtFieldPasajeros.setText("");
-            txtFieldEquipaje.setText("");
-            txtFieldCarga.setText("");
-            txtFieldCombRuta.setText("");
-            txtFieldCombReserva.setText("");
-            txtFieldCombustible.setText("");
-            calcularPesosEnVivo(); // Resetea la barra a 0
             return;
         }
 
-        // Recuperamos el objeto consolidado puro
+        // 3. Cargamos el nuevo objeto vuelo
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+        // ENCENDEMOS LOS CAMPOS AL SELECCIONAR UN VUELO
+        java.awt.Color colorActivo = new java.awt.Color(15, 23, 42); // Color de los campos
 
-        // Mapeamos los datos para las etiquetas con el estilo HTML limpio de tu prototipo
+        txtAreaClima.setEditable(true);
+        txtAreaClima.setFocusable(true);
+        txtAreaClima.setBackground(colorActivo);
+
+        txtFieldPasajeros.setEditable(true);
+        txtFieldPasajeros.setFocusable(true);
+        txtFieldPasajeros.setBackground(colorActivo);
+
+        txtFieldEquipaje.setEditable(true);
+        txtFieldEquipaje.setFocusable(true);
+        txtFieldEquipaje.setBackground(colorActivo);
+
+        txtFieldCarga.setEditable(true);
+        txtFieldCarga.setFocusable(true);
+        txtFieldCarga.setBackground(colorActivo);
+
+        txtFieldCombRuta.setEditable(true);
+        txtFieldCombRuta.setFocusable(true);
+        txtFieldCombRuta.setBackground(colorActivo);
+
+        txtFieldCombReserva.setEditable(true);
+        txtFieldCombReserva.setFocusable(true);
+        txtFieldCombReserva.setBackground(colorActivo);
+        
+        // 4. Actualizamos el MTOW dinámico (Modelo -> VueloProgramado -> Aeronave)
+        this.mtowActual = voSel.getVueloBase().getPesoMaximoDespegue();
+        lblPesoMaximo.setText(mtowActual + " KG"); // Actualizamos la etiqueta del máximo
+
+        // 5. Actualizamos el resumen del vuelo
         String capName = (voSel.getCapitan() != null) ? voSel.getCapitan().getNombre() : "No asignado";
-        String jefeName = (!voSel.getTripulacionCabina().isEmpty()) ? voSel.getTripulacionCabina().get(0).getNombre() : "No asignado";
+        String jefeName = (voSel.getTripulacionCabina() != null && !voSel.getTripulacionCabina().isEmpty()) ? voSel.getTripulacionCabina().get(0).getNombre() : "No asignado";
 
         lblResumenRuta.setText("<html><font color='#94a3b8'>Ruta:</font> <font color='#ffffff'><b>" + voSel.getVueloBase().getOrigenDestino() + 
-                               "</b></font>  <font color='#94a3b8'>Aeronave:</font> <font color='#ffffff'><b>" + voSel.getVueloBase().getMatricula() + " (" + voSel.getVueloBase().getModeloAeronave() + ")</b></font> " +
+                               "</b></font>  <font color='#94a3b8'>Aeronave:</font> <font color='#ffffff'><b>" + voSel.getVueloBase().getMatricula() + "</b></font> " +
                                " <font color='#94a3b8'>CAP:</font> <font color='#ffffff'><b>Cdt. " + capName + "</b></font>  <font color='#94a3b8'>TCP Jefe:</font> <font color='#ffffff'><b>" + jefeName + "</b></font></html>");
 
-        // Inyectamos un METAR realista según el destino de forma dinámica
-        if (voSel.getVueloBase().getOrigenDestino().contains("CHM") || voSel.getVueloBase().getOrigenDestino().contains("Chimbote")) {
-            txtAreaClima.setText("METAR SPHZ 261800Z 21008KT 9999 FEW020 19/14 Q1014 NOSIG");
-        } else {
-            txtAreaClima.setText("METAR SPZO 261800Z 28004KT 9999 FEW050 SCT100 15/02 Q1031");
-        }
 
-        // 🛠️ Ajustamos el MTOW máximo permitido según el modelo del avión seleccionado
-        if (voSel.getVueloBase().getModeloAeronave().equalsIgnoreCase("A320neo")) {
-            this.mtowActual = 79000.0;
-        } else if (voSel.getVueloBase().getModeloAeronave().equalsIgnoreCase("B737-800")) {
-            this.mtowActual = 79016.0;
-        } else {
-            this.mtowActual = 23000.0; // ATR Fallback
-        }
-
-        // Forzamos el recalculo inicial con los campos en blanco
-        calcularPesosEnVivo();
     }//GEN-LAST:event_cbxVuelosDespachoActionPerformed
+
+    private void btnCancelarVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCancelarVueloMouseClicked
+        // 1. Validamos que haya un vuelo seleccionado
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione un vuelo operativo para cancelar.", "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+
+        // 2. Confirmación de seguridad en color rojo
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+                "¿Está seguro que desea CANCELAR el vuelo " + voSel.getCodVuelo() + " de forma definitiva?\nLa tripulación asignada será liberada.",
+                "Alerta Crítica: Cancelar Vuelo",
+                javax.swing.JOptionPane.YES_NO_OPTION,
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+
+            // 3. Ejecutamos la transacción en la Base de Datos
+            if (dao.cancelarVueloOperativo(voSel.getCodVuelo())) {
+
+                // Mensaje de éxito
+                javax.swing.JOptionPane.showMessageDialog(this, "El vuelo " + voSel.getCodVuelo() + " ha sido cancelado exitosamente.");
+
+                // 4. LIMPIAMOS LA VISTA DE DESPACHO
+                limpiarCampos(); 
+                cargarComboBoxesDespacho(); // Recarga el combo para que ya no salga el vuelo cancelado
+
+                // REFRESCO VISUAL DE LAS TARJETAS (PANEL DERECHO)
+
+                // A) Llamamos a tu método que vuelve a consultar a la BD y redibuja las tarjetas
+                cargarVuelosPendientesDespacho(); 
+
+                // B) Le decimos al panel contenedor que "recalcule" sus tamaños
+                pnlListaItemsVuelo.revalidate(); 
+
+                // C) Le decimos al panel que se vuelva a pintar gráficamente (hace el parpadeo instantáneo)
+                pnlListaItemsVuelo.repaint(); 
+
+                // D) Hacemos lo mismo con el JScrollPane por si acaso (para evitar bugs de scroll)
+                ScrollPendientesDespacho.revalidate();
+                ScrollPendientesDespacho.repaint();
+                // =========================================================================
+
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al intentar cancelar el vuelo.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_btnCancelarVueloMouseClicked
 
     /**
      * @param args the command line arguments
@@ -3419,7 +3513,85 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new OficialOperaciones_GUI().setVisible(true));
     }
+
+// ===================================================================================================
+// MÉTODO PARA LIMPIAR LOS CAMPOS Y DESHABILITARLOS SI NO HAY VUELO SELECCIONADO DE LA VISTA DESPACHO
+// ===================================================================================================
+    private void limpiarCampos() {
+        // Limpiamos textos
+        txtAreaClima.setText("");
+        txtFieldPasajeros.setText("");
+        txtFieldEquipaje.setText("");
+        txtFieldCarga.setText("");
+        txtFieldCombRuta.setText("");
+        txtFieldCombReserva.setText("");
+        txtFieldCombustible.setText("");
+        
+        // Bloqueamos los campos y pintamos de azul oscuro #0f172a
+        java.awt.Color colorBloqueado = new java.awt.Color(15, 23, 42);
+        
+        txtAreaClima.setEditable(false);
+        txtAreaClima.setFocusable(false);
+        txtAreaClima.setBackground(colorBloqueado);
+        
+        txtFieldPasajeros.setEditable(false);
+        txtFieldPasajeros.setFocusable(false);
+        txtFieldPasajeros.setBackground(colorBloqueado);
+        
+        txtFieldEquipaje.setEditable(false);
+        txtFieldEquipaje.setFocusable(false);
+        txtFieldEquipaje.setBackground(colorBloqueado);
+        
+        txtFieldCarga.setEditable(false);
+        txtFieldCarga.setFocusable(false);
+        txtFieldCarga.setBackground(colorBloqueado);
+        
+        txtFieldCombRuta.setEditable(false);
+        txtFieldCombRuta.setFocusable(false);
+        txtFieldCombRuta.setBackground(colorBloqueado);
+        
+        txtFieldCombReserva.setEditable(false);
+        txtFieldCombReserva.setFocusable(false);
+        txtFieldCombReserva.setBackground(colorBloqueado);
+        
+        // Reseteamos semáforo
+        lblAprobado.setText("PENDIENTE");
+        lblAprobado.setForeground(java.awt.Color.GRAY);
+        pnlFondoAprobado.setBackground(new java.awt.Color(30, 41, 59));
+        barraMTOW.setValue(0);
+        lblPorcentajeMTOW.setText("0% MTOW");
+        lblSumaTotal.setText("0.00");
+        
+        btnAprobarPlan.setEnabled(false);
+    }    
+
+// ===============================================================================================
+// MÉTODO PARA VALIDAR EL INGRESO DE SOLO NÚMEROS EN LOS CAMPOS DE CALCULO DE PESO VISTA DESPACHO
+// ===============================================================================================
+    private void aplicarValidacionNumerica() {
+        // Creamos un "escucha" que solo deja pasar números y el punto decimal
+        java.awt.event.KeyAdapter validador = new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                char c = evt.getKeyChar();
+                // Si lo que tecleó NO es un número
+                if (!Character.isDigit(c)) {
+                    evt.consume(); // Destruye la tecla (la ignora)
+                }
+            }
+        };
+        
+        // Le inyectamos este escudo protector a los 5 campos
+        txtFieldPasajeros.addKeyListener(validador);
+        txtFieldEquipaje.addKeyListener(validador);
+        txtFieldCarga.addKeyListener(validador);
+        txtFieldCombRuta.addKeyListener(validador);
+        txtFieldCombReserva.addKeyListener(validador);
+    }
     
+
+// ==================================================
+// MÉTODO PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX
+// ==================================================
 //##### ESTE METODO ES PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX #####
     private void aplicarTemaOscuro(javax.swing.JComboBox combo) {
     // 1. ACHICAR FLECHA Y MATAR EL FONDO BLANCO DE RAÍZ
@@ -3482,8 +3654,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     // Borde de exactamente 1 píxel gris (como el panel web)
     combo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 65, 85), 1));
     }
-    
-//##### METODO PARA CAMBIAR EL DISEÑO DEL SCROLL #####
+
+// ==========================================
+// MÉTODO PARA CAMBIAR EL DISEÑO DEL SCROLL
+// ==========================================    
     private void aplicarScrollModerno(javax.swing.JScrollPane scroll) {
         scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder()); // Quita el borde exterior
 
@@ -3523,8 +3697,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
             }
         });
     }
-
-// #### METODOS PARA CAMBIAR DISEÑO DE LAS TABLAS ####
+// ==========================================
+// MÉTODOS PARA CAMBIAR DISEÑO DE LAS TABLAS
+// ==========================================  
     private void aplicarTemaTabla(javax.swing.JTable tabla) {
         // 1. Fondo, color de letra y líneas de la tabla
         tabla.setBackground(new java.awt.Color(30, 41, 59)); // Azul oscuro del fondo (#0f172a)
@@ -3732,7 +3907,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         });
     }
     
-//#### METODO PARA CARGAR DATOS DE PRUEBA ####
+// ELIMINAR AL METER BASE DE DATOS METODO PARA CARGAR DATOS DE PRUEBA
     private void cargarDatosPruebaHistorial() {
         // 1. Obtenemos el modelo de la tabla (Cambia 'tuTablaHistorial' por el nombre de tu variable)
         javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblHistorialVuelo.getModel();
@@ -3763,7 +3938,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         ajustarAlturaDinamica(TblHistorialVuelo, ScrollTablaHistorialVuelos);
     }
 
-// METODO PARA CARGAR DATOS DE PRUEBA EN FLOTA
+// ELIMINAR AL METER BASE DE DATOS METODO PARA CARGAR DATOS DE PRUEBA EN FLOTA
     private void cargarDatosPruebaFlota() {
         // 1. Obtenemos el modelo de tu nueva tabla de Flota
         javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblFlota.getModel();
@@ -3907,46 +4082,77 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
 // ==============================================================
     private void calcularPesosEnVivo() {
         try {
-            // 1. Extraemos los valores. Si la cajita está vacía, asumimos 0 automáticamente.
+            // 1. Extraemos los valores (si la cajita está vacía, asumimos 0)
             double pas = txtFieldPasajeros.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldPasajeros.getText().trim());
             double eq = txtFieldEquipaje.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldEquipaje.getText().trim());
             double car = txtFieldCarga.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCarga.getText().trim());
-            
-            // 2. Cálculo exclusivo de Combustible (Ruta + Reserva)
             double combRuta = txtFieldCombRuta.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombRuta.getText().trim());
             double combRes = txtFieldCombReserva.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombReserva.getText().trim());
-            double combTotal = combRuta + combRes;
             
-            // Mostramos el total de combustible en la caja inhabilitada
-            txtFieldCombustible.setText(String.format("%.2f", combTotal).replace(",", "."));
+            // 2. Cálculo del Combustible Total y Suma Total
+            double combTotal = combRuta + combRes;
+            txtFieldCombustible.setText(String.format(java.util.Locale.US, "%.2f", combTotal)); // Locale.US fuerza el uso de punto decimal
 
-            // 3. Suma de absolutamente todo
             double sumaTotal = pas + eq + car + combTotal;
-            lblSumaTotal.setText(String.format("%.2f", sumaTotal).replace(",", "."));
-            lblPesoMaximo.setText(mtowActual + " KG");
-
-            // 4. Lógica Visual de la Barra de Progreso y Alertas
+            lblSumaTotal.setText(String.format(java.util.Locale.US, "%.2f", sumaTotal));
+            
+            // 3. Lógica Visual de la Barra, Textos y Seguridad
             if (mtowActual > 0) {
-                int porcentaje = (int) ((sumaTotal / mtowActual) * 100);
-                barraMTOW.setValue(porcentaje);
-                lblPorcentajeMTOW.setText(porcentaje + "% MTOW");
+                // Sacamos el porcentaje real
+                double porcentajeReal = (sumaTotal / mtowActual) * 100;
+                int porcentajeRedondeado = (int) Math.round(porcentajeReal);
 
-                if (sumaTotal <= mtowActual) {
-                    // ESTADO: APROBADO (Todo Verde Latam)
-                    barraMTOW.setForeground(new java.awt.Color(34, 197, 94)); 
+                // TRUCO: Congelamos la barra visualmente para que no sobrepase su propio tamaño físico
+                barraMTOW.setValue(Math.min(porcentajeRedondeado, 100));
+                
+                // COLORES DEFINIDOS
+                java.awt.Color verde = new java.awt.Color(34, 197, 94);  // Verde #22c55e
+                java.awt.Color ambar = new java.awt.Color(245, 158, 11); // Naranja/Ámbar #f59e0b
+                java.awt.Color rojo = new java.awt.Color(225, 29, 72);   // Rojo Carmesí #e11d48
+                java.awt.Color fondoBarraOscuro = new java.awt.Color(30, 41, 59); // Color de fondo oscuro para la parte vacía de la barra
+                // == CONDICIÓN 1: TODO VERDE (0% a 85%) ==
+                if (porcentajeReal <= 85.0) {
+                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
+                    barraMTOW.setBackground(fondoBarraOscuro);
+                    barraMTOW.setForeground(verde);
+                    barraMTOW.putClientProperty("ProgressBar.foreground", verde); // <--- FORZAMOS COLOR 
                     lblAprobado.setText("APROBADO");
-                    lblAprobado.setForeground(new java.awt.Color(34, 197, 94));
-                    pnlFondoAprobado.setBackground(new java.awt.Color(5, 46, 22));
-                } else {
-                    // ESTADO: EXCEDIDO PELIGRO (Todo Rojo Alerta)
-                    barraMTOW.setForeground(new java.awt.Color(225, 29, 72)); 
+                    lblAprobado.setForeground(verde);
+                    pnlFondoAprobado.setBackground(new java.awt.Color(5, 46, 22)); // Fondo oscuro [5, 46, 22]                   
+                    lblPorcentajeMTOW.setText(porcentajeRedondeado + "% del MTOW");
+                    btnAprobarPlan.setEnabled(true); // Permitimos guardar
+                } 
+                // == CONDICIÓN 2: ÁMBAR - ADVERTENCIA (85.1% a 100%) ==
+                else if (porcentajeReal <= 100.0) {
+                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
+                    barraMTOW.setBackground(fondoBarraOscuro);
+                    barraMTOW.setForeground(ambar);
+                    barraMTOW.putClientProperty("ProgressBar.foreground", ambar); // <--- FORZAMOS COLOR 
+                    lblAprobado.setText("APROBADO"); // Sigue siendo legal, pero al límite
+                    lblAprobado.setForeground(ambar);
+                    pnlFondoAprobado.setBackground(new java.awt.Color(66, 32, 6)); // Fondo neutro                    
+                    lblPorcentajeMTOW.setText(porcentajeRedondeado + "% del MTOW");
+                    btnAprobarPlan.setEnabled(true); // Permitimos guardar
+                } 
+                // == CONDICIÓN 3: ROJO - PELIGRO EXCEDIDO (> 100%) ==
+                else {
+                    double excedente = sumaTotal - mtowActual;
+                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
+                    barraMTOW.setBackground(fondoBarraOscuro);
+                    barraMTOW.setForeground(rojo);
+                    barraMTOW.putClientProperty("ProgressBar.foreground", rojo); // <--- FORZAMOS COLOR 
                     lblAprobado.setText("¡EXCEDIDO!");
-                    lblAprobado.setForeground(new java.awt.Color(255, 255, 255));
-                    pnlFondoAprobado.setBackground(new java.awt.Color(225, 29, 72));
+                    lblAprobado.setForeground(new java.awt.Color(251, 113, 133)); // Letra rosada #fb7185
+                    pnlFondoAprobado.setBackground(new java.awt.Color(76, 5, 25)); // Fondo guinda #4c0519                   
+                    // Texto dinámico con la diferencia
+                    lblPorcentajeMTOW.setText("100% del MTOW · Excede en " + String.format(java.util.Locale.US, "%,.2f", excedente) + " kg");
+                    btnAprobarPlan.setEnabled(false); // ¡BLOQUEO DE SEGURIDAD ACTIVADO!
                 }
+                // Forzamos el redibujado final
+                barraMTOW.repaint();
             }
         } catch (NumberFormatException e) {
-            // Si el usuario escribe una letra por error, ignoramos el cálculo para que el programa no colapse
+            // Este catch absorbe cualquier error de conversión si una caja queda vacía por un nanosegundo mientras se tipea
         }
     }
 

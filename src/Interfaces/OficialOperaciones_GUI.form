@@ -3052,14 +3052,14 @@
                                   <Group type="103" groupAlignment="1" attributes="0">
                                       <Group type="102" alignment="1" attributes="0">
                                           <Component id="lblDespachoTecnico" pref="298" max="32767" attributes="0"/>
-                                          <EmptySpace min="-2" pref="574" max="-2" attributes="0"/>
-                                          <Component id="cbxVuelosDespacho" min="-2" pref="160" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="554" max="-2" attributes="0"/>
+                                          <Component id="cbxVuelosDespacho" min="-2" pref="180" max="-2" attributes="0"/>
                                       </Group>
                                       <Component id="pnlFondoResumenRuta" alignment="1" max="32767" attributes="0"/>
                                       <Group type="102" alignment="1" attributes="0">
                                           <Group type="103" groupAlignment="0" attributes="0">
                                               <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="lblRequerimientosTecnicos" pref="0" max="32767" attributes="0"/>
+                                                  <Component id="lblRequerimientosTecnicos" max="32767" attributes="0"/>
                                                   <EmptySpace min="-2" pref="277" max="-2" attributes="0"/>
                                               </Group>
                                               <Group type="102" alignment="1" attributes="0">
@@ -3336,7 +3336,6 @@
                               <SubComponents>
                                 <Component class="javax.swing.JTextArea" name="txtAreaClima">
                                   <Properties>
-                                    <Property name="editable" type="boolean" value="false"/>
                                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                       <Color blue="2a" green="17" red="f" type="rgb"/>
                                     </Property>
@@ -3556,17 +3555,17 @@
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="barraMTOW" alignment="0" max="32767" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="lblSumaTotal" max="32767" attributes="0"/>
+                                              <Component id="lblSumaTotal" pref="81" max="32767" attributes="0"/>
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
-                                              <Component id="lblSlash" max="32767" attributes="0"/>
+                                              <Component id="lblSlash" pref="27" max="32767" attributes="0"/>
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
-                                              <Component id="lblPesoMaximo" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" pref="213" max="-2" attributes="0"/>
-                                              <Component id="pnlFondoAprobado" max="32767" attributes="0"/>
+                                              <Component id="lblPesoMaximo" pref="67" max="32767" attributes="0"/>
+                                              <EmptySpace min="-2" pref="191" max="-2" attributes="0"/>
+                                              <Component id="pnlFondoAprobado" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="lblPorcentajeMTOW" max="32767" attributes="0"/>
-                                              <EmptySpace min="349" pref="349" max="-2" attributes="0"/>
+                                              <Component id="lblPorcentajeMTOW" min="-2" pref="370" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                       <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
@@ -3624,6 +3623,9 @@
                             </Component>
                             <Component class="javax.swing.JProgressBar" name="barraMTOW">
                               <Properties>
+                                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                                  <Color blue="3b" green="29" red="1e" type="rgb"/>
+                                </Property>
                                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="5e" green="c5" red="22" type="rgb"/>
                                 </Property>
@@ -3647,7 +3649,7 @@
                               <Layout>
                                 <DimensionLayout dim="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="lblAprobado" alignment="0" max="32767" attributes="0"/>
+                                      <Component id="lblAprobado" alignment="0" pref="93" max="32767" attributes="0"/>
                                   </Group>
                                 </DimensionLayout>
                                 <DimensionLayout dim="1">
@@ -3683,7 +3685,7 @@
                                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="af" green="a3" red="94" type="rgb"/>
                                 </Property>
-                                <Property name="text" type="java.lang.String" value="00% MTOW"/>
+                                <Property name="text" type="java.lang.String" value="00% del MTOW"/>
                               </Properties>
                             </Component>
                           </SubComponents>
@@ -3836,6 +3838,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnCancelarVueloMouseClicked"/>
+                              </Events>
                             </Component>
                           </SubComponents>
                         </Container>
@@ -3854,6 +3859,9 @@
                               <StringArray count="1">
                                 <StringItem index="0" value="LA801 | OB-1995"/>
                               </StringArray>
+                            </Property>
+                            <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+                              <Color id="Cursor de Mano"/>
                             </Property>
                           </Properties>
                           <Events>

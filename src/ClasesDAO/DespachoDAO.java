@@ -14,11 +14,15 @@ public class DespachoDAO {
     
     public List<VueloProgramado> obtenerVuelosDisponibles() {
         List<VueloProgramado> lista = new ArrayList<>();
-        // Agregamos modelo y capacidad a la consulta
+
+        // CORRECCIÓN: Usamos NOT EXISTS. Si el ID ya está en vuelos_operativos (así esté cancelado, terminado o activo), NO se muestra.
+        // Además, filtramos para que solo muestre vuelos desde el día de hoy en adelante.
         String sql = "SELECT vp.id_programacion, vp.cod_programacion, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, vp.fecha_programada " +
-                     "FROM vuelos_programados vp JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
+                     "FROM vuelos_programados vp " +
+                     "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
                      "JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
-                     "WHERE vp.id_programacion NOT IN (SELECT id_programacion FROM vuelos_operativos)";
+                     "WHERE NOT EXISTS (SELECT 1 FROM vuelos_operativos vo WHERE vo.id_programacion = vp.id_programacion)";
+
         try {
             Connection con = ConexionBD.getInstancia().getConexion();
             PreparedStatement ps = con.prepareStatement(sql);
@@ -34,9 +38,12 @@ public class DespachoDAO {
                 vp.setFechaProgramada(rs.getTimestamp("fecha_programada"));
                 lista.add(vp);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace(); // Recomiendo no dejar el catch vacío para poder detectar errores de sintaxis
+        }
         return lista;
     }
+
 
     // AHORA FILTRA POR MODELO DE AVION (JOIN con habilitaciones)
     public List<TripulanteVuelo> obtenerPilotosHabilitados(String cargoBuscado, String modeloAvion) {

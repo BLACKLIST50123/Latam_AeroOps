@@ -9,7 +9,7 @@ public class VueloProgramado {
     private Timestamp fechaProgramada;
     private String modeloAeronave;
     private int capacidadAsientos;
-
+    private double pesoMaximoDespegue; // Nuevo atributo
     public VueloProgramado() {}
 
     public int getIdProgramacion() { return idProgramacion; }
@@ -32,6 +32,9 @@ public class VueloProgramado {
     
     public int getCapacidadAsientos() { return capacidadAsientos; }
     public void setCapacidadAsientos(int capacidadAsientos) { this.capacidadAsientos = capacidadAsientos; }
+    
+    public double getPesoMaximoDespegue() { return pesoMaximoDespegue; }
+    public void setPesoMaximoDespegue(double pesoMaximoDespegue) { this.pesoMaximoDespegue = pesoMaximoDespegue; }
     // ¡ESTO ES LO QUE SE VERÁ EN EL COMBOBOX!
     
     @Override
