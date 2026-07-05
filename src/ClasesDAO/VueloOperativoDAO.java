@@ -5,6 +5,7 @@ import Clases.TripulanteCabina;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 public class VueloOperativoDAO {
 // ===============================
@@ -358,5 +359,111 @@ public class VueloOperativoDAO {
             System.out.println("Error al registrar OOOI: " + e.getMessage());
             return false;
         }
+    }
+
+// ===================================================================
+// MÉTODO PARA CARGAR LOS VUELOS EN EL LOGBOOK
+// ===================================================================       
+    public ArrayList<Clases.VueloOperativo> obtenerVuelosParaLogbook() {
+        ArrayList<Clases.VueloOperativo> lista = new ArrayList<>();
+
+        // 1. Hacemos el JOIN con vuelos_programados y aeronaves para conseguir la matrícula
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, a.matricula " +
+                     "FROM vuelos_operativos vo " +
+                     "INNER JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
+                     "INNER JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
+                     "WHERE vo.estado_oooi = 'IN' AND vo.estado_vuelo != 'COMPLETADO'";
+
+        try (java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+             java.sql.PreparedStatement ps = con.prepareStatement(sql);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Clases.VueloOperativo vo = new Clases.VueloOperativo();
+                vo.setIdVueloOperativo(rs.getInt("id_vuelo_operativo"));
+                vo.setCodVuelo(rs.getString("cod_vuelo"));
+
+                // 2. ¡EL TRUCO PARA QUE TU TOSTRING NO EXPLOTE!
+                // Instanciamos el vueloBase y le seteamos la matrícula
+                Clases.VueloProgramado vueloBase = new Clases.VueloProgramado();
+                vueloBase.setMatricula(rs.getString("matricula")); // Ajusta el setter si se llama distinto
+                vo.setVueloBase(vueloBase); 
+
+                lista.add(vo);
+            }
+        } catch (java.sql.SQLException e) {
+            System.out.println("Error al obtener vuelos Logbook: " + e.getMessage());
+        }
+        return lista;
+    }
+
+// ===================================================================
+// MÉTODO PARA EL LLENADO DE LA TABLA REPORTES_LOGBOOK
+// ===================================================================    
+    public boolean cerrarVueloConLogbook(Clases.ReporteLogbook logbook) {
+        boolean exito = false;
+        java.sql.Connection con = null;
+        
+        try {
+            // Reemplaza esto con tu método de conexión Singleton real
+            con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            con.setAutoCommit(false); // 🚀 INICIO DE LA TRANSACCIÓN
+
+            // 1. Insertar el Logbook
+            String sqlLogbook = "INSERT INTO reportes_logbook (id_vuelo_operativo, combustible_sobrante, observaciones_tecnicas, prioridad) VALUES (?, ?, ?, ?)";
+            try (java.sql.PreparedStatement psLogbook = con.prepareStatement(sqlLogbook)) {
+                psLogbook.setInt(1, logbook.getIdVueloOperativo());
+                psLogbook.setDouble(2, logbook.getCombustibleSobrante());
+                psLogbook.setString(3, logbook.getObservacionesTecnicas());
+                psLogbook.setString(4, logbook.getPrioridad().name()); // .name() extrae el String exacto del Enum para la BD
+                psLogbook.executeUpdate();
+            }
+
+            // 2. Actualizar el estado del vuelo operativo
+            String sqlVuelo = "UPDATE vuelos_operativos SET estado_oooi = 'IN', estado_vuelo = 'COMPLETADO' WHERE id_vuelo_operativo = ?";
+            try (java.sql.PreparedStatement psVuelo = con.prepareStatement(sqlVuelo)) {
+                psVuelo.setInt(1, logbook.getIdVueloOperativo());
+                psVuelo.executeUpdate();
+            }
+
+            // 3. Liberar a la tripulación (Devolverlos a DISPONIBLE)
+            String sqlTripulacion = "UPDATE empleados SET estado_asignacion = 'DISPONIBLE' WHERE id_empleado IN (SELECT id_empleado FROM tripulacion_asignada WHERE id_vuelo_operativo = ?)";
+            try (java.sql.PreparedStatement psTrip = con.prepareStatement(sqlTripulacion)) {
+                psTrip.setInt(1, logbook.getIdVueloOperativo());
+                psTrip.executeUpdate();
+            }
+
+            // 4. (Opcional - Nivel Dios) Si la prioridad es ALTA o MEDIA, mandar el avión a MANTENIMIENTO
+            if (!logbook.getPrioridad().name().equals("SIN_FALLAS") && !logbook.getPrioridad().name().equals("BAJA")) {
+                String sqlAeronave = "UPDATE aeronaves SET estado_tecnico = 'MANTENIMIENTO' WHERE id_aeronave = (SELECT id_aeronave FROM vuelos_programados vp INNER JOIN vuelos_operativos vo ON vp.id_programacion = vo.id_programacion WHERE vo.id_vuelo_operativo = ?)";
+                try (java.sql.PreparedStatement psAeronave = con.prepareStatement(sqlAeronave)) {
+                    psAeronave.setInt(1, logbook.getIdVueloOperativo());
+                    psAeronave.executeUpdate();
+                }
+            }
+
+            con.commit(); // ✅ SI TODO SALIÓ BIEN, SE GUARDA TODO
+            exito = true;
+            
+        } catch (java.sql.SQLException e) {
+            System.out.println("Error en transacción Cierre Vuelo: " + e.getMessage());
+            if (con != null) {
+                try {
+                    con.rollback(); // ❌ SI ALGO FALLÓ, SE DESHACE TODO
+                } catch (java.sql.SQLException ex) {
+                    System.out.println("Error en Rollback: " + ex.getMessage());
+                }
+            }
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true); // Restaurar autocommit
+                } catch (java.sql.SQLException e) {
+                    System.out.println("Error restaurando AutoCommit: " + e.getMessage());
+                }
+            }
+        }
+        
+        return exito;
     }
 }

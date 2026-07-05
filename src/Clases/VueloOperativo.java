@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 public class VueloOperativo {
+    private int idVueloOperativo;
     private String codVuelo;
     private Date fechaOperation;
     private VueloProgramado vueloBase;
@@ -53,6 +54,9 @@ public class VueloOperativo {
     // ====================================================
     
     // Getters y Setters
+    public int getIdVueloOperativo() { return idVueloOperativo;}
+    public void setIdVueloOperativo(int idVuelo) { this.idVueloOperativo = idVueloOperativo;}
+    
     public String getCodVuelo() { return codVuelo; }
     public void setCodVuelo(String codVuelo) { this.codVuelo = codVuelo; }
 
@@ -100,6 +104,9 @@ public class VueloOperativo {
 
     public ReporteLogbook getReporteLogbook() { return reporteLogbook; }
     public void setReporteLogbook(ReporteLogbook reporteLogbook) { this.reporteLogbook = reporteLogbook; }
+
+    public Date getFechaOperation() { return fechaOperation; }
+    public void setFechaOperation(Date fechaOperation) { this.fechaOperation = fechaOperation; }
 
     @Override
     public String toString() {

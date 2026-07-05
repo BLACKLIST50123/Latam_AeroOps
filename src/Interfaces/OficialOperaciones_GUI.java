@@ -1,4 +1,5 @@
 package Interfaces;
+import Clases.ReporteLogbook;
 import Clases.ValidadorMetar;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -6,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -34,7 +36,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         aplicarTemaOscuro(cbxSeleccionCAP);
         aplicarTemaOscuro(cbxSeleccionFO);
         aplicarTemaOscuro(cbxVuelosOOOI);
-        aplicarTemaOscuro(cbxEstadoLogBook);
+        aplicarTemaOscuro(cbxVuelosLogbook);
         aplicarTemaOscuro(cbxVuelosDespacho);
         aplicarTemaOscuro(cbxFiltroVuelo);
         aplicarTemaOscuro(cbxFiltroAeronave);
@@ -73,6 +75,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         cargarVuelosPendientesDespacho();
     // Cargamos los vuelos aprobados para la parte de Control OOOI
         cargarVuelosEnControlOOOI();
+    
+    
     // Fuerza el color gris claro (puedes ajustar los valores RGB)
         txtAreaClima.setForeground(new java.awt.Color(204,204,204));
     // Forzamos el color del perfil
@@ -127,7 +131,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        buttonGroup = new javax.swing.ButtonGroup();
+        grupoPrioridadFallas = new javax.swing.ButtonGroup();
         bordeSuperior = new javax.swing.JPanel();
         fondoBtnSalir = new javax.swing.JPanel();
         txtBtnSalir = new javax.swing.JLabel();
@@ -221,18 +225,19 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         pnlLogBook = new javax.swing.JPanel();
         lblCreacionAsignacionVuelo2 = new javax.swing.JLabel();
         lblVueloProgramado1 = new javax.swing.JLabel();
-        cbxEstadoLogBook = new javax.swing.JComboBox<>();
+        cbxVuelosLogbook = new javax.swing.JComboBox();
         lblVueloProgramado2 = new javax.swing.JLabel();
         lblVueloProgramado3 = new javax.swing.JLabel();
         rbtnPrioridadBaja = new javax.swing.JRadioButton();
         rbtnPrioridadMedia = new javax.swing.JRadioButton();
         rbtnPrioridadAlta = new javax.swing.JRadioButton();
-        jTextField1 = new javax.swing.JTextField();
+        txtCombustibleRestante = new javax.swing.JTextField();
         lblVueloProgramado4 = new javax.swing.JLabel();
         ScrollTxtReporteFallas = new javax.swing.JScrollPane();
-        TxtReporteFallas = new javax.swing.JTextArea();
+        txtReporteFallas = new javax.swing.JTextArea();
         fondoBtnCancelarVuelo3 = new javax.swing.JPanel();
-        btnCancelarVuelo3 = new javax.swing.JLabel();
+        btnCerrarVuelo = new javax.swing.JLabel();
+        rbtnSinFallas = new javax.swing.JRadioButton();
         pnlDespacho = new javax.swing.JPanel();
         pnlDespachoCuerpo = new javax.swing.JPanel();
         pnlVacio = new javax.swing.JPanel();
@@ -1058,7 +1063,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
             .addGroup(pnlPendientesVacioLayout.createSequentialGroup()
                 .addGap(147, 147, 147)
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(125, Short.MAX_VALUE))
+                .addContainerGap(136, Short.MAX_VALUE))
         );
         pnlPendientesVacioLayout.setVerticalGroup(
             pnlPendientesVacioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1380,12 +1385,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         lblVueloProgramado1.setForeground(new java.awt.Color(203, 213, 225));
         lblVueloProgramado1.setText("VUELO EN ESTADO IN");
 
-        cbxEstadoLogBook.setBackground(new java.awt.Color(15, 23, 42));
-        cbxEstadoLogBook.setForeground(new java.awt.Color(255, 255, 255));
-        cbxEstadoLogBook.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "— Seleccionar Vuelo —" }));
-        cbxEstadoLogBook.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
-        cbxEstadoLogBook.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        cbxEstadoLogBook.addActionListener(this::cbxEstadoLogBookActionPerformed);
+        cbxVuelosLogbook.setBackground(new java.awt.Color(15, 23, 42));
+        cbxVuelosLogbook.setForeground(new java.awt.Color(255, 255, 255));
+        cbxVuelosLogbook.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "— Seleccionar Vuelo —" }));
+        cbxVuelosLogbook.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        cbxVuelosLogbook.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        cbxVuelosLogbook.addActionListener(this::cbxVuelosLogbookActionPerformed);
 
         lblVueloProgramado2.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
         lblVueloProgramado2.setForeground(new java.awt.Color(203, 213, 225));
@@ -1395,59 +1400,70 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         lblVueloProgramado3.setForeground(new java.awt.Color(203, 213, 225));
         lblVueloProgramado3.setText("PRIORIDAD REPORTE");
 
-        buttonGroup.add(rbtnPrioridadBaja);
+        grupoPrioridadFallas.add(rbtnPrioridadBaja);
         rbtnPrioridadBaja.setForeground(new java.awt.Color(74, 209, 80));
         rbtnPrioridadBaja.setText("Baja");
         rbtnPrioridadBaja.addActionListener(this::rbtnPrioridadBajaActionPerformed);
 
-        buttonGroup.add(rbtnPrioridadMedia);
+        grupoPrioridadFallas.add(rbtnPrioridadMedia);
         rbtnPrioridadMedia.setForeground(new java.awt.Color(251, 214, 36));
         rbtnPrioridadMedia.setText("Media");
         rbtnPrioridadMedia.addActionListener(this::rbtnPrioridadMediaActionPerformed);
 
-        buttonGroup.add(rbtnPrioridadAlta);
+        grupoPrioridadFallas.add(rbtnPrioridadAlta);
         rbtnPrioridadAlta.setForeground(new java.awt.Color(251, 113, 133));
         rbtnPrioridadAlta.setText("Alta");
         rbtnPrioridadAlta.addActionListener(this::rbtnPrioridadAltaActionPerformed);
 
-        jTextField1.setBackground(new java.awt.Color(15, 23, 42));
-        jTextField1.setForeground(new java.awt.Color(255, 255, 255));
-        jTextField1.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-        jTextField1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
-        jTextField1.addActionListener(this::jTextField1ActionPerformed);
+        txtCombustibleRestante.setBackground(new java.awt.Color(15, 23, 42));
+        txtCombustibleRestante.setForeground(new java.awt.Color(255, 255, 255));
+        txtCombustibleRestante.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+        txtCombustibleRestante.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtCombustibleRestante.addActionListener(this::txtCombustibleRestanteActionPerformed);
 
         lblVueloProgramado4.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
         lblVueloProgramado4.setForeground(new java.awt.Color(203, 213, 225));
         lblVueloProgramado4.setText("FALLAS REPORTADAS");
 
-        TxtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
-        TxtReporteFallas.setColumns(20);
-        TxtReporteFallas.setForeground(new java.awt.Color(255, 255, 255));
-        TxtReporteFallas.setLineWrap(true);
-        TxtReporteFallas.setRows(5);
-        TxtReporteFallas.setWrapStyleWord(true);
-        TxtReporteFallas.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
-        TxtReporteFallas.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
-        ScrollTxtReporteFallas.setViewportView(TxtReporteFallas);
+        txtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
+        txtReporteFallas.setColumns(20);
+        txtReporteFallas.setForeground(new java.awt.Color(255, 255, 255));
+        txtReporteFallas.setLineWrap(true);
+        txtReporteFallas.setRows(5);
+        txtReporteFallas.setWrapStyleWord(true);
+        txtReporteFallas.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtReporteFallas.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        ScrollTxtReporteFallas.setViewportView(txtReporteFallas);
 
         fondoBtnCancelarVuelo3.setBackground(new java.awt.Color(225, 29, 72));
 
-        btnCancelarVuelo3.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
-        btnCancelarVuelo3.setForeground(new java.awt.Color(255, 255, 255));
-        btnCancelarVuelo3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnCancelarVuelo3.setText("Cerrar Vuelo");
-        btnCancelarVuelo3.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCerrarVuelo.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        btnCerrarVuelo.setForeground(new java.awt.Color(255, 255, 255));
+        btnCerrarVuelo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnCerrarVuelo.setText("Cerrar Vuelo");
+        btnCerrarVuelo.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnCerrarVuelo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnCerrarVueloMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnCancelarVuelo3Layout = new javax.swing.GroupLayout(fondoBtnCancelarVuelo3);
         fondoBtnCancelarVuelo3.setLayout(fondoBtnCancelarVuelo3Layout);
         fondoBtnCancelarVuelo3Layout.setHorizontalGroup(
             fondoBtnCancelarVuelo3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCancelarVuelo3, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+            .addComponent(btnCerrarVuelo, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
         );
         fondoBtnCancelarVuelo3Layout.setVerticalGroup(
             fondoBtnCancelarVuelo3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCancelarVuelo3, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+            .addComponent(btnCerrarVuelo, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
         );
+
+        grupoPrioridadFallas.add(rbtnSinFallas);
+        rbtnSinFallas.setForeground(new java.awt.Color(255, 255, 255));
+        rbtnSinFallas.setSelected(true);
+        rbtnSinFallas.setText("Sin Fallas");
+        rbtnSinFallas.addActionListener(this::rbtnSinFallasActionPerformed);
 
         javax.swing.GroupLayout pnlLogBookLayout = new javax.swing.GroupLayout(pnlLogBook);
         pnlLogBook.setLayout(pnlLogBookLayout);
@@ -1459,35 +1475,34 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                     .addGroup(pnlLogBookLayout.createSequentialGroup()
                         .addComponent(fondoBtnCancelarVuelo3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(pnlLogBookLayout.createSequentialGroup()
-                        .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlLogBookLayout.createSequentialGroup()
-                                .addComponent(rbtnPrioridadBaja)
-                                .addGap(18, 18, 18)
-                                .addComponent(rbtnPrioridadMedia)
-                                .addGap(18, 18, 18)
-                                .addComponent(rbtnPrioridadAlta))
-                            .addComponent(lblVueloProgramado4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlLogBookLayout.createSequentialGroup()
                         .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(ScrollTxtReporteFallas, javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlLogBookLayout.createSequentialGroup()
                                 .addComponent(lblCreacionAsignacionVuelo2, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, pnlLogBookLayout.createSequentialGroup()
+                            .addGroup(pnlLogBookLayout.createSequentialGroup()
                                 .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addGroup(pnlLogBookLayout.createSequentialGroup()
-                                        .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(lblVueloProgramado1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(lblVueloProgramado3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addComponent(cbxVuelosLogbook, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(47, 47, 47))
                                     .addGroup(pnlLogBookLayout.createSequentialGroup()
-                                        .addComponent(cbxEstadoLogBook, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addGap(47, 47, 47)))
+                                        .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                .addComponent(lblVueloProgramado1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(lblVueloProgramado3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 180, Short.MAX_VALUE))
+                                            .addGroup(pnlLogBookLayout.createSequentialGroup()
+                                                .addComponent(rbtnPrioridadBaja)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(rbtnPrioridadMedia)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(rbtnPrioridadAlta))
+                                            .addComponent(lblVueloProgramado4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                                 .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(lblVueloProgramado2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jTextField1))))
+                                    .addComponent(txtCombustibleRestante)
+                                    .addComponent(rbtnSinFallas))))
                         .addGap(20, 20, 20))))
         );
         pnlLogBookLayout.setVerticalGroup(
@@ -1501,22 +1516,23 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                     .addComponent(lblVueloProgramado2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(cbxEstadoLogBook, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cbxVuelosLogbook, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtCombustibleRestante, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblVueloProgramado3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rbtnPrioridadBaja)
                     .addComponent(rbtnPrioridadMedia)
-                    .addComponent(rbtnPrioridadAlta))
+                    .addComponent(rbtnPrioridadAlta)
+                    .addComponent(rbtnSinFallas))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(lblVueloProgramado4)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ScrollTxtReporteFallas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(fondoBtnCancelarVuelo3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout pnlContenidoAsignacionLayout = new javax.swing.GroupLayout(pnlContenidoAsignacion);
@@ -3206,24 +3222,41 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxVuelosOOOIActionPerformed
 
     private void rbtnPrioridadBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadBajaActionPerformed
-        // TODO add your handling code here:
+        if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
+            txtReporteFallas.setText(""); // Limpia el texto por defecto
+        }
+        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadBajaActionPerformed
 
     private void rbtnPrioridadMediaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadMediaActionPerformed
-        // TODO add your handling code here:
+        if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
+            txtReporteFallas.setText(""); // Limpia el texto por defecto
+        }
+        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadMediaActionPerformed
 
     private void rbtnPrioridadAltaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadAltaActionPerformed
-        // TODO add your handling code here:
+        if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
+            txtReporteFallas.setText(""); // Limpia el texto por defecto
+        }
+        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadAltaActionPerformed
 
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
+    private void txtCombustibleRestanteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCombustibleRestanteActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTextField1ActionPerformed
+    }//GEN-LAST:event_txtCombustibleRestanteActionPerformed
 
-    private void cbxEstadoLogBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxEstadoLogBookActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbxEstadoLogBookActionPerformed
+    private void cbxVuelosLogbookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxVuelosLogbookActionPerformed
+        if (cbxVuelosLogbook.getSelectedIndex() <= 0) {
+            habilitarPanelLogbook(false); // Apaga todo si no hay vuelo
+            return;
+        } else {
+            habilitarPanelLogbook(true);  // Enciende todo si hay un vuelo seleccionado
+        }
+    }//GEN-LAST:event_cbxVuelosLogbookActionPerformed
 
     private void txtBtnSalirMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_txtBtnSalirMouseClicked
         System.exit(0); //Cierra el programa
@@ -3604,6 +3637,113 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     private void btnINMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnINMouseClicked
         procesarClicControlOOOI("IN", btnIN);
     }//GEN-LAST:event_btnINMouseClicked
+
+    private void btnCerrarVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarVueloMouseClicked
+        // ==========================================
+        // 1. VALIDACIÓN DE COMBUSTIBLE
+        // ==========================================
+        String combustibleStr = txtCombustibleRestante.getText().trim();
+        if (combustibleStr.isEmpty()) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Debe ingresar el combustible sobrante.", 
+                "Error de Validación", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        double combustible = 0.0;
+        try {
+            combustible = Double.parseDouble(combustibleStr);
+        } catch (NumberFormatException e) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "El combustible sobrante debe ser un número válido.", 
+                "Error de Formato", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // ==========================================
+        // 2. VALIDACIÓN DE FALLAS Y OBSERVACIONES
+        // ==========================================
+        // Si el usuario NO marcó "Sin Fallas", obligatoriamente debe escribir qué pasó
+        if (!rbtnSinFallas.isSelected()) {
+            if (txtReporteFallas.getText().trim().isEmpty() || txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                    "Ha reportado una falla. Debe detallarla en las observaciones técnicas.", 
+                    "Atención", 
+                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                txtReporteFallas.requestFocus(); // Pone el cursor en la caja de texto
+                return;
+            }
+        }
+
+        // ==========================================
+        // 3. DETERMINAR LA PRIORIDAD SELECCIONADA
+        // ==========================================
+        Enumeradores.EstadoPrioridad prioridadBD = Enumeradores.EstadoPrioridad.SIN_FALLAS; // Ajusta el nombre según tu Enum
+        if (rbtnPrioridadBaja.isSelected()) prioridadBD = Enumeradores.EstadoPrioridad.BAJA;
+        if (rbtnPrioridadMedia.isSelected()) prioridadBD = Enumeradores.EstadoPrioridad.MEDIA;
+        if (rbtnPrioridadAlta.isSelected()) prioridadBD = Enumeradores.EstadoPrioridad.ALTA;
+
+        // ==========================================
+        // 4. OBTENER EL VUELO DEL COMBOBOX
+        // ==========================================
+        // Nos aseguramos de que haya seleccionado un vuelo real y no el texto por defecto
+        if (cbxVuelosLogbook.getSelectedIndex() <= 0 || !(cbxVuelosLogbook.getSelectedItem() instanceof Clases.VueloOperativo)) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Por favor, seleccione un vuelo válido para cerrar.", 
+                "Advertencia", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        // Casteamos el objeto que viene purito del combo
+        Clases.VueloOperativo vueloSeleccionado = (Clases.VueloOperativo) cbxVuelosLogbook.getSelectedItem();
+
+        // ==========================================
+        // 5. LLENAR EL OBJETO REPORTELOGBOOK (POJO)
+        // ==========================================
+        Clases.ReporteLogbook objLogbook = new Clases.ReporteLogbook();
+
+        // Ingresamos los datos al objeto Logbook
+        objLogbook.setIdVueloOperativo(vueloSeleccionado.getIdVueloOperativo()); 
+        objLogbook.setCombustibleSobrante(combustible);
+        objLogbook.setObservacionesTecnicas(txtReporteFallas.getText().trim());
+        objLogbook.setPrioridad(prioridadBD);
+
+        // ==========================================
+        // 6. EJECUTAR TRANSACCIÓN EN BASE DE DATOS
+        // ==========================================
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        boolean transaccionExitosa = dao.cerrarVueloConLogbook(objLogbook);
+
+        // ==========================================
+        // 7. RESPUESTA VISUAL Y RESETEO DE INTERFAZ
+        // ==========================================
+        if (transaccionExitosa) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Vuelo " + vueloSeleccionado.getCodVuelo() + " cerrado y Logbook registrado exitosamente.", 
+                "Cierre Operacional Completado", 
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            
+            // OJO: Aquí pon el método real que usas para llenar tu combo, para que se actualice la lista
+            // cargarVuelosLogbook(); 
+            
+            // Limpiamos y bloqueamos el panel hasta que seleccione un nuevo vuelo
+            habilitarPanelLogbook(false); 
+            
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Error crítico al intentar registrar el Logbook y cerrar el vuelo. Se ha deshecho la transacción (Rollback).", 
+                "Error de Base de Datos", 
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnCerrarVueloMouseClicked
+
+    private void rbtnSinFallasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnSinFallasActionPerformed
+        txtReporteFallas.setText("NIL - Operación sin novedades");
+        txtReporteFallas.setEnabled(false); // Bloquea la escritura
+    }//GEN-LAST:event_rbtnSinFallasActionPerformed
 
     /**
      * @param args the command line arguments
@@ -4536,6 +4676,50 @@ private void cargarVuelosEnControlOOOI() {
             sincronizarBotonesOOOI(voSel);
         }
     }
+
+// ==============================================
+// MÉTODO PARA CARGAR COMBOX VUELOS PARA LOGBOOK
+// ==============================================
+    private void cargarComboBoxVuelosLogbook() {
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        ArrayList<Clases.VueloOperativo> vuelosIn = dao.obtenerVuelosParaLogbook();
+
+        cbxVuelosLogbook.removeAllItems(); // ⚠️ ¡CRÍTICO! Limpia el combo primero
+        cbxVuelosLogbook.addItem("— Seleccione un Vuelo —"); // Opción por defecto (index 0)
+
+        for (Clases.VueloOperativo vuelo : vuelosIn) {
+            cbxVuelosLogbook.addItem(vuelo); // Agregamos el objeto puro
+        }
+    }
+    
+// ========================================
+// MÉTODO PARA HABILITAR PANEL LOGBOOK
+// ========================================      
+    private void habilitarPanelLogbook(boolean estado) {
+        // Campos de texto
+        txtCombustibleRestante.setEnabled(estado);
+
+        // Radio Buttons
+        rbtnSinFallas.setEnabled(estado);
+        rbtnPrioridadBaja.setEnabled(estado);
+        rbtnPrioridadMedia.setEnabled(estado);
+        rbtnPrioridadAlta.setEnabled(estado);
+
+        // Área de texto y botón final
+        txtReporteFallas.setEnabled(estado);
+        btnCerrarVuelo.setEnabled(estado);
+
+        // Lógica extra: Si se está habilitando el panel, reseteamos a los valores por defecto
+        if (estado) {
+            rbtnSinFallas.setSelected(true);
+            txtReporteFallas.setText("NIL - Operación sin novedades");
+            txtReporteFallas.setEnabled(false); // Se bloquea por defecto porque "Sin Fallas" está marcado
+        } else {
+            txtCombustibleRestante.setText("");
+            txtReporteFallas.setText("");
+        }
+    }
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane ScrollAsignacionVuelos;
@@ -4547,15 +4731,14 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JScrollPane ScrollTxtReporteFallas;
     private javax.swing.JTable TblFlota;
     private javax.swing.JTable TblHistorialVuelo;
-    private javax.swing.JTextArea TxtReporteFallas;
     private javax.swing.JProgressBar barraMTOW;
     private javax.swing.JPanel bordeSuperior;
     private javax.swing.JLabel btnAprobarPlan;
     private ElementosDiseño.BotonMenu btnAsigancionVuelos;
     private ElementosDiseño.BotonMenu btnAutorizarDespacho;
     private javax.swing.JLabel btnCancelarVuelo;
-    private javax.swing.JLabel btnCancelarVuelo3;
     private javax.swing.JLabel btnCerrarSesion;
+    private javax.swing.JLabel btnCerrarVuelo;
     private javax.swing.JLabel btnCrearVuelo;
     private javax.swing.JLabel btnDeclararDemora;
     private ElementosDiseño.BotonMenu btnGestionFlota;
@@ -4567,8 +4750,6 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JPanel btnOFF;
     private javax.swing.JPanel btnON;
     private javax.swing.JPanel btnOUT;
-    private javax.swing.ButtonGroup buttonGroup;
-    private javax.swing.JComboBox<String> cbxEstadoLogBook;
     private javax.swing.JComboBox<String> cbxFiltroAeronave;
     private javax.swing.JComboBox<String> cbxFiltroEstadoAeronave;
     private javax.swing.JComboBox<String> cbxFiltroEstadoVuelo;
@@ -4579,6 +4760,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JComboBox<String> cbxSeleccionFO;
     private javax.swing.JComboBox<String> cbxSeleccionVuelo;
     private javax.swing.JComboBox<String> cbxVuelosDespacho;
+    private javax.swing.JComboBox cbxVuelosLogbook;
     private javax.swing.JComboBox<String> cbxVuelosOOOI;
     private javax.swing.JPanel fondoBarraLateral;
     private javax.swing.JPanel fondoBtnAprobarPlan;
@@ -4594,6 +4776,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JPanel fondoContadores;
     private javax.swing.JPanel fondoContadores1;
     private javax.swing.JPanel fondoContadores2;
+    private javax.swing.ButtonGroup grupoPrioridadFallas;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -4609,7 +4792,6 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JLabel lblAeronavesAptas;
     private javax.swing.JLabel lblAprobado;
     private javax.swing.JLabel lblAprobados;
@@ -4756,13 +4938,16 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JRadioButton rbtnPrioridadAlta;
     private javax.swing.JRadioButton rbtnPrioridadBaja;
     private javax.swing.JRadioButton rbtnPrioridadMedia;
+    private javax.swing.JRadioButton rbtnSinFallas;
     private javax.swing.JTextArea txtAreaClima;
     private javax.swing.JLabel txtBtnSalir;
+    private javax.swing.JTextField txtCombustibleRestante;
     private javax.swing.JTextField txtFieldCarga;
     private javax.swing.JTextField txtFieldCombReserva;
     private javax.swing.JTextField txtFieldCombRuta;
     private javax.swing.JTextField txtFieldCombustible;
     private javax.swing.JTextField txtFieldEquipaje;
     private javax.swing.JTextField txtFieldPasajeros;
+    private javax.swing.JTextArea txtReporteFallas;
     // End of variables declaration//GEN-END:variables
 }

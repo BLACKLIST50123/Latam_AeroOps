@@ -2,7 +2,7 @@
 
 <Form version="1.8" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
-    <Component class="javax.swing.ButtonGroup" name="buttonGroup">
+    <Component class="javax.swing.ButtonGroup" name="grupoPrioridadFallas">
     </Component>
   </NonVisualComponents>
   <Properties>
@@ -1478,7 +1478,7 @@
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace min="-2" pref="147" max="-2" attributes="0"/>
                                               <Component id="jLabel11" min="-2" pref="139" max="-2" attributes="0"/>
-                                              <EmptySpace pref="125" max="32767" attributes="0"/>
+                                              <EmptySpace pref="136" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -2059,19 +2059,6 @@
                                               <Component id="fondoBtnCancelarVuelo3" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                           </Group>
-                                          <Group type="102" attributes="0">
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="rbtnPrioridadBaja" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                                      <Component id="rbtnPrioridadMedia" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                                                      <Component id="rbtnPrioridadAlta" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
-                                                  <Component id="lblVueloProgramado4" min="-2" pref="200" max="-2" attributes="0"/>
-                                              </Group>
-                                              <EmptySpace max="32767" attributes="0"/>
-                                          </Group>
                                           <Group type="102" alignment="1" attributes="0">
                                               <Group type="103" groupAlignment="1" attributes="0">
                                                   <Component id="ScrollTxtReporteFallas" alignment="0" max="32767" attributes="0"/>
@@ -2079,23 +2066,34 @@
                                                       <Component id="lblCreacionAsignacionVuelo2" min="-2" pref="258" max="-2" attributes="0"/>
                                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                                   </Group>
-                                                  <Group type="102" alignment="0" attributes="0">
+                                                  <Group type="102" alignment="1" attributes="0">
                                                       <Group type="103" groupAlignment="0" attributes="0">
                                                           <Group type="102" attributes="0">
-                                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                                  <Component id="lblVueloProgramado1" max="32767" attributes="0"/>
-                                                                  <Component id="lblVueloProgramado3" alignment="1" pref="180" max="32767" attributes="0"/>
-                                                              </Group>
-                                                              <EmptySpace max="32767" attributes="0"/>
+                                                              <Component id="cbxVuelosLogbook" max="32767" attributes="0"/>
+                                                              <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
                                                           </Group>
                                                           <Group type="102" attributes="0">
-                                                              <Component id="cbxEstadoLogBook" max="32767" attributes="0"/>
-                                                              <EmptySpace min="-2" pref="47" max="-2" attributes="0"/>
+                                                              <Group type="103" groupAlignment="0" attributes="0">
+                                                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                                      <Component id="lblVueloProgramado1" max="32767" attributes="0"/>
+                                                                      <Component id="lblVueloProgramado3" alignment="1" pref="180" max="32767" attributes="0"/>
+                                                                  </Group>
+                                                                  <Group type="102" alignment="0" attributes="0">
+                                                                      <Component id="rbtnPrioridadBaja" min="-2" max="-2" attributes="0"/>
+                                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                                                      <Component id="rbtnPrioridadMedia" min="-2" max="-2" attributes="0"/>
+                                                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                                                      <Component id="rbtnPrioridadAlta" min="-2" max="-2" attributes="0"/>
+                                                                  </Group>
+                                                                  <Component id="lblVueloProgramado4" min="-2" pref="200" max="-2" attributes="0"/>
+                                                              </Group>
+                                                              <EmptySpace max="32767" attributes="0"/>
                                                           </Group>
                                                       </Group>
                                                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                                           <Component id="lblVueloProgramado2" max="32767" attributes="0"/>
-                                                          <Component id="jTextField1" max="32767" attributes="0"/>
+                                                          <Component id="txtCombustibleRestante" max="32767" attributes="0"/>
+                                                          <Component id="rbtnSinFallas" min="-2" max="-2" attributes="0"/>
                                                       </Group>
                                                   </Group>
                                               </Group>
@@ -2117,8 +2115,8 @@
                                       </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="cbxEstadoLogBook" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
-                                          <Component id="jTextField1" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                          <Component id="cbxVuelosLogbook" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
+                                          <Component id="txtCombustibleRestante" alignment="3" min="-2" pref="35" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="lblVueloProgramado3" min="-2" max="-2" attributes="0"/>
@@ -2127,6 +2125,7 @@
                                           <Component id="rbtnPrioridadBaja" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="rbtnPrioridadMedia" alignment="3" min="-2" max="-2" attributes="0"/>
                                           <Component id="rbtnPrioridadAlta" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="rbtnSinFallas" alignment="3" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="lblVueloProgramado4" min="-2" max="-2" attributes="0"/>
@@ -2134,7 +2133,7 @@
                                       <Component id="ScrollTxtReporteFallas" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="fondoBtnCancelarVuelo3" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace max="32767" attributes="0"/>
+                                      <EmptySpace pref="23" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                             </DimensionLayout>
@@ -2162,7 +2161,7 @@
                                 <Property name="text" type="java.lang.String" value="VUELO EN ESTADO IN"/>
                               </Properties>
                             </Component>
-                            <Component class="javax.swing.JComboBox" name="cbxEstadoLogBook">
+                            <Component class="javax.swing.JComboBox" name="cbxVuelosLogbook">
                               <Properties>
                                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="2a" green="17" red="f" type="rgb"/>
@@ -2187,10 +2186,10 @@
                                 </Property>
                               </Properties>
                               <Events>
-                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbxEstadoLogBookActionPerformed"/>
+                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cbxVuelosLogbookActionPerformed"/>
                               </Events>
                               <AuxValues>
-                                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
+                                <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value=""/>
                               </AuxValues>
                             </Component>
                             <Component class="javax.swing.JLabel" name="lblVueloProgramado2">
@@ -2218,7 +2217,7 @@
                             <Component class="javax.swing.JRadioButton" name="rbtnPrioridadBaja">
                               <Properties>
                                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                                  <ComponentRef name="buttonGroup"/>
+                                  <ComponentRef name="grupoPrioridadFallas"/>
                                 </Property>
                                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="50" green="d1" red="4a" type="rgb"/>
@@ -2232,7 +2231,7 @@
                             <Component class="javax.swing.JRadioButton" name="rbtnPrioridadMedia">
                               <Properties>
                                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                                  <ComponentRef name="buttonGroup"/>
+                                  <ComponentRef name="grupoPrioridadFallas"/>
                                 </Property>
                                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="24" green="d6" red="fb" type="rgb"/>
@@ -2246,7 +2245,7 @@
                             <Component class="javax.swing.JRadioButton" name="rbtnPrioridadAlta">
                               <Properties>
                                 <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                                  <ComponentRef name="buttonGroup"/>
+                                  <ComponentRef name="grupoPrioridadFallas"/>
                                 </Property>
                                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="85" green="71" red="fb" type="rgb"/>
@@ -2257,7 +2256,7 @@
                                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rbtnPrioridadAltaActionPerformed"/>
                               </Events>
                             </Component>
-                            <Component class="javax.swing.JTextField" name="jTextField1">
+                            <Component class="javax.swing.JTextField" name="txtCombustibleRestante">
                               <Properties>
                                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                   <Color blue="2a" green="17" red="f" type="rgb"/>
@@ -2275,7 +2274,7 @@
                                 </Property>
                               </Properties>
                               <Events>
-                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextField1ActionPerformed"/>
+                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtCombustibleRestanteActionPerformed"/>
                               </Events>
                             </Component>
                             <Component class="javax.swing.JLabel" name="lblVueloProgramado4">
@@ -2296,7 +2295,7 @@
 
                               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
                               <SubComponents>
-                                <Component class="javax.swing.JTextArea" name="TxtReporteFallas">
+                                <Component class="javax.swing.JTextArea" name="txtReporteFallas">
                                   <Properties>
                                     <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                                       <Color blue="2a" green="17" red="f" type="rgb"/>
@@ -2332,17 +2331,17 @@
                               <Layout>
                                 <DimensionLayout dim="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="btnCancelarVuelo3" alignment="0" pref="132" max="32767" attributes="0"/>
+                                      <Component id="btnCerrarVuelo" alignment="0" pref="132" max="32767" attributes="0"/>
                                   </Group>
                                 </DimensionLayout>
                                 <DimensionLayout dim="1">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="btnCancelarVuelo3" alignment="0" pref="35" max="32767" attributes="0"/>
+                                      <Component id="btnCerrarVuelo" alignment="0" pref="35" max="32767" attributes="0"/>
                                   </Group>
                                 </DimensionLayout>
                               </Layout>
                               <SubComponents>
-                                <Component class="javax.swing.JLabel" name="btnCancelarVuelo3">
+                                <Component class="javax.swing.JLabel" name="btnCerrarVuelo">
                                   <Properties>
                                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                                       <Font name="Segoe UI" size="13" style="1"/>
@@ -2356,9 +2355,27 @@
                                       <Color id="Cursor de Mano"/>
                                     </Property>
                                   </Properties>
+                                  <Events>
+                                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnCerrarVueloMouseClicked"/>
+                                  </Events>
                                 </Component>
                               </SubComponents>
                             </Container>
+                            <Component class="javax.swing.JRadioButton" name="rbtnSinFallas">
+                              <Properties>
+                                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                                  <ComponentRef name="grupoPrioridadFallas"/>
+                                </Property>
+                                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                                  <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                                </Property>
+                                <Property name="selected" type="boolean" value="true"/>
+                                <Property name="text" type="java.lang.String" value="Sin Fallas"/>
+                              </Properties>
+                              <Events>
+                                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="rbtnSinFallasActionPerformed"/>
+                              </Events>
+                            </Component>
                           </SubComponents>
                         </Container>
                       </SubComponents>
