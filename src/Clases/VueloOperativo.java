@@ -1,4 +1,7 @@
 package Clases;
+import Enumeradores.EstadoVuelo;
+import Patrones.State.EstadoPendienteDespacho;
+import Patrones.State.IEstadoVuelo;
 import java.util.Date;
 import java.util.List;
 
@@ -6,16 +9,49 @@ public class VueloOperativo {
     private String codVuelo;
     private Date fechaOperation;
     private VueloProgramado vueloBase;
-    private String estadoOOOI;
-    private String estadoVuelo;
-    
+    private String estadoVuelo; // 'PENDIENTE_DESPACHO', 'EN_DEMORA', 'APROBADO', 'EN_VUELO', 'EN_TIERRA', 'COMPLETADO', 'CANCELADO'
+    private IEstadoVuelo estadoLogico;  //Interfaz para la asigancion y accion por estado actual del vuelo
+    private String estadoOOOI; // 'PENDIENTE', 'OUT', 'OFF', 'ON', 'IN'
+    private String horaOut;
+    private String horaOff;
+    private String horaOn;
+    private String horaIn;
     // Tripulación consolidada
     private TripulanteVuelo capitan;
     private TripulanteVuelo primerOficial;
     private List<TripulanteCabina> tripulacionCabina;
 
-    public VueloOperativo() {}
+    // Composiciones del despacho técnico (Weight & Balance / Meteorología / Logbook)
+    private ManifiestoCombustible manifiesto;
+    private ReporteMeteorologico clima;
+    private HojaDeCarga hojaCarga;
+    private ReporteLogbook reporteLogbook;
 
+    public VueloOperativo() {
+    // Todo vuelo nace por defecto en estado Pendiente
+        this.estadoLogico = new EstadoPendienteDespacho();
+        this.estadoVuelo = EstadoVuelo.PENDIENTE_DESPACHO.name();
+    }
+    
+    // ====================================================
+    // MÉTODOS DELEGADOS DEL PATRÓN STATE
+    // ====================================================
+    public void procesarAprobacion() {
+        this.estadoLogico.aprobarDespacho(this);
+    }
+    
+    public void procesarDemora() {
+        this.estadoLogico.declararDemora(this);
+    }
+    
+    public void procesarCancelacion() {
+        this.estadoLogico.cancelarVuelo(this);
+    }
+    
+    public IEstadoVuelo getEstadoLogico() { return estadoLogico; }
+    public void setEstadoLogico(IEstadoVuelo estadoLogico) { this.estadoLogico = estadoLogico; }
+    // ====================================================
+    
     // Getters y Setters
     public String getCodVuelo() { return codVuelo; }
     public void setCodVuelo(String codVuelo) { this.codVuelo = codVuelo; }
@@ -40,6 +76,30 @@ public class VueloOperativo {
 
     public List<TripulanteCabina> getTripulacionCabina() { return tripulacionCabina; }
     public void setTripulacionCabina(List<TripulanteCabina> tripulacionCabina) { this.tripulacionCabina = tripulacionCabina; }
+    
+    public String getHoraOut() { return horaOut; }
+    public void setHoraOut(String horaOut) { this.horaOut = horaOut; }
+
+    public String getHoraOff() { return horaOff; }
+    public void setHoraOff(String horaOff) { this.horaOff = horaOff; }
+
+    public String getHoraOn() { return horaOn; }
+    public void setHoraOn(String horaOn) { this.horaOn = horaOn; }
+
+    public String getHoraIn() { return horaIn; }
+    public void setHoraIn(String horaIn) { this.horaIn = horaIn; }
+
+    public ManifiestoCombustible getManifiesto() { return manifiesto; }
+    public void setManifiesto(ManifiestoCombustible manifiesto) { this.manifiesto = manifiesto; }
+
+    public ReporteMeteorologico getClima() { return clima; }
+    public void setClima(ReporteMeteorologico clima) { this.clima = clima; }
+
+    public HojaDeCarga getHojaCarga() { return hojaCarga; }
+    public void setHojaCarga(HojaDeCarga hojaCarga) { this.hojaCarga = hojaCarga; }
+
+    public ReporteLogbook getReporteLogbook() { return reporteLogbook; }
+    public void setReporteLogbook(ReporteLogbook reporteLogbook) { this.reporteLogbook = reporteLogbook; }
 
     @Override
     public String toString() {

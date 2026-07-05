@@ -1,5 +1,5 @@
 package Interfaces;
-import ElementosDiseño.Copia_Login_GUI;
+import Clases.ValidadorMetar;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -9,10 +9,6 @@ import java.awt.RenderingHints;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import ClasesDAO.DespachoDAO;
-import Clases.VueloProgramado;
-import Clases.TripulanteVuelo;
-import java.util.List;
 
 public class OficialOperaciones_GUI extends javax.swing.JFrame {
     
@@ -75,6 +71,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         cargarComboBoxesDespacho();
     // Cargamos los vuelos pendientes de despacho para la vista
         cargarVuelosPendientesDespacho();
+    // Cargamos los vuelos aprobados para la parte de Control OOOI
+        cargarVuelosEnControlOOOI();
     // Fuerza el color gris claro (puedes ajustar los valores RGB)
         txtAreaClima.setForeground(new java.awt.Color(204,204,204));
     // Forzamos el color del perfil
@@ -119,6 +117,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         txtFieldCarga.getDocument().addDocumentListener(escuchadorPesos);
         txtFieldCombRuta.getDocument().addDocumentListener(escuchadorPesos);
         txtFieldCombReserva.getDocument().addDocumentListener(escuchadorPesos);
+        txtAreaClima.getDocument().addDocumentListener(escuchadorPesos); //Cuadro de texto METAR
     }
 
     public java.util.List<Clases.TripulanteCabina> tcpsSeleccionadosList = new java.util.ArrayList<>();
@@ -291,8 +290,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         pnlFondoAprobado = new javax.swing.JPanel();
         lblAprobado = new javax.swing.JLabel();
         lblPorcentajeMTOW = new javax.swing.JLabel();
-        fondoBtnActualizar = new javax.swing.JPanel();
-        btnActualizar = new javax.swing.JLabel();
         fondoBtnAprobarPlan = new javax.swing.JPanel();
         btnAprobarPlan = new javax.swing.JLabel();
         fondoBtnDeclararDemora = new javax.swing.JPanel();
@@ -1061,7 +1058,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
             .addGroup(pnlPendientesVacioLayout.createSequentialGroup()
                 .addGap(147, 147, 147)
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(146, Short.MAX_VALUE))
+                .addContainerGap(125, Short.MAX_VALUE))
         );
         pnlPendientesVacioLayout.setVerticalGroup(
             pnlPendientesVacioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1096,7 +1093,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(pnlPendientesDespachoLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(pnlBasePendientes, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(pnlBasePendientes, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
         );
         pnlPendientesDespachoLayout.setVerticalGroup(
@@ -1127,6 +1124,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnOUT.setBackground(new java.awt.Color(24, 34, 52));
         btnOUT.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 2, true));
         btnOUT.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOUT.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnOUTMouseClicked(evt);
+            }
+        });
 
         lblOUT.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         lblOUT.setForeground(new java.awt.Color(115, 123, 134));
@@ -1169,6 +1171,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnOFF.setBackground(new java.awt.Color(24, 34, 52));
         btnOFF.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 2, true));
         btnOFF.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnOFF.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnOFFMouseClicked(evt);
+            }
+        });
 
         lblOFF.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         lblOFF.setForeground(new java.awt.Color(115, 123, 134));
@@ -1211,6 +1218,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnON.setBackground(new java.awt.Color(24, 34, 52));
         btnON.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 2, true));
         btnON.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnON.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnONMouseClicked(evt);
+            }
+        });
 
         lblON.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         lblON.setForeground(new java.awt.Color(115, 123, 134));
@@ -1253,6 +1265,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnIN.setBackground(new java.awt.Color(24, 34, 52));
         btnIN.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 2, true));
         btnIN.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnIN.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnINMouseClicked(evt);
+            }
+        });
 
         lblIN.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         lblIN.setForeground(new java.awt.Color(115, 123, 134));
@@ -2052,7 +2069,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         pnlFondoAprobado.setLayout(pnlFondoAprobadoLayout);
         pnlFondoAprobadoLayout.setHorizontalGroup(
             pnlFondoAprobadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(lblAprobado, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+            .addComponent(lblAprobado, javax.swing.GroupLayout.DEFAULT_SIZE, 168, Short.MAX_VALUE)
         );
         pnlFondoAprobadoLayout.setVerticalGroup(
             pnlFondoAprobadoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2076,7 +2093,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                         .addComponent(lblSlash, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(lblPesoMaximo, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
-                        .addGap(191, 191, 191)
+                        .addGap(116, 116, 116)
                         .addComponent(pnlFondoAprobado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(pnlFondoCalculoMTOWLayout.createSequentialGroup()
                         .addComponent(lblPorcentajeMTOW, javax.swing.GroupLayout.PREFERRED_SIZE, 370, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -2100,25 +2117,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addContainerGap(13, Short.MAX_VALUE))
         );
 
-        fondoBtnActualizar.setBackground(new java.awt.Color(15, 23, 42));
-
-        btnActualizar.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        btnActualizar.setForeground(new java.awt.Color(203, 213, 225));
-        btnActualizar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        btnActualizar.setText("Actualizar");
-        btnActualizar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-
-        javax.swing.GroupLayout fondoBtnActualizarLayout = new javax.swing.GroupLayout(fondoBtnActualizar);
-        fondoBtnActualizar.setLayout(fondoBtnActualizarLayout);
-        fondoBtnActualizarLayout.setHorizontalGroup(
-            fondoBtnActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnActualizar, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-        );
-        fondoBtnActualizarLayout.setVerticalGroup(
-            fondoBtnActualizarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnActualizar, javax.swing.GroupLayout.DEFAULT_SIZE, 23, Short.MAX_VALUE)
-        );
-
         fondoBtnAprobarPlan.setBackground(new java.awt.Color(22, 101, 52));
 
         btnAprobarPlan.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
@@ -2126,6 +2124,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnAprobarPlan.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnAprobarPlan.setText("Aprobar Plan De Vuelo");
         btnAprobarPlan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnAprobarPlan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnAprobarPlanLayout = new javax.swing.GroupLayout(fondoBtnAprobarPlan);
         fondoBtnAprobarPlan.setLayout(fondoBtnAprobarPlanLayout);
@@ -2146,6 +2149,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         btnDeclararDemora.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnDeclararDemora.setText("Declarar Demora");
         btnDeclararDemora.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnDeclararDemora.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnDeclararDemoraMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnDeclararDemoraLayout = new javax.swing.GroupLayout(fondoBtnDeclararDemora);
         fondoBtnDeclararDemora.setLayout(fondoBtnDeclararDemoraLayout);
@@ -2198,8 +2206,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                         .addComponent(lblDespachoTecnico, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
-                        .addGap(554, 554, 554)
-                        .addComponent(cbxVuelosDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(504, 504, 504)
+                        .addComponent(cbxVuelosDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(pnlFondoResumenRuta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                         .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2210,8 +2218,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                                         .addComponent(lblClimaDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                                        .addGap(247, 247, 247)
-                                        .addComponent(fondoBtnActualizar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGap(321, 321, 321))
                                     .addComponent(pnlFondoTxtArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                                         .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2275,15 +2282,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                                .addComponent(lblRequerimientosTecnicos)
-                                .addGap(12, 12, 12)
-                                .addComponent(lblClimaDestino)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
-                                .addComponent(fondoBtnActualizar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(6, 6, 6)))
+                        .addComponent(lblRequerimientosTecnicos)
+                        .addGap(12, 12, 12)
+                        .addComponent(lblClimaDestino)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(pnlFondoTxtArea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -3194,7 +3196,13 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxSeleccionVueloActionPerformed
 
     private void cbxVuelosOOOIActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxVuelosOOOIActionPerformed
-        // TODO add your handling code here:
+        if (cbxVuelosOOOI.getSelectedIndex() <= 0 || cbxVuelosOOOI.getSelectedItem() instanceof String) {
+        sincronizarBotonesOOOI(null);
+        return;
+        }
+
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosOOOI.getSelectedItem();
+        sincronizarBotonesOOOI(voSel);
     }//GEN-LAST:event_cbxVuelosOOOIActionPerformed
 
     private void rbtnPrioridadBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadBajaActionPerformed
@@ -3313,7 +3321,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxFiltroEstadoAeronaveActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
-        Copia_Login_GUI login = new Copia_Login_GUI();
+        Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnCerrarSesionMouseClicked
@@ -3447,7 +3455,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
 
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
 
-        // 2. Confirmación de seguridad en color rojo
+        // 2. Confirmación de seguridad con estilo de alerta crítica (del código largo)
         int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
                 "¿Está seguro que desea CANCELAR el vuelo " + voSel.getCodVuelo() + " de forma definitiva?\nLa tripulación asignada será liberada.",
                 "Alerta Crítica: Cancelar Vuelo",
@@ -3455,39 +3463,147 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 javax.swing.JOptionPane.ERROR_MESSAGE);
 
         if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+
+            // 3. INTEGRACIÓN PATRÓN STATE: El objeto cambia internamente a EstadoCancelado
+            voSel.procesarCancelacion(); 
+
             ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
 
-            // 3. Ejecutamos la transacción en la Base de Datos
-            if (dao.cancelarVueloOperativo(voSel.getCodVuelo())) {
+            // 4. ACTUALIZACIÓN EN BASE DE DATOS: Pasamos el código de vuelo y el nuevo String del estado del objeto
+            if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
 
-                // Mensaje de éxito
-                javax.swing.JOptionPane.showMessageDialog(this, "El vuelo " + voSel.getCodVuelo() + " ha sido cancelado exitosamente.");
+                // Mensaje de éxito profesional
+                javax.swing.JOptionPane.showMessageDialog(this, "Vuelo Cancelado. Se ha liberado la aeronave y la tripulación asignada.");
 
-                // 4. LIMPIAMOS LA VISTA DE DESPACHO
+                // 5. LIMPIEZA Y PARPADEO VISUAL DE LA INTERFAZ (Del código largo)
                 limpiarCampos(); 
-                cargarComboBoxesDespacho(); // Recarga el combo para que ya no salga el vuelo cancelado
+                cargarComboBoxesDespacho(); // O usa cargarVuelosEnDespacho() según se llame tu método actual de recarga de combo
 
                 // REFRESCO VISUAL DE LAS TARJETAS (PANEL DERECHO)
-
-                // A) Llamamos a tu método que vuelve a consultar a la BD y redibuja las tarjetas
                 cargarVuelosPendientesDespacho(); 
 
-                // B) Le decimos al panel contenedor que "recalcule" sus tamaños
+                // Forzamos a Java a recalcular tamaños y redibujar los componentes de inmediato
                 pnlListaItemsVuelo.revalidate(); 
-
-                // C) Le decimos al panel que se vuelva a pintar gráficamente (hace el parpadeo instantáneo)
                 pnlListaItemsVuelo.repaint(); 
 
-                // D) Hacemos lo mismo con el JScrollPane por si acaso (para evitar bugs de scroll)
                 ScrollPendientesDespacho.revalidate();
                 ScrollPendientesDespacho.repaint();
-                // =========================================================================
 
             } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al intentar cancelar el vuelo.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al intentar cancelar el vuelo en el sistema.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_btnCancelarVueloMouseClicked
+
+    private void btnAprobarPlanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseClicked
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) return;
+
+        // ==============================================================
+        // 1. VALIDACIÓN DE CAMPOS VACÍOS (Asegura completitud de datos)
+        // ==============================================================
+        if (txtFieldPasajeros.getText().trim().isEmpty() ||
+            txtFieldEquipaje.getText().trim().isEmpty() ||
+            txtFieldCarga.getText().trim().isEmpty() ||
+            txtFieldCombRuta.getText().trim().isEmpty() ||
+            txtFieldCombReserva.getText().trim().isEmpty() ||
+            txtAreaClima.getText().trim().isEmpty()) {
+            
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Operación rechazada: Todos los campos de peso (Pasajeros, Equipaje, Carga, Combustible) y el reporte METAR deben estar completamente llenados antes de autorizar el despacho.", 
+                "Información Incompleta", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return; // Rompe la ejecución aquí y evita el despacho
+        }
+
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+
+        // ==============================================================
+        // 2. REGLA DE ORO: Doble validación estricta (Peso y Clima)
+        //    Ya NO se compara el texto del JLabel: se valida contra las
+        //    clases de negocio reales (HojaDeCarga / ValidadorMetar).
+        // ==============================================================
+        Clases.ManifiestoCombustible manifiesto = construirManifiestoDesdeFormulario();
+        Clases.HojaDeCarga hoja = construirHojaDeCargaDesdeFormulario(manifiesto);
+        String codigoMetar = txtAreaClima.getText().trim().toUpperCase();
+
+        if (!hoja.validarPesoMaximo(mtowActual)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: No se puede aprobar el despacho. El peso actual supera el MTOW de la aeronave.");
+            return; // Rompe la ejecución aquí
+        }
+
+        if (!ValidadorMetar.esClimaApto(codigoMetar)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: El METAR reporta clima adverso. Debe declarar demora o cancelar el vuelo.");
+            return; // Rompe la ejecución aquí
+        }
+
+        if (!metarCorrespondeADestino(codigoMetar, voSel)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: El código METAR ingresado no pertenece al aeropuerto de destino de este vuelo.", "Error de Jurisdicción", javax.swing.JOptionPane.ERROR_MESSAGE);
+            return; // Rompe la ejecución aquí
+        }
+
+        // ==============================================================
+        // 3. PROCESAMIENTO DEL PATRÓN STATE
+        // ==============================================================
+        voSel.procesarAprobacion();
+
+        // ==============================================================
+        // 4. ENSAMBLAJE FINAL CON EL PATRÓN BUILDER
+        //    Reutilizamos el Builder para adjuntar HojaDeCarga, Manifiesto y
+        //    Clima al vuelo YA existente, sin perder tripulación ni estado.
+        // ==============================================================
+        Clases.ReporteMeteorologico clima = new Clases.ReporteMeteorologico();
+        clima.setCodigoMETAR(codigoMetar);
+
+        voSel = new Patrones.VueloOperativoBuilder(voSel)
+                .setHojaCarga(hoja)
+                .setManifiesto(manifiesto)
+                .setClima(clima)
+                .build();
+
+        // ==============================================================
+        // 5. IMPACTO TRANSACCIONAL EN BASE DE DATOS POSTGRESQL
+        // ==============================================================
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        if (dao.aprobarDespachoConDatosOperativos(voSel)) {
+            javax.swing.JOptionPane.showMessageDialog(this, "¡Despacho Autorizado! El vuelo " + voSel.getCodVuelo() + " pasó a estado APROBADO.");
+
+            // 6. Refrescamos el panel
+            cargarVuelosEnDespacho();
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al guardar los datos de despacho en la base de datos.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
+        cargarVuelosEnControlOOOI();
+    }//GEN-LAST:event_btnAprobarPlanMouseClicked
+
+    private void btnDeclararDemoraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnDeclararDemoraMouseClicked
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) return;
+
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+        voSel.procesarDemora(); // El State cambia el comportamiento a EstadoEnDemora
+
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Alerta: El vuelo " + voSel.getCodVuelo() + " ha sido retenido en rampa (EN_DEMORA).");
+
+            cargarVuelosEnDespacho();
+        }
+    }//GEN-LAST:event_btnDeclararDemoraMouseClicked
+
+    private void btnOUTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOUTMouseClicked
+        procesarClicControlOOOI("OUT", btnOUT);
+    }//GEN-LAST:event_btnOUTMouseClicked
+
+    private void btnOFFMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnOFFMouseClicked
+        procesarClicControlOOOI("OFF", btnOFF);
+    }//GEN-LAST:event_btnOFFMouseClicked
+
+    private void btnONMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnONMouseClicked
+        procesarClicControlOOOI("ON", btnON);
+    }//GEN-LAST:event_btnONMouseClicked
+
+    private void btnINMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnINMouseClicked
+        procesarClicControlOOOI("IN", btnIN);
+    }//GEN-LAST:event_btnINMouseClicked
 
     /**
      * @param args the command line arguments
@@ -4078,82 +4194,176 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }
     
 // ==============================================================
-// MÉTODO PARA CALCULAR LOS PESOS EN VIVO EN EL DESPACHO TÉCNICO
+// MÉTODO PARA MAPEAR LOS CAMPOS DE COMBUSTIBLE DEL FORMULARIO A UN OBJETO DE DOMINIO
+// ==============================================================
+    private Clases.ManifiestoCombustible construirManifiestoDesdeFormulario() {
+        double combRuta = txtFieldCombRuta.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombRuta.getText().trim());
+        double combRes = txtFieldCombReserva.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombReserva.getText().trim());
+
+        Clases.ManifiestoCombustible manifiesto = new Clases.ManifiestoCombustible();
+        manifiesto.setCombustibleRutaKg(combRuta);
+        manifiesto.setCombustibleReservaKg(combRes);
+        return manifiesto;
+    }
+
+// ==============================================================
+// MÉTODO PARA MAPEAR LOS CAMPOS DE PESO DEL FORMULARIO A UN OBJETO DE DOMINIO
+// ==============================================================
+    private Clases.HojaDeCarga construirHojaDeCargaDesdeFormulario(Clases.ManifiestoCombustible manifiesto) {
+        double pas = txtFieldPasajeros.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldPasajeros.getText().trim());
+        double eq = txtFieldEquipaje.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldEquipaje.getText().trim());
+        double car = txtFieldCarga.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCarga.getText().trim());
+
+        Clases.HojaDeCarga hoja = new Clases.HojaDeCarga();
+        hoja.setPesoPasajeros(pas);
+        hoja.setPesoEquipaje(eq);
+        hoja.setPesoCarga(car);
+        hoja.setPesoCombustible(manifiesto.calcularCombustibleTotal());
+        return hoja;
+    }
+
+// ==============================================================
+// MÉTODO PARA VALIDAR QUE EL METAR INGRESADO CORRESPONDA AL AEROPUERTO DE DESTINO
+// ==============================================================
+    private boolean metarCorrespondeADestino(String codigoMetar, Clases.VueloOperativo voSel) {
+        String ruta = voSel.getVueloBase().getOrigenDestino().toUpperCase();
+
+        // Diccionario de aeropuertos LATAM AeroOps
+        String icaoDestino = "";
+        if (ruta.contains("CUSCO") || ruta.contains("CUZ")) icaoDestino = "SPZO";
+        else if (ruta.contains("CHIMBOTE") || ruta.contains("CHM")) icaoDestino = "SPHZ";
+        else if (ruta.contains("AREQUIPA") || ruta.contains("AQP")) icaoDestino = "SPQU";
+        else if (ruta.contains("JULIACA") || ruta.contains("JUL")) icaoDestino = "SPJL";
+
+        // Si el METAR no contiene el código de destino correcto, se marca como inválido
+        if (!icaoDestino.isEmpty() && !codigoMetar.contains(icaoDestino) && !codigoMetar.trim().isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+// ==============================================================
+// MÉTODO PARA CALCULAR LOS PESOS Y METAR CON FILTRO DE SEDE EN VIVO
 // ==============================================================
     private void calcularPesosEnVivo() {
         try {
-            // 1. Extraemos los valores (si la cajita está vacía, asumimos 0)
-            double pas = txtFieldPasajeros.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldPasajeros.getText().trim());
-            double eq = txtFieldEquipaje.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldEquipaje.getText().trim());
-            double car = txtFieldCarga.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCarga.getText().trim());
-            double combRuta = txtFieldCombRuta.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombRuta.getText().trim());
-            double combRes = txtFieldCombReserva.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombReserva.getText().trim());
-            
-            // 2. Cálculo del Combustible Total y Suma Total
-            double combTotal = combRuta + combRes;
-            txtFieldCombustible.setText(String.format(java.util.Locale.US, "%.2f", combTotal)); // Locale.US fuerza el uso de punto decimal
+            // 1. Armamos los objetos de dominio reales a partir del formulario
+            //    (mismo método que usará btnAprobarPlanMouseClicked para persistir)
+            Clases.ManifiestoCombustible manifiesto = construirManifiestoDesdeFormulario();
+            Clases.HojaDeCarga hoja = construirHojaDeCargaDesdeFormulario(manifiesto);
 
-            double sumaTotal = pas + eq + car + combTotal;
+            // 2. El cálculo de combustible y peso total ya NO se hace a mano en la GUI:
+            //    se delega a las clases de negocio (SRP)
+            double combTotal = manifiesto.calcularCombustibleTotal();
+            txtFieldCombustible.setText(String.format(java.util.Locale.US, "%.2f", combTotal));
+
+            double sumaTotal = hoja.calcularPesoTotal();
             lblSumaTotal.setText(String.format(java.util.Locale.US, "%.2f", sumaTotal));
             
-            // 3. Lógica Visual de la Barra, Textos y Seguridad
+            // 3. Inyección y evaluación meteorológica en vivo con filtro de Aeropuerto (Sede)
+            String codigoMetar = txtAreaClima.getText().toUpperCase();
+            boolean climaApto = ValidadorMetar.esClimaApto(codigoMetar);
+            boolean metarCorresponde = true;
+
+            // Verificamos a dónde va el vuelo seleccionado para exigir su código OACI
+            if (cbxVuelosDespacho.getSelectedIndex() > 0) {
+                Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+                metarCorresponde = metarCorrespondeADestino(codigoMetar, voSel);
+            }
+            
+            // 5. Lógica Visual de la Barra, Textos y Seguridad por Capas de Carga
             if (mtowActual > 0) {
-                // Sacamos el porcentaje real
+                // Cálculo de porcentajes para el renderizado de la barra de progreso
                 double porcentajeReal = (sumaTotal / mtowActual) * 100;
                 int porcentajeRedondeado = (int) Math.round(porcentajeReal);
 
-                // TRUCO: Congelamos la barra visualmente para que no sobrepase su propio tamaño físico
+                // Forzamos el límite visual de la barra para mantener consistencia gráfica
                 barraMTOW.setValue(Math.min(porcentajeRedondeado, 100));
                 
-                // COLORES DEFINIDOS
+                // Definición de colores institucionales en formato RGB
                 java.awt.Color verde = new java.awt.Color(34, 197, 94);  // Verde #22c55e
                 java.awt.Color ambar = new java.awt.Color(245, 158, 11); // Naranja/Ámbar #f59e0b
                 java.awt.Color rojo = new java.awt.Color(225, 29, 72);   // Rojo Carmesí #e11d48
-                java.awt.Color fondoBarraOscuro = new java.awt.Color(30, 41, 59); // Color de fondo oscuro para la parte vacía de la barra
-                // == CONDICIÓN 1: TODO VERDE (0% a 85%) ==
+                java.awt.Color fondoBarraOscuro = new java.awt.Color(30, 41, 59); // Fondo Dark Mode para la barra
+
+                // Aplicación de renderizador básico para anular estilos del sistema operativo
+                barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
+                barraMTOW.setBackground(fondoBarraOscuro);
+
+                // == CONDICIÓN 1: PESO SEGURO BAJO (0% a 85%) ==
                 if (porcentajeReal <= 85.0) {
-                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
-                    barraMTOW.setBackground(fondoBarraOscuro);
-                    barraMTOW.setForeground(verde);
-                    barraMTOW.putClientProperty("ProgressBar.foreground", verde); // <--- FORZAMOS COLOR 
-                    lblAprobado.setText("APROBADO");
-                    lblAprobado.setForeground(verde);
-                    pnlFondoAprobado.setBackground(new java.awt.Color(5, 46, 22)); // Fondo oscuro [5, 46, 22]                   
+                    if (climaApto && metarCorresponde) {
+                        // Estado óptimo total: Peso en rango verde, clima apto y sede correcta
+                        barraMTOW.setForeground(verde);
+                        lblAprobado.setText("APROBADO");
+                        lblAprobado.setForeground(verde);
+                        pnlFondoAprobado.setBackground(new java.awt.Color(5, 46, 22));
+                        btnAprobarPlan.setEnabled(true);
+                    } else {
+                        // Falla meteorológica o de sede: Cambia a rojo y bloquea el botón
+                        barraMTOW.setForeground(rojo);
+                        lblAprobado.setForeground(new java.awt.Color(255, 255, 255));
+                        pnlFondoAprobado.setBackground(rojo);
+                        btnAprobarPlan.setEnabled(false);
+                        
+                        if (!metarCorresponde) {
+                            lblAprobado.setText("METAR INVÁLIDO");
+                        } else {
+                            lblAprobado.setText("ALERTA CLIMA");
+                        }
+                    }
                     lblPorcentajeMTOW.setText(porcentajeRedondeado + "% del MTOW");
-                    btnAprobarPlan.setEnabled(true); // Permitimos guardar
                 } 
-                // == CONDICIÓN 2: ÁMBAR - ADVERTENCIA (85.1% a 100%) ==
+                // == CONDICIÓN 2: PESO AL LÍMITE DE CAPACIDAD (85.1% a 100%) ==
                 else if (porcentajeReal <= 100.0) {
-                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
-                    barraMTOW.setBackground(fondoBarraOscuro);
-                    barraMTOW.setForeground(ambar);
-                    barraMTOW.putClientProperty("ProgressBar.foreground", ambar); // <--- FORZAMOS COLOR 
-                    lblAprobado.setText("APROBADO"); // Sigue siendo legal, pero al límite
-                    lblAprobado.setForeground(ambar);
-                    pnlFondoAprobado.setBackground(new java.awt.Color(66, 32, 6)); // Fondo neutro                    
+                    if (climaApto && metarCorresponde) {
+                        // Estado legal pesado: Peso en rango ámbar pero aceptable, clima y sede correctos
+                        barraMTOW.setForeground(ambar);
+                        lblAprobado.setText("APROBADO");
+                        lblAprobado.setForeground(ambar);
+                        pnlFondoAprobado.setBackground(new java.awt.Color(66, 32, 6));
+                        btnAprobarPlan.setEnabled(true);
+                    } else {
+                        // Falla meteorológica o de sede estando pesado: Cambia a rojo y bloquea el botón
+                        barraMTOW.setForeground(rojo);
+                        lblAprobado.setForeground(new java.awt.Color(255, 255, 255));
+                        pnlFondoAprobado.setBackground(rojo);
+                        btnAprobarPlan.setEnabled(false);
+                        
+                        if (!metarCorresponde) {
+                            lblAprobado.setText("METAR INVÁLIDO");
+                        } else {
+                            lblAprobado.setText("ALERTA CLIMA");
+                        }
+                    }
                     lblPorcentajeMTOW.setText(porcentajeRedondeado + "% del MTOW");
-                    btnAprobarPlan.setEnabled(true); // Permitimos guardar
                 } 
-                // == CONDICIÓN 3: ROJO - PELIGRO EXCEDIDO (> 100%) ==
+                // == CONDICIÓN 3: EN SOBREPESO CRÍTICO (> 100%) ==
                 else {
+                    // Estado ilegal por peso: Bloquea el despacho de forma mandatoria
                     double excedente = sumaTotal - mtowActual;
-                    barraMTOW.setUI(new javax.swing.plaf.basic.BasicProgressBarUI());
-                    barraMTOW.setBackground(fondoBarraOscuro);
                     barraMTOW.setForeground(rojo);
-                    barraMTOW.putClientProperty("ProgressBar.foreground", rojo); // <--- FORZAMOS COLOR 
-                    lblAprobado.setText("¡EXCEDIDO!");
-                    lblAprobado.setForeground(new java.awt.Color(251, 113, 133)); // Letra rosada #fb7185
-                    pnlFondoAprobado.setBackground(new java.awt.Color(76, 5, 25)); // Fondo guinda #4c0519                   
-                    // Texto dinámico con la diferencia
+                    lblAprobado.setForeground(new java.awt.Color(251, 113, 133));
+                    pnlFondoAprobado.setBackground(new java.awt.Color(76, 5, 25));
+                    btnAprobarPlan.setEnabled(false);
+                    
+                    if (!metarCorresponde) {
+                        lblAprobado.setText("EXCEDIDO & METAR INVÁLIDO");
+                    } else if (!climaApto) {
+                        lblAprobado.setText("CRÍTICO: PESO Y CLIMA");
+                    } else {
+                        lblAprobado.setText("¡EXCEDIDO!");
+                    }
+                    
                     lblPorcentajeMTOW.setText("100% del MTOW · Excede en " + String.format(java.util.Locale.US, "%,.2f", excedente) + " kg");
-                    btnAprobarPlan.setEnabled(false); // ¡BLOQUEO DE SEGURIDAD ACTIVADO!
                 }
-                // Forzamos el redibujado final
+                
+                // Redibujado inmediato de los elementos en pantalla
                 barraMTOW.repaint();
             }
         } catch (NumberFormatException e) {
-            // Este catch absorbe cualquier error de conversión si una caja queda vacía por un nanosegundo mientras se tipea
-        }
+            // Manejo silencioso de excepciones numéricas durante el tipeo transitorio
+        } 
     }
 
 // ==============================================================
@@ -4184,6 +4394,148 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         }
     }
     
+// ====================================================================
+// MÉTODO PARA CARGAR LOS VUELOS AL COMBOX DE ELECCION DE CONTROL OOOI
+// ====================================================================
+private void cargarVuelosEnControlOOOI() {
+    ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+    java.util.List<Clases.VueloOperativo> vuelosOOOI = dao.obtenerVuelosParaControlOOOI();
+    
+    // 🛠️ EL TRUCO: Creamos una variable cruda para saltar la restricción de String de NetBeans
+    javax.swing.JComboBox comboOOOI = cbxVuelosOOOI;
+    
+    comboOOOI.removeAllItems();
+    
+    if (vuelosOOOI.isEmpty()) {
+        comboOOOI.addItem("— No hay vuelos para control —");
+        sincronizarBotonesOOOI(null); // Apaga la interfaz si no hay nada
+    } else {
+        comboOOOI.addItem("— Seleccionar Vuelo —");
+        for (Clases.VueloOperativo vo : vuelosOOOI) {
+            comboOOOI.addItem(vo); // ¡Ahora el compilador te aceptará el objeto sin chistar!
+        }
+    }
+}
+
+// ==============================================================
+// MÉTODO PARA SINCRONIZAR LOS BOTONES DE CONTROL OOOI 
+// ==============================================================    
+    private void sincronizarBotonesOOOI(Clases.VueloOperativo vo) {
+        // 1. Por defecto, apagamos y ponemos en gris todos
+        aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "BLOQUEADO");
+        aplicarEstiloBotonOOOI(btnOFF, lblOFF, lblTakeOff, lblTiempoOFF, "BLOQUEADO");
+        aplicarEstiloBotonOOOI(btnON, lblON, lblLanding, lblTiempoON, "BLOQUEADO");
+        aplicarEstiloBotonOOOI(btnIN, lblIN, lblGateArrival, lblTiempoIN, "BLOQUEADO");
+
+        if (vo == null) {
+            lblTiempoOUT.setText("--:--Z"); lblTiempoOFF.setText("--:--Z");
+            lblTiempoON.setText("--:--Z"); lblTiempoIN.setText("--:--Z");
+            return;
+        }
+
+        // 2. Cargamos los tiempos
+        lblTiempoOUT.setText(vo.getHoraOut() != null ? vo.getHoraOut() : "--:--Z");
+        lblTiempoOFF.setText(vo.getHoraOff() != null ? vo.getHoraOff() : "--:--Z");
+        lblTiempoON.setText(vo.getHoraOn() != null ? vo.getHoraOn() : "--:--Z");
+        lblTiempoIN.setText(vo.getHoraIn() != null ? vo.getHoraIn() : "--:--Z");
+
+        String estado = vo.getEstadoOOOI() != null ? vo.getEstadoOOOI() : "PENDIENTE";
+
+        // 3. Lógica de cascada visual
+        if (estado.equals("PENDIENTE")) {
+            aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "HABILITADO");
+        } 
+        else if (estado.equals("OUT")) {
+            aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnOFF, lblOFF, lblTakeOff, lblTiempoOFF, "HABILITADO");
+        } 
+        else if (estado.equals("OFF")) {
+            aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnOFF, lblOFF, lblTakeOff, lblTiempoOFF, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnON, lblON, lblLanding, lblTiempoON, "HABILITADO");
+        } 
+        else if (estado.equals("ON")) {
+            aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnOFF, lblOFF, lblTakeOff, lblTiempoOFF, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnON, lblON, lblLanding, lblTiempoON, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnIN, lblIN, lblGateArrival, lblTiempoIN, "HABILITADO");
+        } 
+        else if (estado.equals("IN")) {
+            aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnOFF, lblOFF, lblTakeOff, lblTiempoOFF, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnON, lblON, lblLanding, lblTiempoON, "COMPLETADO");
+            aplicarEstiloBotonOOOI(btnIN, lblIN, lblGateArrival, lblTiempoIN, "COMPLETADO");
+        }
+    }
+    
+// ==============================================
+// MÉTODO PARA LOS COLORES DE LOS CONTROLES OOOI
+// ==============================================      
+    private void aplicarEstiloBotonOOOI(javax.swing.JPanel panel, javax.swing.JLabel lblMain, javax.swing.JLabel lblSub, javax.swing.JLabel lblTime, String estadoEstilo) {
+        if (estadoEstilo.equals("COMPLETADO")) {
+            // Verde Neón (Ya se pasó por esta fase)
+            panel.setBackground(new java.awt.Color(5, 46, 22)); 
+            panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(34, 197, 94), 2, true)); 
+            lblMain.setForeground(new java.awt.Color(74, 222, 128)); 
+            lblSub.setForeground(new java.awt.Color(248, 250, 252));
+            lblTime.setForeground(new java.awt.Color(248, 250, 252));
+            panel.setEnabled(false); // Se bloquea para no volver a pulsarlo
+
+        } else if (estadoEstilo.equals("HABILITADO")) {
+            // Rojo Neón (Es el botón que toca pulsar ahora)
+            panel.setBackground(new java.awt.Color(45, 10, 30)); // #2d0a1e
+            panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(225, 29, 72), 2, true)); // #e11d48
+            lblMain.setForeground(new java.awt.Color(251, 113, 133)); // #fb7185
+            lblSub.setForeground(new java.awt.Color(248, 250, 252));
+            lblTime.setForeground(new java.awt.Color(248, 250, 252));
+            panel.setEnabled(true); // Se habilita el clic
+
+        } else { 
+            // BLOQUEADO: Gris oscuro (Aún no es su turno)
+            panel.setBackground(new java.awt.Color(24, 34, 52)); 
+            panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 65, 85), 2, true));
+            lblMain.setForeground(new java.awt.Color(115, 123, 134)); 
+            lblSub.setForeground(new java.awt.Color(115, 123, 134));
+            lblTime.setForeground(new java.awt.Color(115, 123, 134));
+            panel.setEnabled(false); // Se bloquea
+        }
+    }
+    
+// ========================================
+// MÉTODO PARA EL CLICK A LOS BOTONES OOOI
+// ========================================      
+    private void procesarClicControlOOOI(String faseAvanzar, javax.swing.JPanel panelPulsado) {
+        // Candado de seguridad: Si el panel está "apagado", ignoramos el clic
+        if (!panelPulsado.isEnabled() || cbxVuelosOOOI.getSelectedIndex() <= 0) return;
+
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosOOOI.getSelectedItem();
+
+        // Generador de Hora Zulu
+        java.text.SimpleDateFormat formatoZulu = new java.text.SimpleDateFormat("HH:mm'Z'");
+        formatoZulu.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+        String horaActual = formatoZulu.format(new java.util.Date());
+
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+
+        // Registramos en BD
+        if(dao.registrarFaseOOOI(voSel.getCodVuelo(), faseAvanzar, horaActual)){
+            // Actualizamos memoria
+            voSel.setEstadoOOOI(faseAvanzar);
+            if(faseAvanzar.equals("OUT")) voSel.setHoraOut(horaActual);
+            else if(faseAvanzar.equals("OFF")) {
+                voSel.setHoraOff(horaActual);
+                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), "EN_VUELO"); // Actualiza a la vez el estado general
+            }
+            else if(faseAvanzar.equals("ON")) voSel.setHoraOn(horaActual);
+            else if(faseAvanzar.equals("IN")) {
+                voSel.setHoraIn(horaActual);
+                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), "EN_TIERRA");
+            }
+
+            // Volvemos a pintar la interfaz
+            sincronizarBotonesOOOI(voSel);
+        }
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane ScrollAsignacionVuelos;
@@ -4198,7 +4550,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     private javax.swing.JTextArea TxtReporteFallas;
     private javax.swing.JProgressBar barraMTOW;
     private javax.swing.JPanel bordeSuperior;
-    private javax.swing.JLabel btnActualizar;
     private javax.swing.JLabel btnAprobarPlan;
     private ElementosDiseño.BotonMenu btnAsigancionVuelos;
     private ElementosDiseño.BotonMenu btnAutorizarDespacho;
@@ -4230,7 +4581,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     private javax.swing.JComboBox<String> cbxVuelosDespacho;
     private javax.swing.JComboBox<String> cbxVuelosOOOI;
     private javax.swing.JPanel fondoBarraLateral;
-    private javax.swing.JPanel fondoBtnActualizar;
     private javax.swing.JPanel fondoBtnAprobarPlan;
     private javax.swing.JPanel fondoBtnCancelarVuelo;
     private javax.swing.JPanel fondoBtnCancelarVuelo3;

@@ -22,7 +22,7 @@ public class TarjetaVueloPendiente extends JPanel {
 
         setOpaque(false); // Para que las esquinas redondeadas se vean bien
         setPreferredSize(new Dimension(300, 55)); // Alto fijo para la tarjeta
-        setMaximumSize(new Dimension(Integer.MAX_VALUE, 55)); // Evita que el GridLayout la estire deformándola
+        setMaximumSize(new Dimension(600, 55)); // Evita que el GridLayout la estire deformándola
         setLayout(null); // Posicionamiento absoluto para clavar los textos
 
         // Título del Vuelo (Ej: LA800)

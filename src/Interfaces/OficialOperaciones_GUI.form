@@ -1427,7 +1427,7 @@
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="pnlBasePendientes" max="32767" attributes="0"/>
+                                      <Component id="pnlBasePendientes" pref="0" max="32767" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -1478,7 +1478,7 @@
                                           <Group type="102" alignment="0" attributes="0">
                                               <EmptySpace min="-2" pref="147" max="-2" attributes="0"/>
                                               <Component id="jLabel11" min="-2" pref="139" max="-2" attributes="0"/>
-                                              <EmptySpace pref="146" max="32767" attributes="0"/>
+                                              <EmptySpace pref="125" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                     </DimensionLayout>
@@ -1675,6 +1675,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnOUTMouseClicked"/>
+                              </Events>
 
                               <Layout>
                                 <DimensionLayout dim="0">
@@ -1756,6 +1759,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnOFFMouseClicked"/>
+                              </Events>
 
                               <Layout>
                                 <DimensionLayout dim="0">
@@ -1837,6 +1843,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnONMouseClicked"/>
+                              </Events>
 
                               <Layout>
                                 <DimensionLayout dim="0">
@@ -1918,6 +1927,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnINMouseClicked"/>
+                              </Events>
 
                               <Layout>
                                 <DimensionLayout dim="0">
@@ -3052,8 +3064,8 @@
                                   <Group type="103" groupAlignment="1" attributes="0">
                                       <Group type="102" alignment="1" attributes="0">
                                           <Component id="lblDespachoTecnico" pref="298" max="32767" attributes="0"/>
-                                          <EmptySpace min="-2" pref="554" max="-2" attributes="0"/>
-                                          <Component id="cbxVuelosDespacho" min="-2" pref="180" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="504" max="-2" attributes="0"/>
+                                          <Component id="cbxVuelosDespacho" min="-2" pref="230" max="-2" attributes="0"/>
                                       </Group>
                                       <Component id="pnlFondoResumenRuta" alignment="1" max="32767" attributes="0"/>
                                       <Group type="102" alignment="1" attributes="0">
@@ -3066,8 +3078,7 @@
                                                   <Group type="103" groupAlignment="1" attributes="0">
                                                       <Group type="102" alignment="1" attributes="0">
                                                           <Component id="lblClimaDestino" pref="0" max="32767" attributes="0"/>
-                                                          <EmptySpace min="-2" pref="247" max="-2" attributes="0"/>
-                                                          <Component id="fondoBtnActualizar" min="-2" max="-2" attributes="0"/>
+                                                          <EmptySpace min="-2" pref="321" max="-2" attributes="0"/>
                                                       </Group>
                                                       <Component id="pnlFondoTxtArea" alignment="1" max="32767" attributes="0"/>
                                                       <Group type="102" alignment="1" attributes="0">
@@ -3158,18 +3169,10 @@
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="0" attributes="0">
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="lblRequerimientosTecnicos" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
-                                                  <Component id="lblClimaDestino" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                              </Group>
-                                              <Group type="102" alignment="1" attributes="0">
-                                                  <Component id="fondoBtnActualizar" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
-                                              </Group>
-                                          </Group>
+                                          <Component id="lblRequerimientosTecnicos" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                          <Component id="lblClimaDestino" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
                                           <Component id="pnlFondoTxtArea" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace type="separate" max="-2" attributes="0"/>
                                           <Group type="103" groupAlignment="3" attributes="0">
@@ -3560,7 +3563,7 @@
                                               <Component id="lblSlash" pref="27" max="32767" attributes="0"/>
                                               <EmptySpace min="-2" max="-2" attributes="0"/>
                                               <Component id="lblPesoMaximo" pref="67" max="32767" attributes="0"/>
-                                              <EmptySpace min="-2" pref="191" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="116" max="-2" attributes="0"/>
                                               <Component id="pnlFondoAprobado" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
@@ -3649,7 +3652,7 @@
                               <Layout>
                                 <DimensionLayout dim="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="lblAprobado" alignment="0" pref="93" max="32767" attributes="0"/>
+                                      <Component id="lblAprobado" alignment="0" pref="168" max="32767" attributes="0"/>
                                   </Group>
                                 </DimensionLayout>
                                 <DimensionLayout dim="1">
@@ -3690,43 +3693,6 @@
                             </Component>
                           </SubComponents>
                         </Container>
-                        <Container class="javax.swing.JPanel" name="fondoBtnActualizar">
-                          <Properties>
-                            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                              <Color blue="2a" green="17" red="f" type="rgb"/>
-                            </Property>
-                          </Properties>
-
-                          <Layout>
-                            <DimensionLayout dim="0">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="btnActualizar" alignment="0" pref="74" max="32767" attributes="0"/>
-                              </Group>
-                            </DimensionLayout>
-                            <DimensionLayout dim="1">
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="btnActualizar" alignment="0" pref="23" max="32767" attributes="0"/>
-                              </Group>
-                            </DimensionLayout>
-                          </Layout>
-                          <SubComponents>
-                            <Component class="javax.swing.JLabel" name="btnActualizar">
-                              <Properties>
-                                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                                  <Font name="Segoe UI" size="12" style="1"/>
-                                </Property>
-                                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-                                  <Color blue="e1" green="d5" red="cb" type="rgb"/>
-                                </Property>
-                                <Property name="horizontalAlignment" type="int" value="0"/>
-                                <Property name="text" type="java.lang.String" value="Actualizar"/>
-                                <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-                                  <Color id="Cursor de Mano"/>
-                                </Property>
-                              </Properties>
-                            </Component>
-                          </SubComponents>
-                        </Container>
                         <Container class="javax.swing.JPanel" name="fondoBtnAprobarPlan">
                           <Properties>
                             <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
@@ -3761,6 +3727,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnAprobarPlanMouseClicked"/>
+                              </Events>
                             </Component>
                           </SubComponents>
                         </Container>
@@ -3801,6 +3770,9 @@
                                   <Color id="Cursor de Mano"/>
                                 </Property>
                               </Properties>
+                              <Events>
+                                <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="btnDeclararDemoraMouseClicked"/>
+                              </Events>
                             </Component>
                           </SubComponents>
                         </Container>

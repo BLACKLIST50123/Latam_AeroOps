@@ -1,5 +1,4 @@
 package Interfaces;
-import ElementosDiseño.Copia_Login_GUI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -1028,7 +1027,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxFiltroEstadoActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
-        Copia_Login_GUI login = new Copia_Login_GUI();
+        Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_btnCerrarSesionMouseClicked

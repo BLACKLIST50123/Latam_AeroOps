@@ -1,5 +1,4 @@
 package ClasesDAO;
-
 import BaseDeDatos.ConexionBD;
 import Clases.VueloOperativo;
 import Clases.TripulanteCabina;
@@ -98,7 +97,8 @@ public class VueloOperativoDAO {
                      "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
                      "JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
-                     "WHERE vo.estado_vuelo = 'PENDIENTE_DESPACHO' ORDER BY vo.fecha_operacion ASC";
+                     "WHERE vo.estado_vuelo IN ('PENDIENTE_DESPACHO', 'EN_DEMORA') " +
+                     "ORDER BY vo.fecha_operacion ASC";
         try {
             Connection con = ConexionBD.getInstancia().getConexion();
             PreparedStatement ps = con.prepareStatement(sql);
@@ -125,12 +125,13 @@ public class VueloOperativoDAO {
 // ====================================================================
     public java.util.List<Clases.VueloOperativo> obtenerVuelosDetalladosParaDespacho() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
-        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " + 
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " +
                      "FROM vuelos_operativos vo " +
                      "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
                      "JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
-                     "WHERE vo.estado_vuelo = 'PENDIENTE_DESPACHO' ORDER BY vo.fecha_operacion ASC";
+                     "WHERE vo.estado_vuelo IN ('PENDIENTE_DESPACHO', 'EN_DEMORA') " + 
+                     "ORDER BY vo.fecha_operacion ASC";
         try {
             java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
             java.sql.PreparedStatement ps = con.prepareStatement(sql);
@@ -215,5 +216,147 @@ public class VueloOperativoDAO {
         } finally {
             try { if (con != null) con.setAutoCommit(true); } catch (Exception ex) {}
         }
-    }    
+    }
+
+    public boolean actualizarEstadoVuelo(String codVuelo, String nuevoEstado) {
+        String sql = "UPDATE vuelos_operativos SET estado_vuelo = ? WHERE cod_vuelo = ?";
+        try {
+            java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, nuevoEstado);
+            ps.setString(2, codVuelo);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error al actualizar estado en BD: " + e.getMessage());
+            return false;
+        }
+    }
+// ====================================================================================
+// MÉTODO TRANSACCIONAL: PERSISTE HOJA DE CARGA + MANIFIESTO + CLIMA Y APRUEBA EL DESPACHO
+// ====================================================================================
+// ON CONFLICT: si el vuelo ya tenía datos de un intento previo (ej. volvió de EN_DEMORA
+// y se vuelve a calcular el W&B), actualizamos en vez de fallar por la restricción UNIQUE
+// sobre id_vuelo_operativo.
+    public boolean aprobarDespachoConDatosOperativos(Clases.VueloOperativo vo) {
+        String sqlHoja =
+            "INSERT INTO hojas_carga (id_vuelo_operativo, peso_pasajeros, peso_equipaje, peso_carga, peso_combustible) " +
+            "VALUES ((SELECT id_vuelo_operativo FROM vuelos_operativos WHERE cod_vuelo = ?), ?, ?, ?, ?) " +
+            "ON CONFLICT (id_vuelo_operativo) DO UPDATE SET " +
+            "peso_pasajeros = EXCLUDED.peso_pasajeros, peso_equipaje = EXCLUDED.peso_equipaje, " +
+            "peso_carga = EXCLUDED.peso_carga, peso_combustible = EXCLUDED.peso_combustible";
+
+        String sqlManifiesto =
+            "INSERT INTO manifiestos_combustible (id_vuelo_operativo, combustible_ruta_kg, combustible_reserva_kg) " +
+            "VALUES ((SELECT id_vuelo_operativo FROM vuelos_operativos WHERE cod_vuelo = ?), ?, ?) " +
+            "ON CONFLICT (id_vuelo_operativo) DO UPDATE SET " +
+            "combustible_ruta_kg = EXCLUDED.combustible_ruta_kg, combustible_reserva_kg = EXCLUDED.combustible_reserva_kg";
+
+        String sqlClima =
+            "INSERT INTO reportes_meteorologicos (id_vuelo_operativo, codigo_metar) " +
+            "VALUES ((SELECT id_vuelo_operativo FROM vuelos_operativos WHERE cod_vuelo = ?), ?) " +
+            "ON CONFLICT (id_vuelo_operativo) DO UPDATE SET codigo_metar = EXCLUDED.codigo_metar";
+
+        String sqlEstado = "UPDATE vuelos_operativos SET estado_vuelo = ? WHERE cod_vuelo = ?";
+
+        java.sql.Connection con = null;
+        try {
+            con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            con.setAutoCommit(false);
+
+            Clases.HojaDeCarga hoja = vo.getHojaCarga();
+            java.sql.PreparedStatement psHoja = con.prepareStatement(sqlHoja);
+            psHoja.setString(1, vo.getCodVuelo());
+            psHoja.setDouble(2, hoja.getPesoPasajeros());
+            psHoja.setDouble(3, hoja.getPesoEquipaje());
+            psHoja.setDouble(4, hoja.getPesoCarga());
+            psHoja.setDouble(5, hoja.getPesoCombustible());
+            psHoja.executeUpdate();
+
+            Clases.ManifiestoCombustible manifiesto = vo.getManifiesto();
+            java.sql.PreparedStatement psManifiesto = con.prepareStatement(sqlManifiesto);
+            psManifiesto.setString(1, vo.getCodVuelo());
+            psManifiesto.setDouble(2, manifiesto.getCombustibleRutaKg());
+            psManifiesto.setDouble(3, manifiesto.getCombustibleReservaKg());
+            psManifiesto.executeUpdate();
+
+            Clases.ReporteMeteorologico clima = vo.getClima();
+            java.sql.PreparedStatement psClima = con.prepareStatement(sqlClima);
+            psClima.setString(1, vo.getCodVuelo());
+            psClima.setString(2, clima.getCodigoMETAR());
+            psClima.executeUpdate();
+
+            java.sql.PreparedStatement psEstado = con.prepareStatement(sqlEstado);
+            psEstado.setString(1, vo.getEstadoVuelo());
+            psEstado.setString(2, vo.getCodVuelo());
+            psEstado.executeUpdate();
+
+            con.commit();
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error de transacción al aprobar despacho con datos operativos: " + e.getMessage());
+            try { if (con != null) con.rollback(); } catch (Exception ex) {}
+            return false;
+        } finally {
+            try { if (con != null) con.setAutoCommit(true); } catch (Exception ex) {}
+        }
+    }
+
+//----------------------
+// PARA EL CONTROL OOOI
+//----------------------
+// ===================================================================================================
+// MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN LISTOS PARA CONTROL OOOI (Aprobados, En Vuelo o En Tierra)
+// ===================================================================================================
+    public java.util.List<Clases.VueloOperativo> obtenerVuelosParaControlOOOI() {
+        java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
+        String sql = "SELECT vo.*, r.origen_destino, a.matricula " +
+                     "FROM vuelos_operativos vo " +
+                     "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
+                     "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
+                     "JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
+                     "WHERE vo.estado_vuelo IN ('APROBADO', 'EN_VUELO', 'EN_TIERRA') " +
+                     "ORDER BY vo.fecha_operacion ASC";
+        try {
+            java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            java.sql.ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                Clases.VueloOperativo vo = new Clases.VueloOperativo();
+                vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoOOOI(rs.getString("estado_oooi"));
+                // Recuperamos las horas si es que ya se marcaron
+                vo.setHoraOut(rs.getString("hora_out"));
+                vo.setHoraOff(rs.getString("hora_off"));
+                vo.setHoraOn(rs.getString("hora_on"));
+                vo.setHoraIn(rs.getString("hora_in"));
+                
+                Clases.VueloProgramado vp = new Clases.VueloProgramado();
+                vp.setOrigenDestino(rs.getString("origen_destino"));
+                vp.setMatricula(rs.getString("matricula"));
+                vo.setVueloBase(vp);
+                
+                lista.add(vo);
+            }
+        } catch (Exception e) {}
+        return lista;
+    }
+// ===================================================================
+// MÉTODO DINÁMICO PARA GUARDAR LA HORA Y LA FASE EN LA BASE DE DATOS
+// ===================================================================
+    public boolean registrarFaseOOOI(String codVuelo, String fase, String horaZulu) {
+        // Armamos la consulta dinámica según el botón que presionen
+        String columnaHora = "hora_" + fase.toLowerCase(); // Se vuelve hora_out, hora_off, etc.
+        String sql = "UPDATE vuelos_operativos SET estado_oooi = ?, " + columnaHora + " = ? WHERE cod_vuelo = ?";
+        try {
+            java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            java.sql.PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, fase);
+            ps.setString(2, horaZulu);
+            ps.setString(3, codVuelo);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            System.out.println("Error al registrar OOOI: " + e.getMessage());
+            return false;
+        }
+    }
 }

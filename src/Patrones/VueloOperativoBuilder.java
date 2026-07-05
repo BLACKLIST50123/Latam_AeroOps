@@ -4,62 +4,91 @@ import Clases.VueloOperativo;
 import Clases.VueloProgramado;
 import Clases.TripulanteVuelo;
 import Clases.TripulanteCabina;
+import Clases.ManifiestoCombustible;
+import Clases.ReporteMeteorologico;
+import Clases.HojaDeCarga;
+import Clases.ReporteLogbook;
+import Enumeradores.EstadoOOOI;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Builder del agregado VueloOperativo.
+ *
+ * Tiene dos modos de trabajo:
+ *  - new VueloOperativoBuilder(): arma un vuelo operativo DESDE CERO (usado al
+ *    asignar tripulación por primera vez). Aplica los valores por defecto de
+ *    negocio (PENDIENTE_DESPACHO / PENDIENTE).
+ *  - new VueloOperativoBuilder(vueloExistente): continúa ensamblando un vuelo
+ *    YA CREADO y persistido (usado en el panel de Despacho/W&B para adjuntar
+ *    HojaDeCarga, ManifiestoCombustible y ReporteMeteorologico sin perder el
+ *    estado (IEstadoVuelo) ni la tripulación ya asignada).
+ */
 public class VueloOperativoBuilder {
-    private String codVuelo;
-    private Date fechaOperacion;
-    private VueloProgramado vueloBase;
-    private TripulanteVuelo capitan;
-    private TripulanteVuelo primerOficial;
-    private List<TripulanteCabina> tripulacionCabina;
+    private final VueloOperativo vueloOperativo;
 
-    public VueloOperativoBuilder() {}
+    public VueloOperativoBuilder() {
+        this.vueloOperativo = new VueloOperativo();
+        // Valores por defecto iniciales regulados por el negocio.
+        // (estadoVuelo y estadoLogico ya se inicializan dentro del constructor de VueloOperativo)
+        this.vueloOperativo.setEstadoOOOI(EstadoOOOI.PENDIENTE.name());
+    }
+
+    public VueloOperativoBuilder(VueloOperativo vueloExistente) {
+        this.vueloOperativo = vueloExistente;
+    }
 
     public VueloOperativoBuilder setCodVuelo(String codVuelo) {
-        this.codVuelo = codVuelo;
+        vueloOperativo.setCodVuelo(codVuelo);
         return this;
     }
 
     public VueloOperativoBuilder setFechaOperacion(Date fecha) {
-        this.fechaOperacion = fecha;
+        vueloOperativo.setFechaOperacion(fecha);
         return this;
     }
 
     public VueloOperativoBuilder setVueloBase(VueloProgramado v) {
-        this.vueloBase = v;
+        vueloOperativo.setVueloBase(v);
         return this;
     }
 
     public VueloOperativoBuilder setCapitan(TripulanteVuelo cap) {
-        this.capitan = cap;
+        vueloOperativo.setCapitan(cap);
         return this;
     }
 
     public VueloOperativoBuilder setPrimerOficial(TripulanteVuelo fo) {
-        this.primerOficial = fo;
+        vueloOperativo.setPrimerOficial(fo);
         return this;
     }
 
     public VueloOperativoBuilder setTripulacionCabina(List<TripulanteCabina> tcps) {
-        this.tripulacionCabina = tcps;
+        vueloOperativo.setTripulacionCabina(tcps);
         return this;
     }
 
-    // El método central que unifica las partes y retorna la entidad terminada
+    public VueloOperativoBuilder setManifiesto(ManifiestoCombustible manifiesto) {
+        vueloOperativo.setManifiesto(manifiesto);
+        return this;
+    }
+
+    public VueloOperativoBuilder setClima(ReporteMeteorologico clima) {
+        vueloOperativo.setClima(clima);
+        return this;
+    }
+
+    public VueloOperativoBuilder setHojaCarga(HojaDeCarga hojaCarga) {
+        vueloOperativo.setHojaCarga(hojaCarga);
+        return this;
+    }
+
+    public VueloOperativoBuilder setReporteLogbook(ReporteLogbook reporteLogbook) {
+        vueloOperativo.setReporteLogbook(reporteLogbook);
+        return this;
+    }
+
     public VueloOperativo build() {
-        VueloOperativo vo = new VueloOperativo();
-        vo.setCodVuelo(this.codVuelo);
-        vo.setFechaOperacion(this.fechaOperacion);
-        vo.setVueloBase(this.vueloBase);
-        vo.setCapitan(this.capitan);
-        vo.setPrimerOficial(this.primerOficial);
-        vo.setTripulacionCabina(this.tripulacionCabina);
-        
-        // Valores por defecto iniciales regulados por el negocio
-        vo.setEstadoOOOI("PENDIENTE");
-        vo.setEstadoVuelo("PENDIENTE_DESPACHO");
-        return vo;
+        return vueloOperativo;
     }
 }
