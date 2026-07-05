@@ -55,7 +55,7 @@ public class VueloOperativo {
     
     // Getters y Setters
     public int getIdVueloOperativo() { return idVueloOperativo;}
-    public void setIdVueloOperativo(int idVuelo) { this.idVueloOperativo = idVueloOperativo;}
+    public void setIdVueloOperativo(int idVueloOperativo) { this.idVueloOperativo = idVueloOperativo;}
     
     public String getCodVuelo() { return codVuelo; }
     public void setCodVuelo(String codVuelo) { this.codVuelo = codVuelo; }

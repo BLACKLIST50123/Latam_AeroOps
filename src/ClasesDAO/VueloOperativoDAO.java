@@ -305,6 +305,71 @@ public class VueloOperativoDAO {
 //----------------------
 // PARA EL CONTROL OOOI
 //----------------------
+// ===================================================================
+// MÉTODO PARA EL HISTORIAL COMPLETO DE VUELOS (pantalla Historial de Vuelos)
+// ===================================================================
+    public java.util.List<VueloOperativo> obtenerHistorialVuelos() {
+        java.util.List<VueloOperativo> lista = new ArrayList<>();
+
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, vo.estado_vuelo, " +
+                     "vo.hora_out, vo.hora_off, vo.hora_on, vo.hora_in, " +
+                     "r.origen_destino, a.matricula " +
+                     "FROM vuelos_operativos vo " +
+                     "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
+                     "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
+                     "JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
+                     "ORDER BY vo.id_vuelo_operativo DESC";
+
+        try {
+            Connection con = ConexionBD.getInstancia().getConexion();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                VueloOperativo vo = new VueloOperativo();
+                vo.setIdVueloOperativo(rs.getInt("id_vuelo_operativo"));
+                vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
+                vo.setHoraOut(rs.getString("hora_out"));
+                vo.setHoraOff(rs.getString("hora_off"));
+                vo.setHoraOn(rs.getString("hora_on"));
+                vo.setHoraIn(rs.getString("hora_in"));
+
+                Clases.VueloProgramado vueloBase = new Clases.VueloProgramado();
+                vueloBase.setOrigenDestino(rs.getString("origen_destino"));
+                vueloBase.setMatricula(rs.getString("matricula"));
+                vo.setVueloBase(vueloBase);
+
+                // Sub-consulta para el Capitán (mismo criterio que en Despacho)
+                String sqlCap = "SELECT e.nombre FROM tripulacion_asignada ta JOIN empleados e ON ta.id_empleado = e.id_empleado WHERE ta.id_vuelo_operativo = ? AND ta.rol_en_vuelo = 'Piloto'";
+                PreparedStatement psC = con.prepareStatement(sqlCap);
+                psC.setInt(1, vo.getIdVueloOperativo());
+                ResultSet rsC = psC.executeQuery();
+                if (rsC.next()) {
+                    Clases.TripulanteVuelo cap = new Clases.TripulanteVuelo();
+                    cap.setNombre(rsC.getString("nombre"));
+                    vo.setCapitan(cap);
+                }
+
+                // Sub-consulta para el Jefe de Cabina
+                String sqlJefe = "SELECT e.nombre FROM tripulacion_asignada ta JOIN empleados e ON ta.id_empleado = e.id_empleado WHERE ta.id_vuelo_operativo = ? AND ta.rol_en_vuelo = 'Jefe de Cabina'";
+                PreparedStatement psJ = con.prepareStatement(sqlJefe);
+                psJ.setInt(1, vo.getIdVueloOperativo());
+                ResultSet rsJ = psJ.executeQuery();
+                if (rsJ.next()) {
+                    java.util.List<Clases.TripulanteCabina> listaJefe = new ArrayList<>();
+                    Clases.TripulanteCabina jefe = new Clases.TripulanteCabina();
+                    jefe.setNombre(rsJ.getString("nombre"));
+                    listaJefe.add(jefe);
+                    vo.setTripulacionCabina(listaJefe);
+                }
+
+                lista.add(vo);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al obtener historial de vuelos: " + e.getMessage());
+        }
+        return lista;
+    }
 // ===================================================================================================
 // MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN LISTOS PARA CONTROL OOOI (Aprobados, En Vuelo o En Tierra)
 // ===================================================================================================
@@ -374,8 +439,8 @@ public class VueloOperativoDAO {
                      "INNER JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
                      "WHERE vo.estado_oooi = 'IN' AND vo.estado_vuelo != 'COMPLETADO'";
 
-        try (java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
-             java.sql.PreparedStatement ps = con.prepareStatement(sql);
+        java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+        try (java.sql.PreparedStatement ps = con.prepareStatement(sql);
              java.sql.ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {

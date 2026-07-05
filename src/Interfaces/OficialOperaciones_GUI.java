@@ -16,6 +16,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OficialOperaciones_GUI.class.getName());
     private double mtowActual;
+
+    // Cache en memoria: se traen una vez desde la BD y los combos de filtro
+    // trabajan sobre esta lista (los volúmenes de una aerolínea regional chica
+    // no justifican reconsultar la BD por cada cambio de filtro).
+    private java.util.List<Clases.VueloOperativo> listaHistorialCompleta = new java.util.ArrayList<>();
+    private java.util.List<Clases.Aeronave> listaFlotaCompleta = new java.util.ArrayList<>();
     
     public OficialOperaciones_GUI() {
         initComponents();
@@ -65,9 +71,28 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         ajustarAlturaDinamica(TblHistorialVuelo, ScrollTablaHistorialVuelos);
         ajustarAlturaDinamica(TblFlota, ScrollTablaFlota);
 
-// BORRAR ESTO LUEGO Y SU METODOD## INYECCION DE DATOS DE PRUEBA ##
-        cargarDatosPruebaHistorial();
-        cargarDatosPruebaFlota();
+// ## DATOS REALES DESDE POSTGRESQL (Historial y Flota) ##
+        cargarHistorialVuelos();
+        cargarFlota();
+
+        // Los botones "LIMPIAR" son JLabel con estilo de botón (no traen ActionListener
+        // propio desde el GUI Builder), así que los enganchamos aquí a mano.
+        btnLimpiarFiltros.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cbxFiltroVuelo.setSelectedIndex(0);
+                cbxFiltroAeronave.setSelectedIndex(0);
+                cbxFiltroEstadoVuelo.setSelectedIndex(0);
+                aplicarFiltrosHistorial();
+            }
+        });
+        btnLimpiarFiltrosFlota.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cbxFiltroMatricula.setSelectedIndex(0);
+                cbxFiltroModelo.setSelectedIndex(0);
+                cbxFiltroEstadoAeronave.setSelectedIndex(0);
+                aplicarFiltrosFlota();
+            }
+        });
         
     // Llenamos las cajitas dinámicamente desde BD
         cargarComboBoxesDespacho();
@@ -75,6 +100,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         cargarVuelosPendientesDespacho();
     // Cargamos los vuelos aprobados para la parte de Control OOOI
         cargarVuelosEnControlOOOI();
+    // Cargamos los vuelos que ya llegaron (IN) para poder cerrar su Logbook
+        cargarComboBoxVuelosLogbook();
     
     
     // Fuerza el color gris claro (puedes ajustar los valores RGB)
@@ -3222,26 +3249,47 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxVuelosOOOIActionPerformed
 
     private void rbtnPrioridadBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadBajaActionPerformed
+        // Código para los eventos de rbBaja, rbMedia y rbAlta:
         if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
-            txtReporteFallas.setText(""); // Limpia el texto por defecto
+            txtReporteFallas.setText(""); 
         }
-        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        // En lugar de setEnabled(true), ahora usamos esto:
+        txtReporteFallas.setEditable(true);
+        txtReporteFallas.setFocusable(true);
+
+        // Volvemos a pintar el fondo activo (#0F172A)
+        txtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
+        txtReporteFallas.setForeground(java.awt.Color.WHITE);
         txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadBajaActionPerformed
 
     private void rbtnPrioridadMediaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadMediaActionPerformed
+        // Código para los eventos de rbBaja, rbMedia y rbAlta:
         if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
-            txtReporteFallas.setText(""); // Limpia el texto por defecto
+            txtReporteFallas.setText(""); 
         }
-        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        // En lugar de setEnabled(true), ahora usamos esto:
+        txtReporteFallas.setEditable(true);
+        txtReporteFallas.setFocusable(true);
+
+        // Volvemos a pintar el fondo activo (#0F172A)
+        txtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
+        txtReporteFallas.setForeground(java.awt.Color.WHITE);
         txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadMediaActionPerformed
 
     private void rbtnPrioridadAltaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnPrioridadAltaActionPerformed
+        // Código para los eventos de rbBaja, rbMedia y rbAlta:
         if (txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
-            txtReporteFallas.setText(""); // Limpia el texto por defecto
+            txtReporteFallas.setText(""); 
         }
-        txtReporteFallas.setEnabled(true); // Habilita la escritura para que detallen la falla
+        // En lugar de setEnabled(true), ahora usamos esto:
+        txtReporteFallas.setEditable(true);
+        txtReporteFallas.setFocusable(true);
+
+        // Volvemos a pintar el fondo activo (#0F172A)
+        txtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
+        txtReporteFallas.setForeground(java.awt.Color.WHITE);
         txtReporteFallas.requestFocus();
     }//GEN-LAST:event_rbtnPrioridadAltaActionPerformed
 
@@ -3330,27 +3378,27 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnGestionFlotaMouseClicked
 
     private void cbxFiltroEstadoVueloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroEstadoVueloActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorial();
     }//GEN-LAST:event_cbxFiltroEstadoVueloActionPerformed
 
     private void cbxFiltroAeronaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroAeronaveActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorial();
     }//GEN-LAST:event_cbxFiltroAeronaveActionPerformed
 
     private void cbxFiltroVueloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroVueloActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorial();
     }//GEN-LAST:event_cbxFiltroVueloActionPerformed
 
     private void cbxFiltroMatriculaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroMatriculaActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosFlota();
     }//GEN-LAST:event_cbxFiltroMatriculaActionPerformed
 
     private void cbxFiltroModeloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroModeloActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosFlota();
     }//GEN-LAST:event_cbxFiltroModeloActionPerformed
 
     private void cbxFiltroEstadoAeronaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroEstadoAeronaveActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosFlota();
     }//GEN-LAST:event_cbxFiltroEstadoAeronaveActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
@@ -3514,6 +3562,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
 
                 // REFRESCO VISUAL DE LAS TARJETAS (PANEL DERECHO)
                 cargarVuelosPendientesDespacho(); 
+                cargarHistorialVuelos();
 
                 // Forzamos a Java a recalcular tamaños y redibujar los componentes de inmediato
                 pnlListaItemsVuelo.revalidate(); 
@@ -3602,6 +3651,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
 
             // 6. Refrescamos el panel
             cargarVuelosEnDespacho();
+            cargarHistorialVuelos();
         } else {
             javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al guardar los datos de despacho en la base de datos.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
         }
@@ -3619,6 +3669,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Alerta: El vuelo " + voSel.getCodVuelo() + " ha sido retenido en rampa (EN_DEMORA).");
 
             cargarVuelosEnDespacho();
+            cargarHistorialVuelos();
         }
     }//GEN-LAST:event_btnDeclararDemoraMouseClicked
 
@@ -3639,6 +3690,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnINMouseClicked
 
     private void btnCerrarVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarVueloMouseClicked
+        // Si el botón no es focusable, significa que el panel está deshabilitado. No hacemos nada.
+        if (!btnCerrarVuelo.isFocusable()) {
+            return; 
+        }
         // ==========================================
         // 1. VALIDACIÓN DE COMBUSTIBLE
         // ==========================================
@@ -3726,8 +3781,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
                 "Cierre Operacional Completado", 
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
             
-            // OJO: Aquí pon el método real que usas para llenar tu combo, para que se actualice la lista
-            // cargarVuelosLogbook(); 
+            // Refrescamos la lista para que el vuelo recién cerrado desaparezca del combo
+            cargarComboBoxVuelosLogbook();
+            cargarHistorialVuelos();
+            cargarFlota(); // por si la prioridad reportada mandó la aeronave a MANTENIMIENTO
             
             // Limpiamos y bloqueamos el panel hasta que seleccione un nuevo vuelo
             habilitarPanelLogbook(false); 
@@ -3741,8 +3798,16 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCerrarVueloMouseClicked
 
     private void rbtnSinFallasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbtnSinFallasActionPerformed
+        // 1. Ponemos el texto por defecto
         txtReporteFallas.setText("NIL - Operación sin novedades");
-        txtReporteFallas.setEnabled(false); // Bloquea la escritura
+
+        // 2. Aplicamos el truco para bloquear la escritura sin perder el control del diseño
+        txtReporteFallas.setEditable(false);
+        txtReporteFallas.setFocusable(false);
+
+        // 3. Pintamos los colores de "deshabilitado" (Tu fondo gris oscuro y texto plomizo)
+        txtReporteFallas.setBackground(new java.awt.Color(24, 34, 52));
+        txtReporteFallas.setForeground(new java.awt.Color(115, 123, 134));
     }//GEN-LAST:event_rbtnSinFallasActionPerformed
 
     /**
@@ -4164,52 +4229,127 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }
     
 // ELIMINAR AL METER BASE DE DATOS METODO PARA CARGAR DATOS DE PRUEBA
-    private void cargarDatosPruebaHistorial() {
-        // 1. Obtenemos el modelo de la tabla (Cambia 'tuTablaHistorial' por el nombre de tu variable)
-        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblHistorialVuelo.getModel();
+// ===========================================================
+// HISTORIAL DE VUELOS: CARGA DESDE BD + FILTROS EN MEMORIA
+// ===========================================================
+    private void cargarHistorialVuelos() {
+        ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        listaHistorialCompleta = dao.obtenerHistorialVuelos();
 
-        // 2. Limpiamos la tabla por si acaso tenía filas vacías
+        // 1. Repoblamos los combos de filtro con valores reales (código de vuelo / matrícula)
+        java.util.LinkedHashSet<String> codigos = new java.util.LinkedHashSet<>();
+        java.util.LinkedHashSet<String> matriculas = new java.util.LinkedHashSet<>();
+        for (Clases.VueloOperativo vo : listaHistorialCompleta) {
+            codigos.add(vo.getCodVuelo());
+            if (vo.getVueloBase() != null && vo.getVueloBase().getMatricula() != null) {
+                matriculas.add(vo.getVueloBase().getMatricula());
+            }
+        }
+
+        cbxFiltroVuelo.removeAllItems();
+        cbxFiltroVuelo.addItem("Todos");
+        for (String c : codigos) cbxFiltroVuelo.addItem(c);
+
+        cbxFiltroAeronave.removeAllItems();
+        cbxFiltroAeronave.addItem("Todas");
+        for (String m : matriculas) cbxFiltroAeronave.addItem(m);
+
+        // El universo de estados de vuelo es fijo (lo gobierna el patrón State), no viene de los datos
+        cbxFiltroEstadoVuelo.removeAllItems();
+        cbxFiltroEstadoVuelo.addItem("Todos");
+        for (Enumeradores.EstadoVuelo e : Enumeradores.EstadoVuelo.values()) cbxFiltroEstadoVuelo.addItem(e.name());
+
+        // 2. Pintamos la tabla con los filtros actuales (por defecto, "Todos")
+        aplicarFiltrosHistorial();
+    }
+
+    private void aplicarFiltrosHistorial() {
+        String filtroVuelo = (String) cbxFiltroVuelo.getSelectedItem();
+        String filtroAeronave = (String) cbxFiltroAeronave.getSelectedItem();
+        String filtroEstado = (String) cbxFiltroEstadoVuelo.getSelectedItem();
+
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblHistorialVuelo.getModel();
         modelo.setRowCount(0);
 
-        // 3. Agregamos las filas de prueba como si vinieran de una Base de Datos
-        // Las columnas son: VUELO, RUTA, AERONAVE, CAPITÁN, JEFE CABINA, ESTADO, OUT, OFF, ON, IN
-        modelo.addRow(new Object[]{
-            "LA800", "LIM → CUZ", "OB-2200", "Cdt. Ana Vargas", "Pedro Salas", "EN_VUELO", "20:22Z", "20:30Z", "--:--", "--:--"
-        });
+        for (Clases.VueloOperativo vo : listaHistorialCompleta) {
+            String matricula = vo.getVueloBase() != null ? vo.getVueloBase().getMatricula() : "";
+            String ruta = vo.getVueloBase() != null ? vo.getVueloBase().getOrigenDestino() : "";
+            String capitan = vo.getCapitan() != null ? vo.getCapitan().getNombre() : "--";
+            String jefeCabina = (vo.getTripulacionCabina() != null && !vo.getTripulacionCabina().isEmpty())
+                    ? vo.getTripulacionCabina().get(0).getNombre() : "--";
 
-        modelo.addRow(new Object[]{
-            "LA532", "LIM → AQP", "OB-2101", "Cdt. Luis Poma", "Rosa Flores", "COMPLETADO", "18:00Z", "18:15Z", "19:10Z", "19:25Z"
-        });
+            boolean pasaVuelo = filtroVuelo == null || filtroVuelo.equals("Todos") || filtroVuelo.equals(vo.getCodVuelo());
+            boolean pasaAeronave = filtroAeronave == null || filtroAeronave.equals("Todas") || filtroAeronave.equals(matricula);
+            boolean pasaEstado = filtroEstado == null || filtroEstado.equals("Todos") || filtroEstado.equals(vo.getEstadoVuelo());
 
-        modelo.addRow(new Object[]{
-            "LA440", "CUZ → JUL", "OB-1995", "Cdt. Roberto Silva", "Diego Pinto", "APROBADO", "--:--", "--:--", "--:--", "--:--"
-        });
-
-        modelo.addRow(new Object[]{
-            "LA101", "LIM → PIU", "OB-2055", "Cdt. Mario Cueva", "Carla Mendez", "CANCELADO", "--:--", "--:--", "--:--", "--:--"
-        });
-
-        // 4. ¡LA MAGIA! Llamamos al método que ajusta la altura para que la tabla crezca abrazando estas 4 filas
-        // (Asegúrate de cambiar los nombres por las variables de tu tabla y tu scroll)
+            if (pasaVuelo && pasaAeronave && pasaEstado) {
+                modelo.addRow(new Object[]{
+                    vo.getCodVuelo(), ruta, matricula, capitan, jefeCabina, vo.getEstadoVuelo(),
+                    valorOTexto(vo.getHoraOut()), valorOTexto(vo.getHoraOff()), valorOTexto(vo.getHoraOn()), valorOTexto(vo.getHoraIn())
+                });
+            }
+        }
         ajustarAlturaDinamica(TblHistorialVuelo, ScrollTablaHistorialVuelos);
     }
 
-// ELIMINAR AL METER BASE DE DATOS METODO PARA CARGAR DATOS DE PRUEBA EN FLOTA
-    private void cargarDatosPruebaFlota() {
-        // 1. Obtenemos el modelo de tu nueva tabla de Flota
-        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblFlota.getModel();
+    private String valorOTexto(String valor) {
+        return (valor == null || valor.trim().isEmpty()) ? "--:--" : valor;
+    }
 
-        // 2. Limpiamos la tabla
+// ===========================================================
+// GESTIÓN DE FLOTA: CARGA DESDE BD + FILTROS EN MEMORIA
+// ===========================================================
+    private void cargarFlota() {
+        ClasesDAO.AeronaveDAO dao = new ClasesDAO.AeronaveDAO();
+        listaFlotaCompleta = dao.obtenerFlota();
+
+        java.util.LinkedHashSet<String> matriculas = new java.util.LinkedHashSet<>();
+        java.util.LinkedHashSet<String> modelos = new java.util.LinkedHashSet<>();
+        for (Clases.Aeronave a : listaFlotaCompleta) {
+            matriculas.add(a.getMatricula());
+            modelos.add(a.getModelo());
+        }
+
+        cbxFiltroMatricula.removeAllItems();
+        cbxFiltroMatricula.addItem("Todos");
+        for (String m : matriculas) cbxFiltroMatricula.addItem(m);
+
+        cbxFiltroModelo.removeAllItems();
+        cbxFiltroModelo.addItem("Todas");
+        for (String m : modelos) cbxFiltroModelo.addItem(m);
+
+        // El universo de estados técnicos es fijo (enum EstadoAeronave)
+        cbxFiltroEstadoAeronave.removeAllItems();
+        cbxFiltroEstadoAeronave.addItem("Todos");
+        for (Enumeradores.EstadoAeronave e : Enumeradores.EstadoAeronave.values()) cbxFiltroEstadoAeronave.addItem(e.name());
+
+        aplicarFiltrosFlota();
+    }
+
+    private void aplicarFiltrosFlota() {
+        String filtroMatricula = (String) cbxFiltroMatricula.getSelectedItem();
+        String filtroModelo = (String) cbxFiltroModelo.getSelectedItem();
+        String filtroEstado = (String) cbxFiltroEstadoAeronave.getSelectedItem();
+
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblFlota.getModel();
         modelo.setRowCount(0);
 
-        // 3. Agregamos las filas exactas de tu diseño web
-        // Columnas: MATRÍCULA, MODELO, ESTADO, ASIENTOS, MTOW (KG), AUTONOMÍA (KM)
-        modelo.addRow(new Object[]{"OB-2200", "A320neo", "APTO", "180", "79.000", "6300"});
-        modelo.addRow(new Object[]{"OB-2101", "B737-800", "APTO", "162", "79.016", "5765"});
-        modelo.addRow(new Object[]{"OB-1995", "ATR 72-600", "APTO", "70", "23.000", "1528"});
-        modelo.addRow(new Object[]{"OB-2055", "A320neo", "MANTENIMIENTO", "180", "79.000", "6300"});
+        for (Clases.Aeronave a : listaFlotaCompleta) {
+            String estado = a.getEstadoTecnico() != null ? a.getEstadoTecnico().name() : "";
 
-        // 4. ¡LA MAGIA! Llamamos a tu mismo método dinámico para que ajuste esta nueva caja
+            boolean pasaMatricula = filtroMatricula == null || filtroMatricula.equals("Todos") || filtroMatricula.equals(a.getMatricula());
+            boolean pasaModelo = filtroModelo == null || filtroModelo.equals("Todas") || filtroModelo.equals(a.getModelo());
+            boolean pasaEstado = filtroEstado == null || filtroEstado.equals("Todos") || filtroEstado.equals(estado);
+
+            if (pasaMatricula && pasaModelo && pasaEstado) {
+                modelo.addRow(new Object[]{
+                    a.getMatricula(), a.getModelo(), estado,
+                    String.valueOf(a.getCapacidadAsientos()),
+                    String.format(java.util.Locale.US, "%.0f", a.getPesoMaximoDespegue()),
+                    String.format(java.util.Locale.US, "%.0f", a.getAutonomiaMaximaKm())
+                });
+            }
+        }
         ajustarAlturaDinamica(TblFlota, ScrollTablaFlota);
     }
 
@@ -4670,10 +4810,12 @@ private void cargarVuelosEnControlOOOI() {
             else if(faseAvanzar.equals("IN")) {
                 voSel.setHoraIn(horaActual);
                 dao.actualizarEstadoVuelo(voSel.getCodVuelo(), "EN_TIERRA");
+                cargarComboBoxVuelosLogbook(); // el vuelo ya puede cerrarse con Logbook
             }
 
             // Volvemos a pintar la interfaz
             sincronizarBotonesOOOI(voSel);
+            cargarHistorialVuelos();
         }
     }
 
@@ -4696,29 +4838,88 @@ private void cargarVuelosEnControlOOOI() {
 // MÉTODO PARA HABILITAR PANEL LOGBOOK
 // ========================================      
     private void habilitarPanelLogbook(boolean estado) {
-        // Campos de texto
-        txtCombustibleRestante.setEnabled(estado);
+        // Colores personalizados para tu paleta oscura
+        java.awt.Color colorFondoDeshabilitado = new java.awt.Color(24, 34, 52);  // #182234 (Azul grisáceo oscuro)
+        java.awt.Color colorTextoDeshabilitado = new java.awt.Color(115, 123, 134); // Gris para texto bloqueado
+        java.awt.Color colorFondoHabilitado = new java.awt.Color(15, 23, 42);    // #0F172A (Fondo activo original)
+        java.awt.Color colorTextoHabilitado = java.awt.Color.WHITE;
 
-        // Radio Buttons
+        // COLORES EXCLUSIVOS PARA EL BOTÓN CERRAR VUELO (Personalizados por ti)
+        java.awt.Color btnFondoDeshabilitado = new java.awt.Color(110,45,65);   // Guinda corporativo [110,45,65]
+        java.awt.Color btnTextoDeshabilitado = new java.awt.Color(204, 204, 204); // Gris claro [204,204,204]
+        java.awt.Color btnFondoHabilitado = new java.awt.Color(225, 29, 72);     // Rojo vivo/neón cuando está activo (o tu color activo)
+
+        // CURSORES NATIVOS
+        java.awt.Cursor cursorFlecha = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR);
+        java.awt.Cursor cursorTexto = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.TEXT_CURSOR);
+        java.awt.Cursor cursorMano = java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR);
+
+        // ==========================================
+        // CAMPOS DE TEXTO (Combustible)
+        // ==========================================
+        txtCombustibleRestante.setEditable(estado);
+        txtCombustibleRestante.setFocusable(estado);
+        txtCombustibleRestante.setBackground(estado ? colorFondoHabilitado : colorFondoDeshabilitado);
+        txtCombustibleRestante.setForeground(estado ? colorTextoHabilitado : colorTextoDeshabilitado);
+        // Cursor dinámico: Texto si está activo, flecha si está bloqueado
+        txtCombustibleRestante.setCursor(estado ? cursorTexto : cursorFlecha);
+
+        // ==========================================
+        // COMPONENTES DE SELECCIÓN (Radio Buttons)
+        // ==========================================
         rbtnSinFallas.setEnabled(estado);
         rbtnPrioridadBaja.setEnabled(estado);
         rbtnPrioridadMedia.setEnabled(estado);
         rbtnPrioridadAlta.setEnabled(estado);
 
-        // Área de texto y botón final
-        txtReporteFallas.setEnabled(estado);
-        btnCerrarVuelo.setEnabled(estado);
+        // Cursor dinámico: Mano si está activo, flecha si está bloqueado
+        rbtnSinFallas.setCursor(estado ? cursorMano : cursorFlecha);
+        rbtnPrioridadBaja.setCursor(estado ? cursorMano : cursorFlecha);
+        rbtnPrioridadMedia.setCursor(estado ? cursorMano : cursorFlecha);
+        rbtnPrioridadAlta.setCursor(estado ? cursorMano : cursorFlecha);
 
-        // Lógica extra: Si se está habilitando el panel, reseteamos a los valores por defecto
+        // ==========================================
+        // BOTÓN FINAL (Cerrar Vuelo con tus colores)
+        // ==========================================
+        btnCerrarVuelo.setFocusable(estado); 
+        btnCerrarVuelo.setBackground(estado ? btnFondoHabilitado : btnFondoDeshabilitado);
+        btnCerrarVuelo.setForeground(estado ? colorTextoHabilitado : btnTextoDeshabilitado);
+        // Cursor dinámico: Mano si está activo, flecha si está bloqueado
+        btnCerrarVuelo.setCursor(estado ? cursorMano : cursorFlecha);
+
+        // ==========================================
+        // ÁREA DE TEXTO (Reporte Fallas)
+        // ==========================================
         if (estado) {
             rbtnSinFallas.setSelected(true);
             txtReporteFallas.setText("NIL - Operación sin novedades");
-            txtReporteFallas.setEnabled(false); // Se bloquea por defecto porque "Sin Fallas" está marcado
+
+            // Auto-bloqueado por defecto porque "Sin Fallas" inicia seleccionado
+            txtReporteFallas.setEditable(false);
+            txtReporteFallas.setFocusable(false);
+            txtReporteFallas.setBackground(colorFondoDeshabilitado);
+            txtReporteFallas.setForeground(colorTextoDeshabilitado);
+            txtReporteFallas.setCursor(cursorFlecha); // Forzamos flecha por estar auto-bloqueado
         } else {
+            // Limpieza cuando el panel completo se apaga
             txtCombustibleRestante.setText("");
             txtReporteFallas.setText("");
+
+            txtReporteFallas.setEditable(false);
+            txtReporteFallas.setFocusable(false);
+            txtReporteFallas.setBackground(colorFondoDeshabilitado);
+            txtReporteFallas.setForeground(colorTextoDeshabilitado);
+            txtReporteFallas.setCursor(cursorFlecha);
+        }
+
+        // Si por alguna razón externa quedó editable, forzamos que tenga el fondo activo y cursor de escritura
+        if (txtReporteFallas.isEditable()) {
+            txtReporteFallas.setBackground(colorFondoHabilitado);
+            txtReporteFallas.setForeground(colorTextoHabilitado);
+            txtReporteFallas.setCursor(cursorTexto);
         }
     }
+
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
