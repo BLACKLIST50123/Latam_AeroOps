@@ -25,11 +25,11 @@ public class Login_GUI extends javax.swing.JFrame {
         pnlFondoLogin = new javax.swing.JPanel();
         pnlContenedorLogin = new javax.swing.JPanel();
         lblUsuario = new javax.swing.JLabel();
-        entradaUsuario = new javax.swing.JTextField();
+        campoUsuario = new javax.swing.JTextField();
         lblContraseña = new javax.swing.JLabel();
         pnlFondoBtnIniciarSesion = new javax.swing.JPanel();
         btnIniciarSesion = new javax.swing.JLabel();
-        entradaContraseña = new javax.swing.JPasswordField();
+        campoContraseña = new javax.swing.JPasswordField();
         lblError = new javax.swing.JLabel();
         pnlLogoLatam = new javax.swing.JPanel();
         LogoLatam = new javax.swing.JLabel();
@@ -129,8 +129,8 @@ public class Login_GUI extends javax.swing.JFrame {
         lblUsuario.setForeground(new java.awt.Color(255, 255, 255));
         lblUsuario.setText("USUARIO:");
 
-        entradaUsuario.setBackground(new java.awt.Color(15, 23, 42));
-        entradaUsuario.setForeground(new java.awt.Color(255, 255, 255));
+        campoUsuario.setBackground(new java.awt.Color(15, 23, 42));
+        campoUsuario.setForeground(new java.awt.Color(255, 255, 255));
 
         lblContraseña.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblContraseña.setForeground(new java.awt.Color(255, 255, 255));
@@ -160,8 +160,8 @@ public class Login_GUI extends javax.swing.JFrame {
             .addComponent(btnIniciarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
         );
 
-        entradaContraseña.setBackground(new java.awt.Color(15, 23, 42));
-        entradaContraseña.setForeground(new java.awt.Color(255, 255, 255));
+        campoContraseña.setBackground(new java.awt.Color(15, 23, 42));
+        campoContraseña.setForeground(new java.awt.Color(255, 255, 255));
 
         lblError.setBackground(new java.awt.Color(30, 41, 59));
         lblError.setForeground(new java.awt.Color(255, 255, 255));
@@ -176,8 +176,8 @@ public class Login_GUI extends javax.swing.JFrame {
                 .addGroup(pnlContenedorLoginLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(lblContraseña, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(entradaUsuario)
-                    .addComponent(entradaContraseña)
+                    .addComponent(campoUsuario)
+                    .addComponent(campoContraseña)
                     .addComponent(pnlFondoBtnIniciarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblError, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -188,11 +188,11 @@ public class Login_GUI extends javax.swing.JFrame {
                 .addGap(22, 22, 22)
                 .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(entradaUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(campoUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(lblContraseña, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(entradaContraseña, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(campoContraseña, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(41, 41, 41)
                 .addComponent(pnlFondoBtnIniciarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -305,32 +305,27 @@ public class Login_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBtnSalirMouseExited
 
     private void btnIniciarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarSesionMouseClicked
-        String usuario = entradaUsuario.getText().trim();
-        String contrasena = new String(entradaContraseña.getPassword()).trim();
+        String user = campoUsuario.getText().trim();
+        String pass = new String(campoContraseña.getPassword());
 
-        // 1. Instanciamos el contrato apuntando al Proxy (Seguridad primero)
-        Patrones.IAutenticacion loginService = new Patrones.ProxyAcceso();
+        Patrones.ProxyAcceso proxy = new Patrones.ProxyAcceso();
+        
+        // 1. Obtenemos el objeto desde el Proxy
+        Clases.UsuarioSistema usuarioLogueado = proxy.hacerLogin(user, pass);
+        
+        // 2. Revisamos el rol que devolvió
+        String estado = usuarioLogueado.getRolAcceso();
 
-        // 2. Ejecutamos la validación a través del flujo estructurado
-        String resultadoRol = loginService.hacerLogin(usuario, contrasena);
-
-        // 3. Evaluamos la respuesta del motor de autenticación
-        if (resultadoRol.equals("VACIO")) {
-            lblError.setText("Por favor, complete todos los campos.");
-            lblError.setVisible(true);
-        } else if (resultadoRol.equals("DENEGADO") || resultadoRol.equals("MALICIOSO")) {
-            lblError.setText("Credenciales Inválidas. Acceso Denegado.");
-            lblError.setVisible(true);
+        if (estado.equals("VACIO")) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+        } else if (estado.equals("DENEGADO")) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Credenciales incorrectas o acceso bloqueado.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
         } else {
-            // 4. Si el rol es correcto, la Fábrica se encarga de instanciar el Jframe correspondiente
-            javax.swing.JFrame ventanaModulo = Patrones.VentanaFactory.crearVentana(resultadoRol);
-
-            if (ventanaModulo != null) {
-                ventanaModulo.setVisible(true);
-                this.dispose(); // Cerramos la pantalla de Login actual de forma limpia
-            } else {
-                lblError.setText("Error al cargar el módulo asignado.");
-                lblError.setVisible(true);
+            // LOGIN EXITOSO - Mandamos el objeto completo a la fábrica
+            javax.swing.JFrame ventana = Patrones.VentanaFactory.crearVentana(usuarioLogueado);
+            if (ventana != null) {
+                ventana.setVisible(true);
+                this.dispose(); // Cerramos el login
             }
         }
     }//GEN-LAST:event_btnIniciarSesionMouseClicked
@@ -364,8 +359,8 @@ public class Login_GUI extends javax.swing.JFrame {
     private javax.swing.JLabel LogoLatam;
     private javax.swing.JPanel bordeSuperior;
     private javax.swing.JLabel btnIniciarSesion;
-    private javax.swing.JPasswordField entradaContraseña;
-    private javax.swing.JTextField entradaUsuario;
+    private javax.swing.JPasswordField campoContraseña;
+    private javax.swing.JTextField campoUsuario;
     private javax.swing.JPanel fondoBtnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblContraseña;

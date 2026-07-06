@@ -236,8 +236,8 @@
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="lblContraseña" alignment="0" min="-2" pref="326" max="-2" attributes="0"/>
                           <Component id="lblUsuario" min="-2" pref="326" max="-2" attributes="0"/>
-                          <Component id="entradaUsuario" max="32767" attributes="0"/>
-                          <Component id="entradaContraseña" alignment="0" max="32767" attributes="0"/>
+                          <Component id="campoUsuario" max="32767" attributes="0"/>
+                          <Component id="campoContraseña" alignment="0" max="32767" attributes="0"/>
                           <Component id="pnlFondoBtnIniciarSesion" alignment="0" max="32767" attributes="0"/>
                           <Component id="lblError" max="32767" attributes="0"/>
                       </Group>
@@ -251,11 +251,11 @@
                       <EmptySpace min="-2" pref="22" max="-2" attributes="0"/>
                       <Component id="lblUsuario" min="-2" pref="35" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="entradaUsuario" min="-2" pref="35" max="-2" attributes="0"/>
+                      <Component id="campoUsuario" min="-2" pref="35" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="lblContraseña" min="-2" pref="35" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="entradaContraseña" min="-2" pref="35" max="-2" attributes="0"/>
+                      <Component id="campoContraseña" min="-2" pref="35" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="41" max="-2" attributes="0"/>
                       <Component id="pnlFondoBtnIniciarSesion" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -277,7 +277,7 @@
                 <Property name="text" type="java.lang.String" value="USUARIO:"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JTextField" name="entradaUsuario">
+            <Component class="javax.swing.JTextField" name="campoUsuario">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="2a" green="17" red="f" type="rgb"/>
@@ -338,7 +338,7 @@
                 </Component>
               </SubComponents>
             </Container>
-            <Component class="javax.swing.JPasswordField" name="entradaContrase&#xf1;a">
+            <Component class="javax.swing.JPasswordField" name="campoContrase&#xf1;a">
               <Properties>
                 <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="2a" green="17" red="f" type="rgb"/>

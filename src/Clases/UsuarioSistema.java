@@ -2,6 +2,7 @@ package Clases;
 
 public class UsuarioSistema {
     private int idUsuario;
+    private int idEmpleado;
     private String usuario;
     private String contrasena;
     private String rolAcceso;
@@ -12,6 +13,9 @@ public class UsuarioSistema {
     public int getIdUsuario() { return idUsuario; }
     public void setIdUsuario(int idUsuario) { this.idUsuario = idUsuario; }
 
+    public int getIdEmpleado() { return idEmpleado; }
+    public void setIdEmpleado(int idEmpleado) { this.idEmpleado = idEmpleado;}
+    
     public String getUsuario() { return usuario; }
     public void setUsuario(String usuario) { this.usuario = usuario; }
 
@@ -23,4 +27,6 @@ public class UsuarioSistema {
 
     public Empleado getEmpleado() { return empleado; }
     public void setEmpleado(Empleado empleado) { this.empleado = empleado; }
+
+    
 }

@@ -1,5 +1,6 @@
 package Patrones;
+import Clases.UsuarioSistema; // Importamos la clase
 
 public interface IAutenticacion {
-    String hacerLogin(String user, String pass);
+    UsuarioSistema hacerLogin(String user, String pass);
 }

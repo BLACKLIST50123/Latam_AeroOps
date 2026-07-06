@@ -1,4 +1,6 @@
 package Patrones;
+
+import Clases.UsuarioSistema;
 import ClasesDAO.AutenticacionDAO;
 
 public class ProxyAcceso implements IAutenticacion {
@@ -9,18 +11,30 @@ public class ProxyAcceso implements IAutenticacion {
     }
 
     @Override
-    public String hacerLogin(String user, String pass) {
-        // Filtro de Seguridad Inicial (Defensa básica contra inyección de código)
+    public UsuarioSistema hacerLogin(String user, String pass) {
+        
+        // Objeto temporal para manejar errores
+        UsuarioSistema usuarioError = new UsuarioSistema();
+        
         if (user.isEmpty() || pass.isEmpty()) {
-            return "VACIO";
+            usuarioError.setRolAcceso("VACIO");
+            return usuarioError;
         }
         
         if (user.contains("'") || pass.contains("'") || user.contains("--")) {
-            System.out.println("⚠ Intento de Inyección SQL detectado y bloqueado por el Proxy.");
-            return "DENEGADO";
+            System.out.println(" Intento de Inyección SQL detectado y bloqueado por el Proxy.");
+            usuarioError.setRolAcceso("DENEGADO");
+            return usuarioError;
         }
         
-        // Si pasa los filtros de seguridad, delega la validación real a la BD
-        return autenticacionReal.hacerLogin(user, pass);
+        // Delegamos al DAO Real
+        UsuarioSistema usuarioReal = autenticacionReal.hacerLogin(user, pass);
+        
+        if (usuarioReal == null) {
+            usuarioError.setRolAcceso("DENEGADO");
+            return usuarioError;
+        }
+        
+        return usuarioReal;
     }
 }

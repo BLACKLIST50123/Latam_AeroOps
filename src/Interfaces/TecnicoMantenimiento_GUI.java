@@ -8,13 +8,26 @@ import java.awt.RenderingHints;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import ClasesDAO.MantenimientoDAO;
+import ClasesDTO.ReportePendienteDTO;
+import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.JOptionPane;
 
 public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TecnicoMantenimiento_GUI.class.getName());
-
-
-    public TecnicoMantenimiento_GUI() {
+    // Variables globales de la clase para recordar quién está operando
+        private String usuarioLogueado;
+        private String rolLogueado;
+        private int idTecnicoLogueado;
+        private int idLogbookSeleccionado;
+        
+    public TecnicoMantenimiento_GUI(int idEmpleado, String nombreUsuario, String rol) {
+        this.idTecnicoLogueado = idEmpleado;
+        this.usuarioLogueado = nombreUsuario;
+        this.rolLogueado = rol;
+        
         initComponents();
 //## CAMBIO DE DISEÑO BOTONES MENU ##
         // Le ponemos el texto a cada botón
@@ -51,8 +64,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 //AJUSTE DINAMICO TABLAS
         ajustarAlturaDinamica(TblHistorialLogBook, ScrollTablaHistorialLogBook);
 
-// BORRA ESTO CUANDO TENGAS LA BASE DE DATOS, SON DATOS DE PRUEBA PARA EL DISEÑO
-        cargarDatosPruebaLogbook();
+//CARGA LOS REPORTES LOGBOOK REPORTADOS POR OFICIAL_GUI    
+        cargarReportesPendientes();
+        
+//CARGA LA FIRMA EN EL CAMPO DE DETALLE DE FORMA AUTOMATICA
+        configurarFirmaTecnica();
     }
 
     @SuppressWarnings("unchecked")
@@ -90,6 +106,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         ScrollListaReportes = new javax.swing.JScrollPane();
         pnlContenedorTarjetasReportes = new javax.swing.JPanel();
         pnlTarjetasLleno = new javax.swing.JPanel();
+        ScrollTarjetasReportes = new javax.swing.JScrollPane();
+        pnlListaTarjetasReportes = new javax.swing.JPanel();
         pnlTarjetasVacio = new javax.swing.JPanel();
         lblSinAeronaves = new javax.swing.JLabel();
         lblOperacionesMantenimiento = new javax.swing.JLabel();
@@ -102,7 +120,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlDatoAvion = new javax.swing.JPanel();
         lblMatriculaAeronave = new javax.swing.JLabel();
         lblModeloAeronave = new javax.swing.JLabel();
-        pnlPrioridadMant = new javax.swing.JPanel();
+        pnlPrioridadMant = new ElementosDiseño.PanelRedondeado();
         lblPrioridadMant = new javax.swing.JLabel();
         lblObservacioneslogbook = new javax.swing.JLabel();
         ScrollTxtObservacionesLogbook = new javax.swing.JScrollPane();
@@ -111,7 +129,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         scrollTxtRegistroAcciones = new javax.swing.JScrollPane();
         txtAreaRegistroAcciones = new javax.swing.JTextArea();
         lblFirmaTecnica = new javax.swing.JLabel();
-        txtFieldFirmaTecnica = new javax.swing.JTextField();
+        txtFirmaTecnica = new javax.swing.JTextField();
         fondoBtnAprobarPlan = new javax.swing.JPanel();
         btnAprobarPlan = new javax.swing.JLabel();
         pnlFondoContadorAOG = new javax.swing.JPanel();
@@ -405,7 +423,17 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlContenedorTarjetasReportes.setLayout(new java.awt.CardLayout());
 
         pnlTarjetasLleno.setBackground(new java.awt.Color(15, 23, 42));
-        pnlTarjetasLleno.setLayout(new java.awt.GridLayout(1, 0));
+        pnlTarjetasLleno.setLayout(new java.awt.BorderLayout());
+
+        ScrollTarjetasReportes.setBackground(new java.awt.Color(15, 23, 42));
+        ScrollTarjetasReportes.setBorder(null);
+
+        pnlListaTarjetasReportes.setBackground(new java.awt.Color(15, 23, 42));
+        pnlListaTarjetasReportes.setLayout(new javax.swing.BoxLayout(pnlListaTarjetasReportes, javax.swing.BoxLayout.LINE_AXIS));
+        ScrollTarjetasReportes.setViewportView(pnlListaTarjetasReportes);
+
+        pnlTarjetasLleno.add(ScrollTarjetasReportes, java.awt.BorderLayout.CENTER);
+
         pnlContenedorTarjetasReportes.add(pnlTarjetasLleno, "card3");
 
         pnlTarjetasVacio.setBackground(new java.awt.Color(15, 23, 42));
@@ -511,9 +539,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlPrioridadMant.setLayout(pnlPrioridadMantLayout);
         pnlPrioridadMantLayout.setHorizontalGroup(
             pnlPrioridadMantLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlPrioridadMantLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
-                .addComponent(lblPrioridadMant, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(lblPrioridadMant, javax.swing.GroupLayout.DEFAULT_SIZE, 90, Short.MAX_VALUE)
         );
         pnlPrioridadMantLayout.setVerticalGroup(
             pnlPrioridadMantLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -580,9 +606,9 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         lblFirmaTecnica.setForeground(new java.awt.Color(255, 255, 255));
         lblFirmaTecnica.setText("FIRMA TÉCNICA");
 
-        txtFieldFirmaTecnica.setBackground(new java.awt.Color(15, 23, 42));
-        txtFieldFirmaTecnica.setForeground(new java.awt.Color(255, 255, 255));
-        txtFieldFirmaTecnica.setToolTipText("");
+        txtFirmaTecnica.setBackground(new java.awt.Color(15, 23, 42));
+        txtFirmaTecnica.setForeground(new java.awt.Color(255, 255, 255));
+        txtFirmaTecnica.setToolTipText("");
 
         fondoBtnAprobarPlan.setBackground(new java.awt.Color(22, 101, 52));
 
@@ -591,6 +617,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         btnAprobarPlan.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnAprobarPlan.setText("Firmar liberación a servicio (APTO)");
         btnAprobarPlan.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnAprobarPlan.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMouseClicked(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnAprobarPlanLayout = new javax.swing.GroupLayout(fondoBtnAprobarPlan);
         fondoBtnAprobarPlan.setLayout(fondoBtnAprobarPlanLayout);
@@ -617,7 +648,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                         .addComponent(lblRegistroAcciones, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(ScrollTxtObservacionesLogbook)
                         .addComponent(pnlDatoAvion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtFieldFirmaTecnica))
+                        .addComponent(txtFirmaTecnica))
                     .addComponent(fondoBtnAprobarPlan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(18, Short.MAX_VALUE))
         );
@@ -637,7 +668,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addComponent(lblFirmaTecnica)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFieldFirmaTecnica, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(txtFirmaTecnica, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(24, 24, 24)
                 .addComponent(fondoBtnAprobarPlan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(19, Short.MAX_VALUE))
@@ -1032,30 +1063,74 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         this.dispose();
     }//GEN-LAST:event_btnCerrarSesionMouseClicked
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void btnAprobarPlanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseClicked
+        // 1. Validar que la acción tomada no esté vacía
+        String accionTomada = txtAreaRegistroAcciones.getText().trim();
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new TecnicoMantenimiento_GUI().setVisible(true));
-    }
+        if (accionTomada.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe registrar la acción técnica realizada antes de firmar.", "Campos Incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // 2. Confirmación visual estilo bitácora aeronáutica
+        int confirmar = JOptionPane.showConfirmDialog(this, 
+            "¿Confirmar liberación a servicio firmada por " + usuarioLogueado + "?", 
+            "Confirmación de Firma Electrónica", 
+            JOptionPane.YES_NO_OPTION, 
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (confirmar != JOptionPane.YES_OPTION) {
+            return; // Cancela el flujo si el técnico presiona NO
+        }
+
+        // 3. Ejecutar a través de tu Fachada (Pasando el ID transaccional real)
+        Patrones.Facade.MantenimientoFacade facade = new Patrones.Facade.MantenimientoFacade();
+
+        // Usamos las variables globales de sesión e interfaz
+        boolean exito = facade.liberarAeronaveAervicio(
+            idLogbookSeleccionado, 
+            lblMatriculaAeronave.getText(), 
+            idTecnicoLogueado, // Inyecta directo el ID de la sesión segura
+            accionTomada
+        );
+
+        if (exito) {
+            JOptionPane.showMessageDialog(this, "¡Liberación técnica procesada! Aeronave declarada APTA para el servicio.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+
+            // Limpiamos la caja de texto editable
+            txtAreaRegistroAcciones.setText("");
+
+            // Recargamos la lista de la izquierda
+            cargarReportesPendientes();
+        } else {
+            JOptionPane.showMessageDialog(this, "Hubo un problema al procesar la liberación en la base de datos.", "Error de Transacción", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnAprobarPlanMouseClicked
+
+//    /**
+//     * @param args the command line arguments
+//     */
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+//            logger.log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(() -> new TecnicoMantenimiento_GUI().setVisible(true));
+//    }
     
 //##### ESTE METODO ES PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX #####
     private void aplicarTemaOscuro(javax.swing.JComboBox combo) {
@@ -1351,33 +1426,115 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         });
     }
     
-//#### METODO PARA CARGAR DATOS EN HISTORIAL LOGBOOK ####
-    private void cargarDatosPruebaLogbook() {
-        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblHistorialLogBook.getModel();
-        modelo.setRowCount(0);
+// ===========================================
+// MÉTODO PARA CARGAR LOS REPORTES PENDIENTES
+// ===========================================    
+    public void cargarReportesPendientes() {
+        pnlTarjetasLleno.removeAll();
 
-        // Columnas esperadas: #, FECHA, MATRÍCULA, FALLA REPORTADA, PRIORIDAD, ACCIÓN DE MANT., TÉCNICO, ESTADO
-        modelo.addRow(new Object[]{
-            "#1", "20/05/2026", "OB-2200", "Falla intermitente en sensor AOA", "BAJO", "Pendiente", "Pendiente", "ABIERTO"
-        });
-        
-        modelo.addRow(new Object[]{
-            "#2", "19/05/2026", "OB-2101", "Reemplazo de neumático principal", "MEDIO", "Se reemplazó rueda izq.", "A. Quispe", "CERRADO"
-        });
-        
-        modelo.addRow(new Object[]{
-            "#3", "18/05/2026", "OB-1995", "Alerta de sistema hidráulico", "ALTO", "Revisión completa sist. verde", "C. Mendoza", "CERRADO"
-        });
+        MantenimientoDAO dao = new MantenimientoDAO();
+        List<ReportePendienteDTO> reportes = dao.obtenerReportesPendientes();
 
-        // Aplicamos el ajuste dinámico
-        ajustarAlturaDinamica(TblHistorialLogBook, ScrollTablaHistorialLogBook);
+        if (reportes.isEmpty()) {
+            // Si no hay reportes, mostramos el panel vacío
+            java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorTarjetasReportes.getLayout();
+            cl.show(pnlContenedorTarjetasReportes, "card2"); 
+        } else {
+            // Configuramos el layout tipo lista vertical
+            pnlTarjetasLleno.setLayout(new javax.swing.BoxLayout(pnlTarjetasLleno, javax.swing.BoxLayout.Y_AXIS));
+
+            // Iteramos la lista que nos devolvió el DAO
+            for (ReportePendienteDTO rep : reportes) {
+                // Creamos la tarjeta y la agregamos al panel
+                ElementosDiseño.TarjetaReporteMant tarjeta = new ElementosDiseño.TarjetaReporteMant(
+                    rep.getIdLogbook(),
+                    rep.getMatricula(), 
+                    rep.getModelo(), 
+                    rep.getPrioridad(), 
+                    rep.getObservaciones(), 
+                    this
+                );
+                pnlTarjetasLleno.add(tarjeta);
+                // Agregamos un pequeño espacio entre tarjetas
+                pnlTarjetasLleno.add(javax.swing.Box.createRigidArea(new java.awt.Dimension(0, 10))); 
+            }
+
+            // Mostramos el panel lleno
+            java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorTarjetasReportes.getLayout();
+            cl.show(pnlContenedorTarjetasReportes, "card3"); 
+        }
+
+        // Refrescar la interfaz para que los cambios se vean
+        pnlTarjetasLleno.revalidate();
+        pnlTarjetasLleno.repaint();
+
+        // Aseguramos que el detalle derecho nazca vacío
+        java.awt.CardLayout clDetalle = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
+        clDetalle.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
     }
+// ===========================================================================
+// MÉTODO CARGAR LA VISTA DE DETALLE DEL REPORTE AL HACER CLICK A UNA TARJETA
+// ===========================================================================
+    public void mostrarDetalleReporte(int idLogbook, String matricula, String modelo, String prioridad, String observaciones) {
+        
+        this.idLogbookSeleccionado = idLogbook; //Guarda el id del reporte seleccionado
+        // Llenamos las etiquetas con la info base
+        lblMatriculaAeronave.setText(matricula);
+        lblModeloAeronave.setText(modelo);
+        lblPrioridadMant.setText(prioridad.toUpperCase());
+        txtAreaObservacionesLogbook.setText(observaciones);
+        
+        // --- PALETA DE COLORES ULTRA-ESTILIZADA (Fondo vs Texto) ---
+        switch (prioridad.toUpperCase()) {
+            case "ALTA":
+                pnlPrioridadMant.setBackground(new Color(64, 15, 27));     // Fondo Guinda profundo (#400f1b)
+                lblPrioridadMant.setForeground(new Color(251, 113, 133)); // Texto Rosa/Rojo Neón (#f77185)
+                break;
+            case "MEDIA":
+                pnlPrioridadMant.setBackground(new Color(66, 32, 6));      // Fondo Marrón Quemado (#422006)
+                lblPrioridadMant.setForeground(new Color(251, 191, 36));   // Texto Ámbar brillante (#fbbf24)
+                break;
+            default: // BAJA
+                pnlPrioridadMant.setBackground(new Color(5, 46, 22));      // Fondo Verde Bosque (#052e16)
+                lblPrioridadMant.setForeground(new Color(74, 222, 128));   // Texto Verde Esmeralda (#4ade80)
+                break;
+        }
+
+        // Forzamos al contenedor de la pastilla a redibujarse inmediatamente con los nuevos colores
+        pnlPrioridadMant.revalidate();
+        pnlPrioridadMant.repaint();
+
+        // Cambiamos la baraja del CardLayout al panel lleno
+        java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
+        cl.show(pnlContenedorDetalleReporte, "pnlDetalleSeleccionado");
+    }  
     
+// ===========================================================================
+// MÉTODO CARGAR LA FIRMA DIGITAL DEL TECNICO
+// ===========================================================================
+    private void configurarFirmaTecnica() {
+        // 1. Formateamos el texto de la firma automatizada (Ejemplo: "Frank Montero [TÉCNICO]")
+        txtFirmaTecnica.setText(usuarioLogueado + " [" + rolLogueado.toUpperCase() + "]");
+
+        // 2. Hacemos que sea estrictamente de SOLO LECTURA
+        txtFirmaTecnica.setEditable(false);
+
+        // 3. Quitamos el foco para que ni siquiera parpadee la barrita del cursor al hacer clic
+        txtFirmaTecnica.setFocusable(false);
+
+        // 4. Mantenemos la estética Web Premium (Evita que Swing le ponga el fondo gris por defecto)
+        txtFirmaTecnica.setBackground(new Color(15, 23, 42)); // Slate-900 (#0f172a) igual a tus paneles base
+        txtFirmaTecnica.setForeground(new Color(148, 163, 184)); // Gris Slate-400 amortiguado para denotar que está bloqueado
+
+        // Le ponemos un borde sutil para que no desentone
+        txtFirmaTecnica.setBorder(BorderFactory.createLineBorder(new Color(51, 65, 85), 1)); 
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane ScrollListaReportes;
     private javax.swing.JScrollPane ScrollReportesMantenimiento;
     private javax.swing.JScrollPane ScrollTablaHistorialLogBook;
+    private javax.swing.JScrollPane ScrollTarjetasReportes;
     private javax.swing.JScrollPane ScrollTxtObservacionesLogbook;
     private javax.swing.JTable TblHistorialLogBook;
     private javax.swing.JPanel bordeSuperior;
@@ -1440,6 +1597,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     private javax.swing.JPanel pnlHistorialCuerpo;
     private javax.swing.JPanel pnlHistorialLogBook;
     private javax.swing.JPanel pnlListaReportes;
+    private javax.swing.JPanel pnlListaTarjetasReportes;
     private javax.swing.JPanel pnlPrioridadMant;
     private javax.swing.JPanel pnlReportesMantenimiento;
     private javax.swing.JPanel pnlReportesMantenimientoCuerpo;
@@ -1450,7 +1608,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     private javax.swing.JTextArea txtAreaObservacionesLogbook;
     private javax.swing.JTextArea txtAreaRegistroAcciones;
     private javax.swing.JLabel txtBtnSalir;
-    private javax.swing.JTextField txtFieldFirmaTecnica;
     private javax.swing.JFormattedTextField txtFiltroFecha;
+    private javax.swing.JTextField txtFirmaTecnica;
     // End of variables declaration//GEN-END:variables
 }

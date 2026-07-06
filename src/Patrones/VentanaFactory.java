@@ -1,18 +1,21 @@
 package Patrones;
+
+import Clases.UsuarioSistema;
 import javax.swing.JFrame;
 
 public class VentanaFactory {
-    
-    public static JFrame crearVentana(String rol) {
-        if (rol == null) return null;
+    // Recibimos el objeto completo
+    public static JFrame crearVentana(UsuarioSistema usuarioLogueado) {
+        String rol = usuarioLogueado.getRolAcceso().toUpperCase();
         
-        switch (rol.toUpperCase()) {
-            case "OFICIAL":
-                return new Interfaces.OficialOperaciones_GUI();
-            case "TECNICO":
-                return new Interfaces.TecnicoMantenimiento_GUI();
-            default:
-                return null;
+        if (rol.equals("OFICIAL")) {
+            // Le pasas los datos al constructor del Oficial (Deberás actualizar el constructor del Oficial también)
+            return new Interfaces.OficialOperaciones_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso());
+            
+        } else if (rol.equals("TECNICO")) {
+            // Le pasas los datos a tu ventana de Técnico
+            return new Interfaces.TecnicoMantenimiento_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso());
         }
+        return null;
     }
 }

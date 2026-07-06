@@ -12,18 +12,26 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-public class OficialOperaciones_GUI extends javax.swing.JFrame {
+public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patrones.Observer.MantenimientoObserver {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OficialOperaciones_GUI.class.getName());
-    private double mtowActual;
-
+        private double mtowActual;
+        // Variables globales de la clase para recordar quién está operando
+        private String usuarioLogueado;
+        private String rolLogueado;
+        private int idOficialLogueado;
+        
     // Cache en memoria: se traen una vez desde la BD y los combos de filtro
     // trabajan sobre esta lista (los volúmenes de una aerolínea regional chica
     // no justifican reconsultar la BD por cada cambio de filtro).
     private java.util.List<Clases.VueloOperativo> listaHistorialCompleta = new java.util.ArrayList<>();
     private java.util.List<Clases.Aeronave> listaFlotaCompleta = new java.util.ArrayList<>();
     
-    public OficialOperaciones_GUI() {
+    public OficialOperaciones_GUI(int idEmpleado, String nombreUsuario, String rol) {
+        this.idOficialLogueado = idEmpleado;
+        this.usuarioLogueado = nombreUsuario;
+        this.rolLogueado = rol;
+        
         initComponents();
         // LISTA GLOBAL PARA GUARDAR A LOS SELECCIONADOS
 //## CAMBIO DE DISEÑO BOTONES MENU ##
@@ -71,10 +79,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         ajustarAlturaDinamica(TblHistorialVuelo, ScrollTablaHistorialVuelos);
         ajustarAlturaDinamica(TblFlota, ScrollTablaFlota);
 
-// ## DATOS REALES DESDE POSTGRESQL (Historial y Flota) ##
+//DATOS REALES DESDE POSTGRESQL (Historial y Flota) ##
         cargarHistorialVuelos();
         cargarFlota();
 
+    
         // Los botones "LIMPIAR" son JLabel con estilo de botón (no traen ActionListener
         // propio desde el GUI Builder), así que los enganchamos aquí a mano.
         btnLimpiarFiltros.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -149,6 +158,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
         txtFieldCombRuta.getDocument().addDocumentListener(escuchadorPesos);
         txtFieldCombReserva.getDocument().addDocumentListener(escuchadorPesos);
         txtAreaClima.getDocument().addDocumentListener(escuchadorPesos); //Cuadro de texto METAR
+        
+    //El Oficial se inscribe para escuchar los eventos de mantenimiento
+        Patrones.Observer.MantenimientoPublisher.getInstancia().suscribir(this);
     }
 
     public java.util.List<Clases.TripulanteCabina> tcpsSeleccionadosList = new java.util.ArrayList<>();
@@ -3811,29 +3823,29 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_rbtnSinFallasActionPerformed
 
     /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new OficialOperaciones_GUI().setVisible(true));
-    }
+//     * @param args the command line arguments
+//     */
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
+//            logger.log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(() -> new OficialOperaciones_GUI().setVisible(true));
+//    }
 
 // ===================================================================================================
 // MÉTODO PARA LIMPIAR LOS CAMPOS Y DESHABILITARLOS SI NO HAY VUELO SELECCIONADO DE LA VISTA DESPACHO
@@ -4918,6 +4930,22 @@ private void cargarVuelosEnControlOOOI() {
             txtReporteFallas.setForeground(colorTextoHabilitado);
             txtReporteFallas.setCursor(cursorTexto);
         }
+    }
+    
+// ========================================
+// MÉTODO IMPLEMENTACION OBSERVER
+// ========================================    
+    public void onAeronaveLiberada(String matricula) {
+        // Este código se ejecuta SOLO cuando el técnico firma un avión
+        System.out.println("¡Aviso Reactivo! El oficial detectó la liberación de: " + matricula);
+        
+        // Aquí llamas a tus métodos del Oficial para recargar datos en vivo
+        // ej: cargarComboBoxAeronaves(); o actualizarTablaVuelos();
+        
+        javax.swing.JOptionPane.showMessageDialog(this, 
+            "La aeronave con matrícula " + matricula + " ha sido liberada por mantenimiento y está lista para programación.", 
+            "Actualización de Flota", 
+            javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 
     
