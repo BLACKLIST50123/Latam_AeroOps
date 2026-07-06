@@ -93,7 +93,7 @@ public class VueloOperativoDAO {
 // =============================================================================
     public java.util.List<VueloOperativo> obtenerVuelosPendientesDespacho() {
         java.util.List<VueloOperativo> lista = new java.util.ArrayList<>();
-        String sql = "SELECT vo.cod_vuelo, r.origen_destino, a.matricula " +
+        String sql = "SELECT vo.cod_vuelo, vo.estado_vuelo, r.origen_destino, a.matricula " +
                      "FROM vuelos_operativos vo " +
                      "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
@@ -107,6 +107,7 @@ public class VueloOperativoDAO {
             while(rs.next()){
                 VueloOperativo vo = new VueloOperativo();
                 vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
                 
                 // Usamos el objeto interno para transportar los datos del JOIN
                 Clases.VueloProgramado vp = new Clases.VueloProgramado();
@@ -126,7 +127,7 @@ public class VueloOperativoDAO {
 // ====================================================================
     public java.util.List<Clases.VueloOperativo> obtenerVuelosDetalladosParaDespacho() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
-        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " +
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, vo.estado_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " +
                      "FROM vuelos_operativos vo " +
                      "JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "JOIN rutas_vuelo r ON vp.id_ruta = r.id_ruta " +
@@ -140,6 +141,7 @@ public class VueloOperativoDAO {
             while(rs.next()){
                 Clases.VueloOperativo vo = new Clases.VueloOperativo();
                 vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
                 
                 Clases.VueloProgramado vp = new Clases.VueloProgramado();
                 vp.setOrigenDestino(rs.getString("origen_destino"));
@@ -389,6 +391,7 @@ public class VueloOperativoDAO {
             while(rs.next()){
                 Clases.VueloOperativo vo = new Clases.VueloOperativo();
                 vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
                 vo.setEstadoOOOI(rs.getString("estado_oooi"));
                 // Recuperamos las horas si es que ya se marcaron
                 vo.setHoraOut(rs.getString("hora_out"));
@@ -433,7 +436,7 @@ public class VueloOperativoDAO {
         ArrayList<Clases.VueloOperativo> lista = new ArrayList<>();
 
         // 1. Hacemos el JOIN con vuelos_programados y aeronaves para conseguir la matrícula
-        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, a.matricula " +
+        String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, vo.estado_vuelo, a.matricula " +
                      "FROM vuelos_operativos vo " +
                      "INNER JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
                      "INNER JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
@@ -447,6 +450,7 @@ public class VueloOperativoDAO {
                 Clases.VueloOperativo vo = new Clases.VueloOperativo();
                 vo.setIdVueloOperativo(rs.getInt("id_vuelo_operativo"));
                 vo.setCodVuelo(rs.getString("cod_vuelo"));
+                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
 
                 // 2. ¡EL TRUCO PARA QUE TU TOSTRING NO EXPLOTE!
                 // Instanciamos el vueloBase y le seteamos la matrícula

@@ -25,7 +25,9 @@ public class EstadoAprobado implements IEstadoVuelo {
 
     @Override
     public void iniciarVuelo(VueloOperativo vuelo) {
-        // Aquí conectaremos con el OOOI luego
+        // BUG corregido: antes solo cambiaba el texto y dejaba el objeto de estado
+        // en EstadoAprobado. Ahora sí transiciona de verdad a EstadoEnVuelo.
+        vuelo.setEstadoLogico(new EstadoEnVuelo());
         vuelo.setEstadoVuelo(EstadoVuelo.EN_VUELO.name());
         System.out.println("Vuelo " + vuelo.getCodVuelo() + " en el aire.");
     }
@@ -33,6 +35,11 @@ public class EstadoAprobado implements IEstadoVuelo {
     @Override
     public void finalizarVuelo(VueloOperativo vuelo) {
         System.out.println("ERROR: El vuelo debe despegar primero.");
+    }
+
+    @Override
+    public void completarVuelo(VueloOperativo vuelo) {
+        System.out.println("ERROR: El vuelo debe completar su ciclo OOOI antes de cerrar Logbook.");
     }
 
     @Override

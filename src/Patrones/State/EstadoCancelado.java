@@ -31,6 +31,11 @@ public class EstadoCancelado implements IEstadoVuelo {
     }
 
     @Override
+    public void completarVuelo(VueloOperativo vuelo) {
+        System.out.println("ERROR: Un vuelo cancelado no tiene Logbook que cerrar.");
+    }
+
+    @Override
     public String getNombreEstado() {
         return EstadoVuelo.CANCELADO.name();
     }

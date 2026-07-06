@@ -3414,6 +3414,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_cbxFiltroEstadoAeronaveActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
+        // Nos damos de baja del Observer: si no, cada vuelta de logout/login
+        // dejaría una ventana ya cerrada "escuchando" liberaciones de aeronaves.
+        Patrones.Observer.MantenimientoPublisher.getInstancia().desuscribir(this);
         Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
@@ -3766,6 +3769,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         
         // Casteamos el objeto que viene purito del combo
         Clases.VueloOperativo vueloSeleccionado = (Clases.VueloOperativo) cbxVuelosLogbook.getSelectedItem();
+
+        // Delegado al State: EnTierra -> Completado (deja el objeto en memoria consistente
+        // con lo que la transacción de abajo va a grabar en la BD)
+        vueloSeleccionado.procesarCompletarVuelo();
 
         // ==========================================
         // 5. LLENAR EL OBJETO REPORTELOGBOOK (POJO)
@@ -4816,12 +4823,14 @@ private void cargarVuelosEnControlOOOI() {
             if(faseAvanzar.equals("OUT")) voSel.setHoraOut(horaActual);
             else if(faseAvanzar.equals("OFF")) {
                 voSel.setHoraOff(horaActual);
-                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), "EN_VUELO"); // Actualiza a la vez el estado general
+                voSel.procesarIniciarVuelo(); // Delegado al State: Aprobado -> EnVuelo
+                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo());
             }
             else if(faseAvanzar.equals("ON")) voSel.setHoraOn(horaActual);
             else if(faseAvanzar.equals("IN")) {
                 voSel.setHoraIn(horaActual);
-                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), "EN_TIERRA");
+                voSel.procesarFinalizarVuelo(); // Delegado al State: EnVuelo -> EnTierra
+                dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo());
                 cargarComboBoxVuelosLogbook(); // el vuelo ya puede cerrarse con Logbook
             }
 
@@ -4938,10 +4947,10 @@ private void cargarVuelosEnControlOOOI() {
     public void onAeronaveLiberada(String matricula) {
         // Este código se ejecuta SOLO cuando el técnico firma un avión
         System.out.println("¡Aviso Reactivo! El oficial detectó la liberación de: " + matricula);
-        
-        // Aquí llamas a tus métodos del Oficial para recargar datos en vivo
-        // ej: cargarComboBoxAeronaves(); o actualizarTablaVuelos();
-        
+
+        // Refrescamos de verdad la tabla de Flota (antes solo se mostraba el aviso, sin recargar datos)
+        cargarFlota();
+
         javax.swing.JOptionPane.showMessageDialog(this, 
             "La aeronave con matrícula " + matricula + " ha sido liberada por mantenimiento y está lista para programación.", 
             "Actualización de Flota", 

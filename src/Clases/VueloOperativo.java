@@ -48,6 +48,18 @@ public class VueloOperativo {
     public void procesarCancelacion() {
         this.estadoLogico.cancelarVuelo(this);
     }
+
+    public void procesarIniciarVuelo() {
+        this.estadoLogico.iniciarVuelo(this);
+    }
+
+    public void procesarFinalizarVuelo() {
+        this.estadoLogico.finalizarVuelo(this);
+    }
+
+    public void procesarCompletarVuelo() {
+        this.estadoLogico.completarVuelo(this);
+    }
     
     public IEstadoVuelo getEstadoLogico() { return estadoLogico; }
     public void setEstadoLogico(IEstadoVuelo estadoLogico) { this.estadoLogico = estadoLogico; }
@@ -70,7 +82,13 @@ public class VueloOperativo {
     public void setEstadoOOOI(String estadoOOOI) { this.estadoOOOI = estadoOOOI; }
 
     public String getEstadoVuelo() { return estadoVuelo; }
-    public void setEstadoVuelo(String estadoVuelo) { this.estadoVuelo = estadoVuelo; }
+    public void setEstadoVuelo(String estadoVuelo) {
+        this.estadoVuelo = estadoVuelo;
+        // Mantenemos sincronizado el objeto de comportamiento (State) con el
+        // texto guardado. Así, cualquier DAO que reconstruya un VueloOperativo
+        // desde la BD queda automáticamente en el estado lógico correcto.
+        this.estadoLogico = Patrones.State.EstadoVueloFactory.crear(estadoVuelo);
+    }
 
     public TripulanteVuelo getCapitan() { return capitan; }
     public void setCapitan(TripulanteVuelo capitan) { this.capitan = capitan; }

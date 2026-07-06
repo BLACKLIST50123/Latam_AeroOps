@@ -37,6 +37,11 @@ public class EstadoPendienteDespacho implements IEstadoVuelo {
     }
 
     @Override
+    public void completarVuelo(VueloOperativo vuelo) {
+        System.out.println("ERROR: El vuelo ni siquiera ha despegado, no se puede cerrar Logbook.");
+    }
+
+    @Override
     public String getNombreEstado() {
         return EstadoVuelo.PENDIENTE_DESPACHO.name();
     }

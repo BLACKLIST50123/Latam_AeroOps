@@ -34,6 +34,11 @@ public class EstadoEnDemora implements IEstadoVuelo {
     }
 
     @Override
+    public void completarVuelo(VueloOperativo vuelo) {
+        System.out.println("ERROR: El vuelo está en demora, no se puede cerrar Logbook.");
+    }
+
+    @Override
     public String getNombreEstado() {
         return EstadoVuelo.EN_DEMORA.name();
     }

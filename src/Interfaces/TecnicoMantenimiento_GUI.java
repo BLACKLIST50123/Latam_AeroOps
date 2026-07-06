@@ -1091,7 +1091,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
             idLogbookSeleccionado, 
             lblMatriculaAeronave.getText(), 
             idTecnicoLogueado, // Inyecta directo el ID de la sesión segura
-            accionTomada
+            accionTomada,
+            txtFirmaTecnica.getText()
         );
 
         if (exito) {
