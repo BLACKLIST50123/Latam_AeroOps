@@ -1,6 +1,5 @@
-package Patrones.Facade;
+package Patrones.Facade_Observer;
 import ClasesDAO.MantenimientoDAO;
-import Patrones.Observer.MantenimientoPublisher;
 
 public class MantenimientoFacade {
     private MantenimientoDAO mantenimientoDAO;
@@ -13,7 +12,7 @@ public class MantenimientoFacade {
      * Fachada unificada para procesar el despacho técnico de liberación
      * Devuelve true si se completó con éxito toda la operación.
      */
-    public boolean liberarAeronaveAervicio(int idLogbook, String matricula, int idTecnico, String accionTomada, String firmaTecnica) {
+    public boolean liberarAeronaveAServicio(int idLogbook, String matricula, int idTecnico, String accionTomada, String firmaTecnica) {
         // Aquí la fachada podría incluir validaciones adicionales de negocio antes de tocar el DAO
         if (accionTomada == null || accionTomada.trim().isEmpty()) {
             return false;

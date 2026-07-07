@@ -289,8 +289,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         logo.setText("jLabel2");
 
         lblUsuario.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        lblUsuario.setForeground(new java.awt.Color(255, 255, 255));
         lblUsuario.setText("Nombre");
 
+        lblRolSistema.setForeground(new java.awt.Color(255, 255, 255));
         lblRolSistema.setText("Rol en Sistema ");
 
         javax.swing.GroupLayout pnlFondoPerfilLayout = new javax.swing.GroupLayout(pnlFondoPerfil);
@@ -1127,10 +1129,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         }
 
         // 3. Ejecutar a través de tu Fachada (Pasando el ID transaccional real)
-        Patrones.Facade.MantenimientoFacade facade = new Patrones.Facade.MantenimientoFacade();
+        Patrones.Facade_Observer.MantenimientoFacade facade = new Patrones.Facade_Observer.MantenimientoFacade();
 
         // Usamos las variables globales de sesión e interfaz
-        boolean exito = facade.liberarAeronaveAervicio(
+        boolean exito = facade.liberarAeronaveAServicio(
             idLogbookSeleccionado, 
             lblMatriculaAeronave.getText(), 
             idTecnicoLogueado, // Inyecta directo el ID de la sesión segura

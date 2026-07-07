@@ -308,7 +308,7 @@ public class Login_GUI extends javax.swing.JFrame {
         String user = campoUsuario.getText().trim();
         String pass = new String(campoContraseña.getPassword());
 
-        Patrones.ProxyAcceso proxy = new Patrones.ProxyAcceso();
+        Patrones.Proxy_Factory.ProxyAcceso proxy = new Patrones.Proxy_Factory.ProxyAcceso();
         
         // 1. Obtenemos el objeto desde el Proxy
         Clases.UsuarioSistema usuarioLogueado = proxy.hacerLogin(user, pass);
@@ -322,7 +322,7 @@ public class Login_GUI extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Credenciales incorrectas o acceso bloqueado.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
         } else {
             // LOGIN EXITOSO - Mandamos el objeto completo a la fábrica
-            javax.swing.JFrame ventana = Patrones.VentanaFactory.crearVentana(usuarioLogueado);
+            javax.swing.JFrame ventana = Patrones.Proxy_Factory.VentanaFactory.crearVentana(usuarioLogueado);
             if (ventana != null) {
                 ventana.setVisible(true);
                 this.dispose(); // Cerramos el login

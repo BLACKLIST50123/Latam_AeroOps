@@ -2,7 +2,7 @@ package ClasesDAO;
 
 import BaseDeDatos.ConexionBD;
 import Clases.UsuarioSistema;
-import Patrones.IAutenticacion;
+import Patrones.Proxy_Factory.IAutenticacion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

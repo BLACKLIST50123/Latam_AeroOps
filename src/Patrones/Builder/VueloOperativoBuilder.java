@@ -1,4 +1,4 @@
-package Patrones;
+package Patrones.Builder;
 
 import Clases.VueloOperativo;
 import Clases.VueloProgramado;

@@ -1,4 +1,4 @@
-package Patrones;
+package Patrones.Proxy_Factory;
 
 import Clases.UsuarioSistema;
 import javax.swing.JFrame;

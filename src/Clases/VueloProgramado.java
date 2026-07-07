@@ -10,6 +10,7 @@ public class VueloProgramado {
     private String modeloAeronave;
     private int capacidadAsientos;
     private double pesoMaximoDespegue; // Nuevo atributo
+    
     public VueloProgramado() {}
 
     public int getIdProgramacion() { return idProgramacion; }

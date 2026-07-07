@@ -1,4 +1,4 @@
-package Patrones.Observer;
+package Patrones.Facade_Observer;
 
 public interface MantenimientoObserver {
     // Este método se ejecutará automáticamente en los suscritos cuando pase algo

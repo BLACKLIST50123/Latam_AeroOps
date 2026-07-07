@@ -12,7 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patrones.Observer.MantenimientoObserver {
+public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patrones.Facade_Observer.MantenimientoObserver {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OficialOperaciones_GUI.class.getName());
         private double mtowActual;
@@ -160,7 +160,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtAreaClima.getDocument().addDocumentListener(escuchadorPesos); //Cuadro de texto METAR
         
     //El Oficial se inscribe para escuchar los eventos de mantenimiento
-        Patrones.Observer.MantenimientoPublisher.getInstancia().suscribir(this);
+        Patrones.Facade_Observer.MantenimientoPublisher.getInstancia().suscribir(this);
     }
 
     public java.util.List<Clases.TripulanteCabina> tcpsSeleccionadosList = new java.util.ArrayList<>();
@@ -179,7 +179,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         jLabel2 = new javax.swing.JLabel();
         fondoBarraLateral = new javax.swing.JPanel();
         lblModulos = new javax.swing.JLabel();
-        logo = new javax.swing.JLabel();
         lblUsuario = new javax.swing.JLabel();
         lblRolSistema = new javax.swing.JLabel();
         pnlFondoPerfil = new javax.swing.JPanel();
@@ -191,6 +190,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         btnAutorizarDespacho = new ElementosDiseño.BotonMenu();
         btnHistorialVuelos = new ElementosDiseño.BotonMenu();
         btnGestionFlota = new ElementosDiseño.BotonMenu();
+        logo = new javax.swing.JLabel();
         pnlContenedorPrincipal = new javax.swing.JPanel();
         pnlAsignacion = new javax.swing.JPanel();
         pnlAsignacionCuerpo = new javax.swing.JPanel();
@@ -485,12 +485,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblModulos.setForeground(new java.awt.Color(144, 163, 184));
         lblModulos.setText("MÓDULOS");
 
-        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/logo.png"))); // NOI18N
-        logo.setText("jLabel2");
-
         lblUsuario.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
+        lblUsuario.setForeground(new java.awt.Color(255, 255, 255));
         lblUsuario.setText("Nombre");
 
+        lblRolSistema.setForeground(new java.awt.Color(255, 255, 255));
         lblRolSistema.setText("Rol en Sistema ");
 
         javax.swing.GroupLayout pnlFondoPerfilLayout = new javax.swing.GroupLayout(pnlFondoPerfil);
@@ -570,49 +569,48 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             }
         });
 
+        logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/LogoInterfaces.png"))); // NOI18N
+        logo.setText("jLabel2");
+
         javax.swing.GroupLayout fondoBarraLateralLayout = new javax.swing.GroupLayout(fondoBarraLateral);
         fondoBarraLateral.setLayout(fondoBarraLateralLayout);
         fondoBarraLateralLayout.setHorizontalGroup(
             fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoBarraLateralLayout.createSequentialGroup()
-                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, fondoBarraLateralLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(lblRolSistema)
+                    .addComponent(lblUsuario))
+                .addGap(34, 34, 34)
+                .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnGestionFlota, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoBarraLateralLayout.createSequentialGroup()
+                        .addGap(37, 37, 37)
+                        .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(33, 33, 33))
+                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
                         .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                                .addGap(15, 15, 15)
-                                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                                        .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addComponent(lblRolSistema)
-                                            .addComponent(lblUsuario))
-                                        .addGap(34, 34, 34)
-                                        .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                                        .addGap(27, 27, 27)
-                                        .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 141, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                                .addGap(56, 56, 56)
-                                .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 13, Short.MAX_VALUE))
-                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, fondoBarraLateralLayout.createSequentialGroup()
-                                .addComponent(lblModulos)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnGestionFlota, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGap(50, 50, 50)
+                                .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(lblModulos))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         fondoBarraLateralLayout.setVerticalGroup(
             fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                .addGap(21, 21, 21)
-                .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(22, 22, 22)
+                .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31)
@@ -625,7 +623,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnGestionFlota, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 566, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 556, Short.MAX_VALUE)
                 .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(fondoBarraLateralLayout.createSequentialGroup()
                         .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -3416,7 +3414,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
         // Nos damos de baja del Observer: si no, cada vuelta de logout/login
         // dejaría una ventana ya cerrada "escuchando" liberaciones de aeronaves.
-        Patrones.Observer.MantenimientoPublisher.getInstancia().desuscribir(this);
+        Patrones.Facade_Observer.MantenimientoPublisher.getInstancia().desuscribir(this);
         Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
@@ -3464,7 +3462,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         }
 
         // 4. EJECUCIÓN TÉCNICA DEL PATRÓN BUILDER
-        Patrones.VueloOperativoBuilder builder = new Patrones.VueloOperativoBuilder();
+        Patrones.Builder.VueloOperativoBuilder builder = new Patrones.Builder.VueloOperativoBuilder();
         Clases.VueloOperativo vueloConstruido = builder
                 .setCodVuelo("LA" + vueloSel.getCodProgramacion()) // Generamos código transaccional
                 .setFechaOperacion(new java.util.Date())          // Registramos momento exacto
@@ -3651,7 +3649,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         Clases.ReporteMeteorologico clima = new Clases.ReporteMeteorologico();
         clima.setCodigoMETAR(codigoMetar);
 
-        voSel = new Patrones.VueloOperativoBuilder(voSel)
+        voSel = new Patrones.Builder.VueloOperativoBuilder(voSel)
                 .setHojaCarga(hoja)
                 .setManifiesto(manifiesto)
                 .setClima(clima)

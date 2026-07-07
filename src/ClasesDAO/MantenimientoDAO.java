@@ -11,7 +11,9 @@ import java.util.List;
 
 public class MantenimientoDAO {
 
-    // Método para obtener los reportes que necesitan mantenimiento
+   // ===================================================================
+    // MÉTODO PARA OBTENER LOS REPORTES PENDIENTES (TARJETAS REPORTES)
+    // ===================================================================
     public List<ReportePendienteDTO> obtenerReportesPendientes() {
         List<ReportePendienteDTO> listaReportes = new ArrayList<>();
         
@@ -183,13 +185,3 @@ public class MantenimientoDAO {
     
 }
 
-//System.err.println("Error en transacción de liberación: " + e.getMessage());
-//            if (conn != null) {
-//                try {
-//                    conn.rollback(); // Si algo falla, deshacemos todo para evitar corrupción de datos
-//                    System.out.println("Rollback ejecutado exitosamente.");
-//                } catch (SQLException ex) {
-//                    System.err.println("Error al hacer rollback: " + ex.getMessage());
-//                }
-//            }
-//            return false;

@@ -1,4 +1,4 @@
-package Patrones;
+package Patrones.Proxy_Factory;
 import Clases.UsuarioSistema; // Importamos la clase
 
 public interface IAutenticacion {

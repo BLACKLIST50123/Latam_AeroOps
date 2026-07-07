@@ -61,8 +61,7 @@ public class VueloOperativo {
         this.estadoLogico.completarVuelo(this);
     }
     
-    public IEstadoVuelo getEstadoLogico() { return estadoLogico; }
-    public void setEstadoLogico(IEstadoVuelo estadoLogico) { this.estadoLogico = estadoLogico; }
+
     // ====================================================
     
     // Getters y Setters
@@ -80,7 +79,10 @@ public class VueloOperativo {
 
     public String getEstadoOOOI() { return estadoOOOI; }
     public void setEstadoOOOI(String estadoOOOI) { this.estadoOOOI = estadoOOOI; }
-
+    
+    public IEstadoVuelo getEstadoLogico() { return estadoLogico; }
+    public void setEstadoLogico(IEstadoVuelo estadoLogico) { this.estadoLogico = estadoLogico; }
+    
     public String getEstadoVuelo() { return estadoVuelo; }
     public void setEstadoVuelo(String estadoVuelo) {
         this.estadoVuelo = estadoVuelo;

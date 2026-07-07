@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class VueloOperativoDAO {
 // ===============================
-// METODO PARA REGISTRAR UN VUELO   
+// 1. METODO PARA REGISTRAR UN VUELO   
 // ===============================
     public boolean registrarVueloOperativo(VueloOperativo vo) {
         String sqlVuelo = "INSERT INTO vuelos_operativos (cod_vuelo, id_programacion, fecha_operacion, estado_oooi, estado_vuelo) VALUES (?, ?, ?, ?, ?)";
@@ -89,7 +89,7 @@ public class VueloOperativoDAO {
     }
 
 // =============================================================================    
-// MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN PENDIENTES A DESPACHO TÉCNICO (W&B)
+// 2. MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN PENDIENTES A DESPACHO TÉCNICO (W&B)
 // =============================================================================
     public java.util.List<VueloOperativo> obtenerVuelosPendientesDespacho() {
         java.util.List<VueloOperativo> lista = new java.util.ArrayList<>();
@@ -123,7 +123,7 @@ public class VueloOperativoDAO {
         return lista;
     }
 // ====================================================================
-// MÉTODO PARA OBTENER LOS VUELOS DETALLADOS PARA LA VISTA DE DESPACHO
+// 3. MÉTODO PARA OBTENER LOS VUELOS DETALLADOS PARA LA VISTA DE DESPACHO
 // ====================================================================
     public java.util.List<Clases.VueloOperativo> obtenerVuelosDetalladosParaDespacho() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
@@ -184,7 +184,7 @@ public class VueloOperativoDAO {
     }
 
 // ====================================================================
-// MÉTODO PARA CANCELAR UN VUELO Y LIBERAR A LA TRIPULACIÓN
+// 4. MÉTODO PARA CANCELAR UN VUELO Y LIBERAR A LA TRIPULACIÓN
 // ====================================================================
     public boolean cancelarVueloOperativo(String codVuelo) {
         String sqlCancelarVuelo = "UPDATE vuelos_operativos SET estado_vuelo = 'CANCELADO' WHERE cod_vuelo = ?";
@@ -235,7 +235,7 @@ public class VueloOperativoDAO {
         }
     }
 // ====================================================================================
-// MÉTODO TRANSACCIONAL: PERSISTE HOJA DE CARGA + MANIFIESTO + CLIMA Y APRUEBA EL DESPACHO
+// 5. MÉTODO TRANSACCIONAL: PERSISTE HOJA DE CARGA + MANIFIESTO + CLIMA Y APRUEBA EL DESPACHO
 // ====================================================================================
 // ON CONFLICT: si el vuelo ya tenía datos de un intento previo (ej. volvió de EN_DEMORA
 // y se vuelve a calcular el W&B), actualizamos en vez de fallar por la restricción UNIQUE
@@ -308,7 +308,7 @@ public class VueloOperativoDAO {
 // PARA EL CONTROL OOOI
 //----------------------
 // ===================================================================
-// MÉTODO PARA EL HISTORIAL COMPLETO DE VUELOS (pantalla Historial de Vuelos)
+// 6. MÉTODO PARA EL HISTORIAL COMPLETO DE VUELOS (pantalla Historial de Vuelos)
 // ===================================================================
     public java.util.List<VueloOperativo> obtenerHistorialVuelos() {
         java.util.List<VueloOperativo> lista = new ArrayList<>();
@@ -373,7 +373,7 @@ public class VueloOperativoDAO {
         return lista;
     }
 // ===================================================================================================
-// MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN LISTOS PARA CONTROL OOOI (Aprobados, En Vuelo o En Tierra)
+// 7. MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN LISTOS PARA CONTROL OOOI (Aprobados, En Vuelo o En Tierra)
 // ===================================================================================================
     public java.util.List<Clases.VueloOperativo> obtenerVuelosParaControlOOOI() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
@@ -410,7 +410,7 @@ public class VueloOperativoDAO {
         return lista;
     }
 // ===================================================================
-// MÉTODO DINÁMICO PARA GUARDAR LA HORA Y LA FASE EN LA BASE DE DATOS
+// 8. MÉTODO DINÁMICO PARA GUARDAR LA HORA Y LA FASE EN LA BASE DE DATOS
 // ===================================================================
     public boolean registrarFaseOOOI(String codVuelo, String fase, String horaZulu) {
         // Armamos la consulta dinámica según el botón que presionen
@@ -430,7 +430,7 @@ public class VueloOperativoDAO {
     }
 
 // ===================================================================
-// MÉTODO PARA CARGAR LOS VUELOS EN EL LOGBOOK
+// 9. MÉTODO PARA CARGAR LOS VUELOS EN EL LOGBOOK
 // ===================================================================       
     public ArrayList<Clases.VueloOperativo> obtenerVuelosParaLogbook() {
         ArrayList<Clases.VueloOperativo> lista = new ArrayList<>();
@@ -467,7 +467,7 @@ public class VueloOperativoDAO {
     }
 
 // ===================================================================
-// MÉTODO PARA EL LLENADO DE LA TABLA REPORTES_LOGBOOK
+// 10. MÉTODO PARA EL LLENADO DE LA TABLA REPORTES_LOGBOOK
 // ===================================================================    
     public boolean cerrarVueloConLogbook(Clases.ReporteLogbook logbook) {
         boolean exito = false;

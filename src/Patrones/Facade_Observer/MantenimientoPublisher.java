@@ -1,4 +1,4 @@
-package Patrones.Observer;
+package Patrones.Facade_Observer;
 import java.util.ArrayList;
 import java.util.List;
 
