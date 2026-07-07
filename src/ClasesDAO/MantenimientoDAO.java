@@ -60,6 +60,57 @@ public class MantenimientoDAO {
         return listaReportes;
     }
 
+    // ===================================================================
+    // MÉTODO PARA EL HISTORIAL DE MANTENIMIENTO (pantalla Historial LogBook)
+    // ===================================================================
+    public List<ClasesDTO.RegistroMantenimientoDTO> obtenerHistorialMantenimiento() {
+        List<ClasesDTO.RegistroMantenimientoDTO> lista = new ArrayList<>();
+
+        String sql = "SELECT rm.fecha_reparacion, a.matricula, rl.observaciones_tecnicas, rl.prioridad, " +
+                     "rm.accion_realizada, e.nombre AS tecnico, rm.estado_registro " +
+                     "FROM registros_mantenimiento rm " +
+                     "INNER JOIN reportes_logbook rl ON rm.id_logbook = rl.id_logbook " +
+                     "INNER JOIN vuelos_operativos vo ON rl.id_vuelo_operativo = vo.id_vuelo_operativo " +
+                     "INNER JOIN vuelos_programados vp ON vo.id_programacion = vp.id_programacion " +
+                     "INNER JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
+                     "INNER JOIN empleados e ON rm.id_tecnico = e.id_empleado " +
+                     "ORDER BY rm.id_registro DESC";
+
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            conn = ConexionBD.getInstancia().getConexion();
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ClasesDTO.RegistroMantenimientoDTO r = new ClasesDTO.RegistroMantenimientoDTO();
+                java.sql.Date fecha = rs.getDate("fecha_reparacion");
+                r.setFecha(fecha != null ? fecha.toString() : "--");
+                r.setMatricula(rs.getString("matricula"));
+                r.setFallaReportada(rs.getString("observaciones_tecnicas"));
+                r.setPrioridad(rs.getString("prioridad"));
+                r.setAccionMantenimiento(rs.getString("accion_realizada"));
+                r.setTecnico(rs.getString("tecnico"));
+                r.setEstadoRegistro(rs.getString("estado_registro"));
+                lista.add(r);
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al obtener historial de mantenimiento: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ps != null) ps.close();
+                // OJO: NO cerramos "conn" (es la conexión Singleton compartida de toda la app).
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar recursos: " + e.getMessage());
+            }
+        }
+        return lista;
+    }
+
 // Método transaccional complejo para liberar el avión
     public boolean registrarLiberacionAeronave(int idLogbook, String matricula, int idTecnico, String accionTomada, String firmaTecnica) {
         Connection conn = null;

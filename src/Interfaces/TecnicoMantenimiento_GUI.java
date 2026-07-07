@@ -22,6 +22,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         private String rolLogueado;
         private int idTecnicoLogueado;
         private int idLogbookSeleccionado;
+
+        // Cache en memoria del historial completo: los combos de filtro trabajan
+        // sobre esta lista sin volver a golpear la BD en cada cambio de filtro.
+        private java.util.List<ClasesDTO.RegistroMantenimientoDTO> listaHistorialMantenimiento = new java.util.ArrayList<>();
         
     public TecnicoMantenimiento_GUI(int idEmpleado, String nombreUsuario, String rol) {
         this.idTecnicoLogueado = idEmpleado;
@@ -66,6 +70,45 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
 //CARGA LOS REPORTES LOGBOOK REPORTADOS POR OFICIAL_GUI    
         cargarReportesPendientes();
+
+//## FILTRO DE FECHA: escribes solo números y se autoformatea a yyyy-MM-dd ##
+        // (mismo formato que devuelve java.sql.Date en Java, así el filtro compara
+        // texto contra texto sin tener que parsear ni convertir nada)
+        // OJO: esto va ANTES de cargarHistorialMantenimiento(), porque esa función
+        // ya dispara el primer filtrado y necesita el campo ya inicializado.
+        try {
+            javax.swing.text.MaskFormatter mascaraFecha = new javax.swing.text.MaskFormatter("####-##-##");
+            mascaraFecha.setPlaceholderCharacter('_');
+            mascaraFecha.setValidCharacters("0123456789");
+            txtFiltroFecha.setFormatterFactory(new javax.swing.text.DefaultFormatterFactory(mascaraFecha));
+            txtFiltroFecha.setEditable(true);
+            txtFiltroFecha.setValue(null);
+            txtFiltroFecha.setText("____-__-__");
+        } catch (java.text.ParseException e) {
+            System.err.println("Error al configurar la máscara de fecha: " + e.getMessage());
+        }
+        // Filtra al presionar Enter o al salir del campo (no hace falta un botón aparte)
+        txtFiltroFecha.addActionListener(evt -> aplicarFiltrosHistorialMantenimiento());
+        txtFiltroFecha.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                aplicarFiltrosHistorialMantenimiento();
+            }
+        });
+
+//CARGA EL HISTORIAL DE MANTENIMIENTO REAL (antes tenía datos de prueba)
+        cargarHistorialMantenimiento();
+
+        // "LIMPIAR" es un JLabel con estilo de botón, sin ActionListener propio
+        // desde el GUI Builder; lo enganchamos aquí a mano.
+        btnLimpiarFiltros.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                cbxFiltroMatrícula.setSelectedIndex(0);
+                cbxFiltroPrioridad.setSelectedIndex(0);
+                cbxFiltroEstado.setSelectedIndex(0);
+                txtFiltroFecha.setText("____-__-__");
+                aplicarFiltrosHistorialMantenimiento();
+            }
+        });
         
 //CARGA LA FIRMA EN EL CAMPO DE DETALLE DE FORMA AUTOMATICA
         configurarFirmaTecnica();
@@ -1046,15 +1089,15 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_btnHistorialLogbookMouseClicked
 
     private void cbxFiltroPrioridadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroPrioridadActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorialMantenimiento();
     }//GEN-LAST:event_cbxFiltroPrioridadActionPerformed
 
     private void cbxFiltroMatrículaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroMatrículaActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorialMantenimiento();
     }//GEN-LAST:event_cbxFiltroMatrículaActionPerformed
 
     private void cbxFiltroEstadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroEstadoActionPerformed
-        // TODO add your handling code here:
+        aplicarFiltrosHistorialMantenimiento();
     }//GEN-LAST:event_cbxFiltroEstadoActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
@@ -1103,6 +1146,9 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
             // Recargamos la lista de la izquierda
             cargarReportesPendientes();
+
+            // El registro recién creado ya debe verse en el Historial
+            cargarHistorialMantenimiento();
         } else {
             JOptionPane.showMessageDialog(this, "Hubo un problema al procesar la liberación en la base de datos.", "Error de Transacción", JOptionPane.ERROR_MESSAGE);
         }
@@ -1472,6 +1518,75 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         // Aseguramos que el detalle derecho nazca vacío
         java.awt.CardLayout clDetalle = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
         clDetalle.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
+    }
+
+// ===========================================================================
+// HISTORIAL DE MANTENIMIENTO: CARGA DESDE BD + FILTROS EN MEMORIA
+// ===========================================================================
+    public void cargarHistorialMantenimiento() {
+        MantenimientoDAO dao = new MantenimientoDAO();
+        listaHistorialMantenimiento = dao.obtenerHistorialMantenimiento();
+
+        // Repoblamos los combos de filtro con valores reales de la BD
+        java.util.LinkedHashSet<String> matriculas = new java.util.LinkedHashSet<>();
+        java.util.LinkedHashSet<String> estados = new java.util.LinkedHashSet<>();
+        for (ClasesDTO.RegistroMantenimientoDTO r : listaHistorialMantenimiento) {
+            if (r.getMatricula() != null) matriculas.add(r.getMatricula());
+            if (r.getEstadoRegistro() != null) estados.add(r.getEstadoRegistro());
+        }
+
+        cbxFiltroMatrícula.removeAllItems();
+        cbxFiltroMatrícula.addItem("Todas");
+        for (String m : matriculas) cbxFiltroMatrícula.addItem(m);
+
+        // Prioridad SÍ tiene un catálogo fijo (enum) — mostramos las 4 opciones
+        // desde el día uno, aunque todavía no haya ningún registro con esa prioridad.
+        cbxFiltroPrioridad.removeAllItems();
+        cbxFiltroPrioridad.addItem("Todos");
+        for (Enumeradores.EstadoPrioridad p : Enumeradores.EstadoPrioridad.values()) cbxFiltroPrioridad.addItem(p.name());
+
+        // Estado (estado_registro) no tiene enum en el proyecto -> se arma con lo que haya en los datos
+        cbxFiltroEstado.removeAllItems();
+        cbxFiltroEstado.addItem("Todos");
+        for (String e : estados) cbxFiltroEstado.addItem(e);
+
+        aplicarFiltrosHistorialMantenimiento();
+    }
+
+    public void aplicarFiltrosHistorialMantenimiento() {
+        String filtroMatricula = (String) cbxFiltroMatrícula.getSelectedItem();
+        String filtroPrioridad = (String) cbxFiltroPrioridad.getSelectedItem();
+        String filtroEstado = (String) cbxFiltroEstado.getSelectedItem();
+
+        // Solo filtramos por fecha si el usuario terminó de escribir los 8 dígitos
+        // (mientras queden guiones bajos de la máscara, se ignora este filtro)
+        String filtroFecha = txtFiltroFecha.getText();
+        boolean fechaCompleta = filtroFecha != null && !filtroFecha.contains("_");
+
+        javax.swing.table.DefaultTableModel modelo = (javax.swing.table.DefaultTableModel) TblHistorialLogBook.getModel();
+        modelo.setRowCount(0);
+
+        int contador = 1;
+        for (ClasesDTO.RegistroMantenimientoDTO r : listaHistorialMantenimiento) {
+            boolean pasaMatricula = filtroMatricula == null || filtroMatricula.equals("Todas") || filtroMatricula.equals(r.getMatricula());
+            boolean pasaPrioridad = filtroPrioridad == null || filtroPrioridad.equals("Todos") || filtroPrioridad.equals(r.getPrioridad());
+            boolean pasaEstado = filtroEstado == null || filtroEstado.equals("Todos") || filtroEstado.equals(r.getEstadoRegistro());
+            boolean pasaFecha = !fechaCompleta || filtroFecha.equals(r.getFecha());
+
+            if (pasaMatricula && pasaPrioridad && pasaEstado && pasaFecha) {
+                modelo.addRow(new Object[]{
+                    String.valueOf(contador++),
+                    r.getFecha(),
+                    r.getMatricula(),
+                    r.getFallaReportada(),
+                    r.getPrioridad(),
+                    r.getAccionMantenimiento(),
+                    r.getTecnico(),
+                    r.getEstadoRegistro()
+                });
+            }
+        }
+        ajustarAlturaDinamica(TblHistorialLogBook, ScrollTablaHistorialLogBook);
     }
 // ===========================================================================
 // MÉTODO CARGAR LA VISTA DE DETALLE DEL REPORTE AL HACER CLICK A UNA TARJETA
