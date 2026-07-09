@@ -122,8 +122,8 @@ public class NotificacionDialog {
         filaTitulo.add(lblTitulo);
 
         JTextArea txtMensaje = new JTextArea(mensaje);
-        txtMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtMensaje.setForeground(new Color(203, 213, 225));
+        txtMensaje.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtMensaje.setForeground(new Color(148, 163, 184)); //203, 213, 225
         txtMensaje.setBackground(new Color(15, 23, 42));
         txtMensaje.setEditable(false);
         txtMensaje.setFocusable(false);
@@ -131,8 +131,14 @@ public class NotificacionDialog {
         txtMensaje.setWrapStyleWord(true);
         txtMensaje.setBorder(BorderFactory.createEmptyBorder(14, 4, 0, 4));
         txtMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
-        txtMensaje.setColumns(30);
-
+        //txtMensaje.setColumns(30);
+        // ESTA ES LA CLAVE: Forzar un ancho preferido, pero dejar el alto dinámico
+        // 310 es un buen ancho para que la ventana quede proporcional.
+        txtMensaje.setSize(new Dimension(310, Short.MAX_VALUE)); 
+        txtMensaje.setPreferredSize(new Dimension(310, txtMensaje.getPreferredSize().height));
+        txtMensaje.setBorder(BorderFactory.createEmptyBorder(10, 8, 10, 8)); // Más padding
+        txtMensaje.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
         cuerpo.add(filaTitulo);
         cuerpo.add(txtMensaje);
         raiz.add(cuerpo, BorderLayout.CENTER);
