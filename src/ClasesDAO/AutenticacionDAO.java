@@ -12,8 +12,11 @@ public class AutenticacionDAO implements IAutenticacion {
 
     @Override
     public UsuarioSistema hacerLogin(String user, String pass) {
-        // 1. Agregamos id_empleado a la consulta SQL
-        String query = "SELECT id_empleado, usuario, rol_acceso FROM usuarios_sistema WHERE usuario = ? AND contrasena = ?";
+        // JOIN con empleados para traer el nombre real (antes solo se traía el usuario de acceso)
+        String query = "SELECT us.id_empleado, us.usuario, us.rol_acceso, e.nombre " +
+                       "FROM usuarios_sistema us " +
+                       "JOIN empleados e ON us.id_empleado = e.id_empleado " +
+                       "WHERE us.usuario = ? AND us.contrasena = ?";
         
         try {
             Connection con = ConexionBD.getInstancia().getConexion();
@@ -29,6 +32,7 @@ public class AutenticacionDAO implements IAutenticacion {
                 usuarioLogueado.setIdEmpleado(rs.getInt("id_empleado"));
                 usuarioLogueado.setUsuario(rs.getString("usuario"));
                 usuarioLogueado.setRolAcceso(rs.getString("rol_acceso"));
+                usuarioLogueado.setNombreCompleto(rs.getString("nombre"));
                 
                 // 3. Retornamos EL OBJETO COMPLETO, no solo el String
                 return usuarioLogueado;

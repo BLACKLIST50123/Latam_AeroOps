@@ -2,7 +2,6 @@ package BaseDeDatos;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import javax.swing.JOptionPane;
 
 public class ConexionBD {
     // 1. Instancia estática y privada (Singleton)
@@ -22,7 +21,8 @@ public class ConexionBD {
             conexion = DriverManager.getConnection(URL, USUARIO, CLAVE);
             System.out.println("¡Conexión a LATAM_AeroOps exitosa!");
         } catch (ClassNotFoundException | SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error de conexión: " + e.getMessage());
+            // parent = null: todavía no existe ninguna ventana en este punto del arranque
+            ElementosDiseño.NotificacionDialog.error(null, "Error de conexión: " + e.getMessage(), "Error de Base de Datos");
         }
     }
     

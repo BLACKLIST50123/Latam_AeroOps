@@ -9,12 +9,10 @@ public class VentanaFactory {
         String rol = usuarioLogueado.getRolAcceso().toUpperCase();
         
         if (rol.equals("OFICIAL")) {
-            // Le pasas los datos al constructor del Oficial (Deberás actualizar el constructor del Oficial también)
-            return new Interfaces.OficialOperaciones_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso());
+            return new Interfaces.OficialOperaciones_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso(), usuarioLogueado.getNombreCompleto());
             
         } else if (rol.equals("TECNICO")) {
-            // Le pasas los datos a tu ventana de Técnico
-            return new Interfaces.TecnicoMantenimiento_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso());
+            return new Interfaces.TecnicoMantenimiento_GUI(usuarioLogueado.getIdEmpleado(), usuarioLogueado.getUsuario(), usuarioLogueado.getRolAcceso(), usuarioLogueado.getNombreCompleto());
         }
         return null;
     }

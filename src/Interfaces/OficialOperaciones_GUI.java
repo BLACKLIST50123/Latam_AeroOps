@@ -27,12 +27,16 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private java.util.List<Clases.VueloOperativo> listaHistorialCompleta = new java.util.ArrayList<>();
     private java.util.List<Clases.Aeronave> listaFlotaCompleta = new java.util.ArrayList<>();
     
-    public OficialOperaciones_GUI(int idEmpleado, String nombreUsuario, String rol) {
+    public OficialOperaciones_GUI(int idEmpleado, String nombreUsuario, String rol, String nombreCompleto) {
         this.idOficialLogueado = idEmpleado;
         this.usuarioLogueado = nombreUsuario;
         this.rolLogueado = rol;
         
         initComponents();
+        // Pintamos el nombre real del empleado y su rol en la barra lateral
+        // (antes se quedaba con el texto de diseño "Nombre" / "Rol en Sistema")
+        lblUsuario.setText(nombreCompleto != null ? nombreCompleto : nombreUsuario);
+        lblRolSistema.setText(nombreRolLegible(rol));
         // LISTA GLOBAL PARA GUARDAR A LOS SELECCIONADOS
 //## CAMBIO DE DISEÑO BOTONES MENU ##
         // Le ponemos el texto a cada botón
@@ -80,6 +84,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         ajustarAlturaDinamica(TblFlota, ScrollTablaFlota);
 
 //DATOS REALES DESDE POSTGRESQL (Historial y Flota) ##
+        configurarTooltipsContadores();
         cargarHistorialVuelos();
         cargarFlota();
 
@@ -182,6 +187,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblUsuario = new javax.swing.JLabel();
         lblRolSistema = new javax.swing.JLabel();
         pnlFondoPerfil = new javax.swing.JPanel();
+        jLabel4 = new javax.swing.JLabel();
         fondoBtnCerrarSesion = new javax.swing.JPanel();
         btnCerrarSesion = new javax.swing.JLabel();
         pnlFondoSistemaOnline = new javax.swing.JPanel();
@@ -492,21 +498,38 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblRolSistema.setForeground(new java.awt.Color(255, 255, 255));
         lblRolSistema.setText("Rol en Sistema ");
 
+        pnlFondoPerfil.setBackground(new java.awt.Color(15, 23, 43));
+        pnlFondoPerfil.setPreferredSize(new java.awt.Dimension(44, 44));
+
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/user1.png"))); // NOI18N
+        jLabel4.setText("jLabel4");
+
         javax.swing.GroupLayout pnlFondoPerfilLayout = new javax.swing.GroupLayout(pnlFondoPerfil);
         pnlFondoPerfil.setLayout(pnlFondoPerfilLayout);
         pnlFondoPerfilLayout.setHorizontalGroup(
             pnlFondoPerfilLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 48, Short.MAX_VALUE)
+            .addGroup(pnlFondoPerfilLayout.createSequentialGroup()
+                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         pnlFondoPerfilLayout.setVerticalGroup(
             pnlFondoPerfilLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 44, Short.MAX_VALUE)
+            .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
+        fondoBtnCerrarSesion.setBackground(new java.awt.Color(15, 23, 43));
+
+        btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/exit (2).png"))); // NOI18N
         btnCerrarSesion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnCerrarSesionMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnCerrarSesionMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnCerrarSesionMouseExited(evt);
             }
         });
 
@@ -514,11 +537,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         fondoBtnCerrarSesion.setLayout(fondoBtnCerrarSesionLayout);
         fondoBtnCerrarSesionLayout.setHorizontalGroup(
             fondoBtnCerrarSesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         fondoBtnCerrarSesionLayout.setVerticalGroup(
             fondoBtnCerrarSesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pnlFondoSistemaOnline.setBackground(new java.awt.Color(5, 46, 22));
@@ -580,10 +603,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGap(15, 15, 15)
                 .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(lblRolSistema)
-                    .addComponent(lblUsuario))
-                .addGap(34, 34, 34)
+                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblRolSistema, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(fondoBarraLateralLayout.createSequentialGroup()
@@ -969,7 +992,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         ScrollTripulacion.setViewportView(pnlContendorTCP);
 
-        fondoBtnCrearVuelo.setBackground(new java.awt.Color(225, 29, 72));
+        fondoBtnCrearVuelo.setBackground(new java.awt.Color(219, 29, 72));
 
         btnCrearVuelo.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         btnCrearVuelo.setForeground(new java.awt.Color(255, 255, 255));
@@ -1091,7 +1114,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 13)); // NOI18N
         jLabel11.setForeground(new java.awt.Color(148, 163, 175));
         jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel11.setText("Sin vuelos pendientes ");
+        jLabel11.setText("Sin vuelos pendientes...");
 
         javax.swing.GroupLayout pnlPendientesVacioLayout = new javax.swing.GroupLayout(pnlPendientesVacio);
         pnlPendientesVacio.setLayout(pnlPendientesVacioLayout);
@@ -3343,6 +3366,13 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     // Esto permitira intercambiar paneles de forma rapida como si fueran barajas, poniendo la que se usa encima de la anterior
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlAsignacion"); // Aca va el nombre del panel
+
+    // 4. Reactividad: si no hay un vuelo a medio asignar, refrescamos la lista
+    // de vuelos programados disponibles (por si se agregó uno nuevo mientras
+    // la ventana estaba abierta en otra pestaña)
+        if (cbxSeleccionVuelo.getSelectedIndex() <= 0) {
+            cargarComboBoxesDespacho();
+        }
     }//GEN-LAST:event_btnAsigancionVuelosMouseClicked
 
     private void btnAutorizarDespachoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAutorizarDespachoMouseClicked
@@ -3372,6 +3402,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // Muestras el panel de Historial
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlHistorial");
+
+        // Pantalla de solo lectura: siempre es seguro refrescarla al entrar
+        cargarHistorialVuelos();
     }//GEN-LAST:event_btnHistorialVuelosMouseClicked
 
     private void btnGestionFlotaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnGestionFlotaMouseClicked
@@ -3385,6 +3418,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // Muestras el panel de Flota
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlFlota");
+
+        // Pantalla de solo lectura: siempre es seguro refrescarla al entrar
+        cargarFlota();
     }//GEN-LAST:event_btnGestionFlotaMouseClicked
 
     private void cbxFiltroEstadoVueloActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroEstadoVueloActionPerformed
@@ -3415,6 +3451,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // Nos damos de baja del Observer: si no, cada vuelta de logout/login
         // dejaría una ventana ya cerrada "escuchando" liberaciones de aeronaves.
         Patrones.Facade_Observer.MantenimientoPublisher.getInstancia().desuscribir(this);
+        ElementosDiseño.NotificacionDialog.exito(this, "Sesión cerrada correctamente.", "Hasta pronto");
         Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
@@ -3427,7 +3464,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private void btnCrearVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCrearVueloMouseClicked
         // 1. Validaciones iniciales de seguridad en interfaz
         if (cbxSeleccionVuelo.getSelectedIndex() <= 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Por favor, seleccione un vuelo programado.");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Por favor, seleccione un vuelo programado.");
             return;
         }
 
@@ -3435,11 +3472,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         javax.swing.JComboBox comboFO = cbxSeleccionFO;
 
         if (comboCAP.getSelectedIndex() <= 0 || comboCAP.getSelectedItem().equals("—")) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Debe asignar un Capitán disponible.");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Debe asignar un Capitán disponible.");
             return;
         }
         if (comboFO.getSelectedIndex() <= 0 || comboFO.getSelectedItem().equals("—")) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Debe asignar un Primer Oficial disponible.");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Debe asignar un Primer Oficial disponible.");
             return;
         }
 
@@ -3450,14 +3487,14 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         // 2. Regla de negocio: El mismo piloto no puede duplicar roles en el mismo avión
         if (capitanSel.getIdEmpleado() == foSel.getIdEmpleado()) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Alerta: El Capitán y el Copiloto no pueden ser la misma persona.");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "El Capitán y el Copiloto no pueden ser la misma persona.");
             return;
         }
 
         // 3. Regla de negocio: Validar la capacidad de asientos (1 TCP cada 50 asientos)
         int tcpMinimos = (int) Math.ceil(vueloSel.getCapacidadAsientos() / 50.0);
         if (tcpsSeleccionadosList.size() < tcpMinimos) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Tripulación insuficiente. Se requieren mínimo " + tcpMinimos + " TCPs seleccionados.");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Tripulación insuficiente. Se requieren mínimo " + tcpMinimos + " TCPs seleccionados.");
             return;
         }
 
@@ -3475,14 +3512,14 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // 5. Invocamos al DAO para persistir en PostgreSQL
         ClasesDAO.VueloOperativoDAO voDAO = new ClasesDAO.VueloOperativoDAO();
         if (voDAO.registrarVueloOperativo(vueloConstruido)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "¡Vuelo " + vueloConstruido.getCodVuelo() + " asignado con éxito a despacho!");
+            ElementosDiseño.NotificacionDialog.exito(this, "Vuelo " + vueloConstruido.getCodVuelo() + " asignado con éxito a despacho.");
 
             // 6. Refrescamos el ComboBox inicial. Al borrarse de la lista de vírgenes, desaparecerá automáticamente.
             cargarComboBoxesDespacho();
             cargarVuelosPendientesDespacho(); //Actualizamos y agregamos el vuelo creado a la lista de pendientes despacho
             cargarVuelosEnDespacho(); // Asegura el intercambio inmediato de estados
         } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Error crítico al guardar la asignación del vuelo operativo.");
+            ElementosDiseño.NotificacionDialog.error(this, "Error crítico al guardar la asignación del vuelo operativo.");
         }
     }//GEN-LAST:event_btnCrearVueloMouseClicked
 
@@ -3543,20 +3580,18 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private void btnCancelarVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCancelarVueloMouseClicked
         // 1. Validamos que haya un vuelo seleccionado
         if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Seleccione un vuelo operativo para cancelar.", "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Seleccione un vuelo operativo para cancelar.", "Aviso");
             return;
         }
 
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
 
         // 2. Confirmación de seguridad con estilo de alerta crítica (del código largo)
-        int confirm = javax.swing.JOptionPane.showConfirmDialog(this,
+        boolean confirm = ElementosDiseño.NotificacionDialog.confirmar(this,
                 "¿Está seguro que desea CANCELAR el vuelo " + voSel.getCodVuelo() + " de forma definitiva?\nLa tripulación asignada será liberada.",
-                "Alerta Crítica: Cancelar Vuelo",
-                javax.swing.JOptionPane.YES_NO_OPTION,
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                "Alerta Crítica: Cancelar Vuelo");
 
-        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+        if (confirm) {
 
             // 3. INTEGRACIÓN PATRÓN STATE: El objeto cambia internamente a EstadoCancelado
             voSel.procesarCancelacion(); 
@@ -3567,7 +3602,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
 
                 // Mensaje de éxito profesional
-                javax.swing.JOptionPane.showMessageDialog(this, "Vuelo Cancelado. Se ha liberado la aeronave y la tripulación asignada.");
+                ElementosDiseño.NotificacionDialog.exito(this, "Vuelo Cancelado. Se ha liberado la aeronave y la tripulación asignada.");
 
                 // 5. LIMPIEZA Y PARPADEO VISUAL DE LA INTERFAZ (Del código largo)
                 limpiarCampos(); 
@@ -3585,7 +3620,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 ScrollPendientesDespacho.repaint();
 
             } else {
-                javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al intentar cancelar el vuelo en el sistema.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                ElementosDiseño.NotificacionDialog.error(this, "Ocurrió un error al intentar cancelar el vuelo en el sistema.");
             }
         }
     }//GEN-LAST:event_btnCancelarVueloMouseClicked
@@ -3603,10 +3638,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             txtFieldCombReserva.getText().trim().isEmpty() ||
             txtAreaClima.getText().trim().isEmpty()) {
             
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Operación rechazada: Todos los campos de peso (Pasajeros, Equipaje, Carga, Combustible) y el reporte METAR deben estar completamente llenados antes de autorizar el despacho.", 
-                "Información Incompleta", 
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+            ElementosDiseño.NotificacionDialog.advertencia(this, 
+                "Todos los campos de peso (Pasajeros, Equipaje, Carga, Combustible) y el reporte METAR deben estar completamente llenados antes de autorizar el despacho.", 
+                "Información Incompleta");
             return; // Rompe la ejecución aquí y evita el despacho
         }
 
@@ -3622,17 +3656,17 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         String codigoMetar = txtAreaClima.getText().trim().toUpperCase();
 
         if (!hoja.validarPesoMaximo(mtowActual)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: No se puede aprobar el despacho. El peso actual supera el MTOW de la aeronave.");
+            ElementosDiseño.NotificacionDialog.error(this, "No se puede aprobar el despacho. El peso actual supera el MTOW de la aeronave.", "Peso Excedido");
             return; // Rompe la ejecución aquí
         }
 
         if (!ValidadorMetar.esClimaApto(codigoMetar)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: El METAR reporta clima adverso. Debe declarar demora o cancelar el vuelo.");
+            ElementosDiseño.NotificacionDialog.error(this, "El METAR reporta clima adverso. Debe declarar demora o cancelar el vuelo.", "Clima Adverso");
             return; // Rompe la ejecución aquí
         }
 
         if (!metarCorrespondeADestino(codigoMetar, voSel)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "CRÍTICO: El código METAR ingresado no pertenece al aeropuerto de destino de este vuelo.", "Error de Jurisdicción", javax.swing.JOptionPane.ERROR_MESSAGE);
+            ElementosDiseño.NotificacionDialog.error(this, "El código METAR ingresado no pertenece al aeropuerto de destino de este vuelo.", "Error de Jurisdicción");
             return; // Rompe la ejecución aquí
         }
 
@@ -3659,14 +3693,17 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // 5. IMPACTO TRANSACCIONAL EN BASE DE DATOS POSTGRESQL
         // ==============================================================
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
-        if (dao.aprobarDespachoConDatosOperativos(voSel)) {
-            javax.swing.JOptionPane.showMessageDialog(this, "¡Despacho Autorizado! El vuelo " + voSel.getCodVuelo() + " pasó a estado APROBADO.");
+        setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
+        boolean exitoDespacho = dao.aprobarDespachoConDatosOperativos(voSel);
+        setCursor(java.awt.Cursor.getDefaultCursor());
+        if (exitoDespacho) {
+            ElementosDiseño.NotificacionDialog.exito(this, "Despacho Autorizado. El vuelo " + voSel.getCodVuelo() + " pasó a estado APROBADO.");
 
             // 6. Refrescamos el panel
             cargarVuelosEnDespacho();
             cargarHistorialVuelos();
         } else {
-            javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al guardar los datos de despacho en la base de datos.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            ElementosDiseño.NotificacionDialog.error(this, "Ocurrió un error al guardar los datos de despacho en la base de datos.");
         }
         cargarVuelosEnControlOOOI();
     }//GEN-LAST:event_btnAprobarPlanMouseClicked
@@ -3679,7 +3716,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Alerta: El vuelo " + voSel.getCodVuelo() + " ha sido retenido en rampa (EN_DEMORA).");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "El vuelo " + voSel.getCodVuelo() + " ha sido retenido en rampa (EN_DEMORA).");
 
             cargarVuelosEnDespacho();
             cargarHistorialVuelos();
@@ -3712,10 +3749,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // ==========================================
         String combustibleStr = txtCombustibleRestante.getText().trim();
         if (combustibleStr.isEmpty()) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
+            ElementosDiseño.NotificacionDialog.error(this, 
                 "Debe ingresar el combustible sobrante.", 
-                "Error de Validación", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                "Error de Validación");
             return;
         }
 
@@ -3723,10 +3759,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         try {
             combustible = Double.parseDouble(combustibleStr);
         } catch (NumberFormatException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
+            ElementosDiseño.NotificacionDialog.error(this, 
                 "El combustible sobrante debe ser un número válido.", 
-                "Error de Formato", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                "Error de Formato");
             return;
         }
 
@@ -3736,10 +3771,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // Si el usuario NO marcó "Sin Fallas", obligatoriamente debe escribir qué pasó
         if (!rbtnSinFallas.isSelected()) {
             if (txtReporteFallas.getText().trim().isEmpty() || txtReporteFallas.getText().equals("NIL - Operación sin novedades")) {
-                javax.swing.JOptionPane.showMessageDialog(this, 
+                ElementosDiseño.NotificacionDialog.advertencia(this, 
                     "Ha reportado una falla. Debe detallarla en las observaciones técnicas.", 
-                    "Atención", 
-                    javax.swing.JOptionPane.WARNING_MESSAGE);
+                    "Atención");
                 txtReporteFallas.requestFocus(); // Pone el cursor en la caja de texto
                 return;
             }
@@ -3758,10 +3792,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // ==========================================
         // Nos aseguramos de que haya seleccionado un vuelo real y no el texto por defecto
         if (cbxVuelosLogbook.getSelectedIndex() <= 0 || !(cbxVuelosLogbook.getSelectedItem() instanceof Clases.VueloOperativo)) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
+            ElementosDiseño.NotificacionDialog.advertencia(this, 
                 "Por favor, seleccione un vuelo válido para cerrar.", 
-                "Advertencia", 
-                javax.swing.JOptionPane.WARNING_MESSAGE);
+                "Advertencia");
             return;
         }
         
@@ -3787,16 +3820,17 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // 6. EJECUTAR TRANSACCIÓN EN BASE DE DATOS
         // ==========================================
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
+        setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
         boolean transaccionExitosa = dao.cerrarVueloConLogbook(objLogbook);
+        setCursor(java.awt.Cursor.getDefaultCursor());
 
         // ==========================================
         // 7. RESPUESTA VISUAL Y RESETEO DE INTERFAZ
         // ==========================================
         if (transaccionExitosa) {
-            javax.swing.JOptionPane.showMessageDialog(this, 
+            ElementosDiseño.NotificacionDialog.exito(this, 
                 "Vuelo " + vueloSeleccionado.getCodVuelo() + " cerrado y Logbook registrado exitosamente.", 
-                "Cierre Operacional Completado", 
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                "Cierre Operacional Completado");
             
             // Refrescamos la lista para que el vuelo recién cerrado desaparezca del combo
             cargarComboBoxVuelosLogbook();
@@ -3807,10 +3841,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             habilitarPanelLogbook(false); 
             
         } else {
-            javax.swing.JOptionPane.showMessageDialog(this, 
+            ElementosDiseño.NotificacionDialog.error(this, 
                 "Error crítico al intentar registrar el Logbook y cerrar el vuelo. Se ha deshecho la transacción (Rollback).", 
-                "Error de Base de Datos", 
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                "Error de Base de Datos");
         }
     }//GEN-LAST:event_btnCerrarVueloMouseClicked
 
@@ -3826,6 +3859,15 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtReporteFallas.setBackground(new java.awt.Color(24, 34, 52));
         txtReporteFallas.setForeground(new java.awt.Color(115, 123, 134));
     }//GEN-LAST:event_rbtnSinFallasActionPerformed
+
+    private void btnCerrarSesionMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseEntered
+            btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Rojo.png")));
+
+    }//GEN-LAST:event_btnCerrarSesionMouseEntered
+
+    private void btnCerrarSesionMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseExited
+            btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png")));
+    }//GEN-LAST:event_btnCerrarSesionMouseExited
 
     /**
 //     * @param args the command line arguments
@@ -4245,10 +4287,73 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         });
     }
     
-// ELIMINAR AL METER BASE DE DATOS METODO PARA CARGAR DATOS DE PRUEBA
+// ===========================================================
+// CONTADORES DEL DASHBOARD: se recalculan sobre las listas en memoria
+// (listaHistorialCompleta / listaFlotaCompleta) cada vez que cambian
+// ===========================================================
+    private void configurarTooltipsContadores() {
+        lblContadorVuelosActivos.setToolTipText("Vuelos que no han finalizado ni sido cancelados (incluye pendientes, aprobados, en demora, en vuelo y en tierra)");
+        lblContadorPendientesDespacho.setToolTipText("Vuelos esperando aprobación de despacho");
+        lblContadorAeronavesAptas.setToolTipText("Aeronaves de la flota con estado técnico APTO");
+        lblContadorPersonalLibre.setToolTipText("Empleados con estado DISPONIBLE en este momento");
+        lblContadorPendientesDemora.setToolTipText("Vuelos actualmente retenidos en rampa (EN_DEMORA)");
+        lblContadorAprobados.setToolTipText("Vuelos con despacho aprobado");
+        lblContadorCancelados.setToolTipText("Vuelos cancelados");
+        lblContadorPendientesDemora1.setToolTipText("Vuelos actualmente retenidos en rampa (EN_DEMORA)");
+        lblContadorAprobados1.setToolTipText("Vuelos con despacho aprobado");
+        lblContadorCancelados1.setToolTipText("Vuelos cancelados");
+    }
+
+    private void actualizarContadoresDashboard() {
+        int vuelosActivos = 0, pendientesDespacho = 0, enDemora = 0, aprobados = 0, cancelados = 0;
+        for (Clases.VueloOperativo vo : listaHistorialCompleta) {
+            String estado = vo.getEstadoVuelo();
+            if (estado == null) continue;
+            switch (estado) {
+                case "PENDIENTE_DESPACHO": pendientesDespacho++; vuelosActivos++; break;
+                case "EN_DEMORA": enDemora++; vuelosActivos++; break;
+                case "APROBADO": aprobados++; vuelosActivos++; break;
+                case "EN_VUELO": vuelosActivos++; break;
+                case "EN_TIERRA": vuelosActivos++; break;
+                case "CANCELADO": cancelados++; break;
+                default: break; // COMPLETADO no cuenta como activo
+            }
+        }
+
+        int aeronavesAptas = 0;
+        for (Clases.Aeronave a : listaFlotaCompleta) {
+            if (a.getEstadoTecnico() == Enumeradores.EstadoAeronave.APTO) aeronavesAptas++;
+        }
+
+        int personalLibre = new ClasesDAO.DespachoDAO().contarPersonalDisponible();
+
+        // Dashboard superior
+        lblContadorVuelosActivos.setText(String.valueOf(vuelosActivos));
+        lblContadorPendientesDespacho.setText(String.valueOf(pendientesDespacho));
+        lblContadorAeronavesAptas.setText(String.valueOf(aeronavesAptas));
+        lblContadorPersonalLibre.setText(String.valueOf(personalLibre));
+
+        // Paneles de Despacho y Control OOOI (versiones duplicadas "1")
+        lblContadorPendientesDemora.setText(String.valueOf(enDemora));
+        lblContadorAprobados.setText(String.valueOf(aprobados));
+        lblContadorCancelados.setText(String.valueOf(cancelados));
+        lblContadorPendientesDemora1.setText(String.valueOf(enDemora));
+        lblContadorAprobados1.setText(String.valueOf(aprobados));
+        lblContadorCancelados1.setText(String.valueOf(cancelados));
+    }
+
 // ===========================================================
 // HISTORIAL DE VUELOS: CARGA DESDE BD + FILTROS EN MEMORIA
 // ===========================================================
+    private String nombreRolLegible(String rolAcceso) {
+        if (rolAcceso == null) return "";
+        switch (rolAcceso.toUpperCase()) {
+            case "OFICIAL": return "Oficial de Operaciones";
+            case "TECNICO": return "Técnico de Mantenimiento";
+            default: return rolAcceso;
+        }
+    }
+
     private void cargarHistorialVuelos() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         listaHistorialCompleta = dao.obtenerHistorialVuelos();
@@ -4278,6 +4383,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         // 2. Pintamos la tabla con los filtros actuales (por defecto, "Todos")
         aplicarFiltrosHistorial();
+        actualizarContadoresDashboard();
     }
 
     private void aplicarFiltrosHistorial() {
@@ -4341,6 +4447,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         for (Enumeradores.EstadoAeronave e : Enumeradores.EstadoAeronave.values()) cbxFiltroEstadoAeronave.addItem(e.name());
 
         aplicarFiltrosFlota();
+        actualizarContadoresDashboard();
     }
 
     private void aplicarFiltrosFlota() {
@@ -4949,10 +5056,9 @@ private void cargarVuelosEnControlOOOI() {
         // Refrescamos de verdad la tabla de Flota (antes solo se mostraba el aviso, sin recargar datos)
         cargarFlota();
 
-        javax.swing.JOptionPane.showMessageDialog(this, 
+        ElementosDiseño.NotificacionDialog.info(this, 
             "La aeronave con matrícula " + matricula + " ha sido liberada por mantenimiento y está lista para programación.", 
-            "Actualización de Flota", 
-            javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            "Actualización de Flota");
     }
 
     
@@ -5020,6 +5126,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;

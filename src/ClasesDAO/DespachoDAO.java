@@ -65,7 +65,9 @@ public class DespachoDAO {
                 tv.setCargoBase(rs.getString("cargo_base"));
                 lista.add(tv);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println("Error al obtener pilotos habilitados: " + e.getMessage());
+        }
         return lista;
     }
 
@@ -85,7 +87,27 @@ public class DespachoDAO {
                 tcp.setNombre(rs.getString("nombre"));
                 lista.add(tcp);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println("Error al obtener TCPs habilitados: " + e.getMessage());
+        }
         return lista;
+    }
+
+    // ===================================================================
+    // CONTADOR PARA EL DASHBOARD DEL OFICIAL: personal libre en este momento
+    // ===================================================================
+    public int contarPersonalDisponible() {
+        String sql = "SELECT COUNT(*) FROM empleados WHERE estado_asignacion = 'DISPONIBLE'";
+        try {
+            Connection con = ConexionBD.getInstancia().getConexion();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Error al contar personal disponible: " + e.getMessage());
+        }
+        return 0;
     }
 }

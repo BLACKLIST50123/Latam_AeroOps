@@ -12,7 +12,6 @@ import ClasesDAO.MantenimientoDAO;
 import ClasesDTO.ReportePendienteDTO;
 import java.util.List;
 import javax.swing.BorderFactory;
-import javax.swing.JOptionPane;
 
 public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     
@@ -22,17 +21,21 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         private String rolLogueado;
         private int idTecnicoLogueado;
         private int idLogbookSeleccionado;
+        private javax.swing.Timer timerRefrescoReportes;
 
         // Cache en memoria del historial completo: los combos de filtro trabajan
         // sobre esta lista sin volver a golpear la BD en cada cambio de filtro.
         private java.util.List<ClasesDTO.RegistroMantenimientoDTO> listaHistorialMantenimiento = new java.util.ArrayList<>();
         
-    public TecnicoMantenimiento_GUI(int idEmpleado, String nombreUsuario, String rol) {
+    public TecnicoMantenimiento_GUI(int idEmpleado, String nombreUsuario, String rol, String nombreCompleto) {
         this.idTecnicoLogueado = idEmpleado;
         this.usuarioLogueado = nombreUsuario;
         this.rolLogueado = rol;
         
         initComponents();
+        // Pintamos el nombre real del empleado y su rol en la barra lateral
+        lblUsuario.setText(nombreCompleto != null ? nombreCompleto : nombreUsuario);
+        lblRolSistema.setText(nombreRolLegible(rol));
 //## CAMBIO DE DISEÑO BOTONES MENU ##
         // Le ponemos el texto a cada botón
         btnReportesMantenimiento.setTexto("Reportes de Mantenimiento ");
@@ -70,6 +73,18 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
 //CARGA LOS REPORTES LOGBOOK REPORTADOS POR OFICIAL_GUI    
         cargarReportesPendientes();
+
+//## REACTIVIDAD: como Oficial y Técnico corren en instancias separadas, no hay
+// forma de "empujar" un aviso en tiempo real (eso sí funciona con OficialOperaciones_GUI
+// via Observer, pero es dentro de la MISMA JVM). Acá usamos polling: cada 20s revisamos
+// si hay reportes nuevos. Solo refrescamos si el técnico NO tiene un reporte abierto en
+// este momento, para no pisarle el texto que esté escribiendo a medias.
+        timerRefrescoReportes = new javax.swing.Timer(20000, evt -> {
+            if (idLogbookSeleccionado <= 0) {
+                cargarReportesPendientes();
+            }
+        });
+        timerRefrescoReportes.start();
 
 //## FILTRO DE FECHA: escribes solo números y se autoformatea a yyyy-MM-dd ##
         // (mismo formato que devuelve java.sql.Date en Java, así el filtro compara
@@ -131,6 +146,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         lblUsuario = new javax.swing.JLabel();
         lblRolSistema = new javax.swing.JLabel();
         pnlFondoPerfil = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
         fondoBtnCerrarSesion = new javax.swing.JPanel();
         btnCerrarSesion = new javax.swing.JLabel();
         pnlFondoSistemaOnline = new javax.swing.JPanel();
@@ -295,21 +311,38 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         lblRolSistema.setForeground(new java.awt.Color(255, 255, 255));
         lblRolSistema.setText("Rol en Sistema ");
 
+        pnlFondoPerfil.setBackground(new java.awt.Color(15, 23, 43));
+        pnlFondoPerfil.setPreferredSize(new java.awt.Dimension(44, 44));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/user1.png"))); // NOI18N
+        jLabel3.setText("jLabel3");
+
         javax.swing.GroupLayout pnlFondoPerfilLayout = new javax.swing.GroupLayout(pnlFondoPerfil);
         pnlFondoPerfil.setLayout(pnlFondoPerfilLayout);
         pnlFondoPerfilLayout.setHorizontalGroup(
             pnlFondoPerfilLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 48, Short.MAX_VALUE)
+            .addGroup(pnlFondoPerfilLayout.createSequentialGroup()
+                .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         pnlFondoPerfilLayout.setVerticalGroup(
             pnlFondoPerfilLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 44, Short.MAX_VALUE)
+            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
+        fondoBtnCerrarSesion.setBackground(new java.awt.Color(15, 23, 43));
+
+        btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png"))); // NOI18N
         btnCerrarSesion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnCerrarSesionMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnCerrarSesionMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnCerrarSesionMouseExited(evt);
             }
         });
 
@@ -317,11 +350,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         fondoBtnCerrarSesion.setLayout(fondoBtnCerrarSesionLayout);
         fondoBtnCerrarSesionLayout.setHorizontalGroup(
             fondoBtnCerrarSesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         fondoBtnCerrarSesionLayout.setVerticalGroup(
             fondoBtnCerrarSesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 30, Short.MAX_VALUE)
+            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pnlFondoSistemaOnline.setBackground(new java.awt.Color(5, 46, 22));
@@ -370,10 +403,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                                 .addGap(15, 15, 15)
                                 .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(lblRolSistema)
-                                    .addComponent(lblUsuario))
-                                .addGap(34, 34, 34)
+                                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(lblUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(lblRolSistema, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))
+                                .addGap(18, 18, 18)
                                 .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(fondoBarraLateralLayout.createSequentialGroup()
                                 .addGap(56, 56, 56)
@@ -382,7 +415,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                     .addGroup(fondoBarraLateralLayout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnReportesMantenimiento, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnReportesMantenimiento, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, fondoBarraLateralLayout.createSequentialGroup()
                                 .addComponent(lblModulos)
                                 .addGap(0, 0, Short.MAX_VALUE))
@@ -758,7 +791,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                             .addComponent(pnlListaReportes, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(18, 18, 18)
                             .addComponent(pnlContenedorDetalleReporte, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
         pnlContenidoReportesMantLayout.setVerticalGroup(
             pnlContenidoReportesMantLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -785,7 +818,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlReportesMantenimientoCuerpoLayout.setHorizontalGroup(
             pnlReportesMantenimientoCuerpoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(panelEncabezado3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(ScrollReportesMantenimiento, javax.swing.GroupLayout.DEFAULT_SIZE, 1100, Short.MAX_VALUE)
+            .addComponent(ScrollReportesMantenimiento, javax.swing.GroupLayout.DEFAULT_SIZE, 1102, Short.MAX_VALUE)
         );
         pnlReportesMantenimientoCuerpoLayout.setVerticalGroup(
             pnlReportesMantenimientoCuerpoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -831,7 +864,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
                 .addGroup(panelEncabezado5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel9)
                     .addComponent(jLabel8))
-                .addContainerGap(935, Short.MAX_VALUE))
+                .addContainerGap(937, Short.MAX_VALUE))
         );
         panelEncabezado5Layout.setVerticalGroup(
             panelEncabezado5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1077,6 +1110,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     // Esto permitira intercambiar paneles de forma rapida como si fueran barajas, poniendo la que se usa encima de la anterior
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlReportesMantenimiento"); // Aca va el nombre del panel
+
+    // 4. Reactividad: solo refrescamos si no hay un reporte a medio llenar
+        if (idLogbookSeleccionado <= 0) {
+            cargarReportesPendientes();
+        }
     }//GEN-LAST:event_btnReportesMantenimientoMouseClicked
 
     private void btnHistorialLogbookMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnHistorialLogbookMouseClicked
@@ -1088,6 +1126,9 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         // Muestras el panel de Historial LogBook
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlHistorialLogBook");
+
+        // Pantalla de solo lectura: siempre es seguro refrescarla al entrar
+        cargarHistorialMantenimiento();
     }//GEN-LAST:event_btnHistorialLogbookMouseClicked
 
     private void cbxFiltroPrioridadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxFiltroPrioridadActionPerformed
@@ -1103,6 +1144,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxFiltroEstadoActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
+        if (timerRefrescoReportes != null) {
+            timerRefrescoReportes.stop();
+        }
+        ElementosDiseño.NotificacionDialog.exito(this, "Sesión cerrada correctamente.", "Hasta pronto");
         Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
@@ -1113,18 +1158,16 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         String accionTomada = txtAreaRegistroAcciones.getText().trim();
 
         if (accionTomada.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Debe registrar la acción técnica realizada antes de firmar.", "Campos Incompletos", JOptionPane.WARNING_MESSAGE);
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Debe registrar la acción técnica realizada antes de firmar.", "Campos Incompletos");
             return;
         }
 
         // 2. Confirmación visual estilo bitácora aeronáutica
-        int confirmar = JOptionPane.showConfirmDialog(this, 
+        boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
             "¿Confirmar liberación a servicio firmada por " + usuarioLogueado + "?", 
-            "Confirmación de Firma Electrónica", 
-            JOptionPane.YES_NO_OPTION, 
-            JOptionPane.QUESTION_MESSAGE);
+            "Confirmación de Firma Electrónica");
 
-        if (confirmar != JOptionPane.YES_OPTION) {
+        if (!confirmar) {
             return; // Cancela el flujo si el técnico presiona NO
         }
 
@@ -1132,6 +1175,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         Patrones.Facade_Observer.MantenimientoFacade facade = new Patrones.Facade_Observer.MantenimientoFacade();
 
         // Usamos las variables globales de sesión e interfaz
+        setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
         boolean exito = facade.liberarAeronaveAServicio(
             idLogbookSeleccionado, 
             lblMatriculaAeronave.getText(), 
@@ -1139,9 +1183,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
             accionTomada,
             txtFirmaTecnica.getText()
         );
+        setCursor(java.awt.Cursor.getDefaultCursor());
 
         if (exito) {
-            JOptionPane.showMessageDialog(this, "¡Liberación técnica procesada! Aeronave declarada APTA para el servicio.", "Operación Exitosa", JOptionPane.INFORMATION_MESSAGE);
+            ElementosDiseño.NotificacionDialog.exito(this, "Liberación técnica procesada. Aeronave declarada APTA para el servicio.", "Operación Exitosa");
 
             // Limpiamos la caja de texto editable
             txtAreaRegistroAcciones.setText("");
@@ -1152,9 +1197,17 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
             // El registro recién creado ya debe verse en el Historial
             cargarHistorialMantenimiento();
         } else {
-            JOptionPane.showMessageDialog(this, "Hubo un problema al procesar la liberación en la base de datos.", "Error de Transacción", JOptionPane.ERROR_MESSAGE);
+            ElementosDiseño.NotificacionDialog.error(this, "Hubo un problema al procesar la liberación en la base de datos.", "Error de Transacción");
         }
     }//GEN-LAST:event_btnAprobarPlanMouseClicked
+
+    private void btnCerrarSesionMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseEntered
+            btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Rojo.png")));
+    }//GEN-LAST:event_btnCerrarSesionMouseEntered
+
+    private void btnCerrarSesionMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseExited
+            btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png")));
+    }//GEN-LAST:event_btnCerrarSesionMouseExited
 
 //    /**
 //     * @param args the command line arguments
@@ -1480,9 +1533,16 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 // ===========================================    
     public void cargarReportesPendientes() {
         pnlTarjetasLleno.removeAll();
+        // Se recarga la lista completa: ya no hay ningún reporte "seleccionado"
+        // vivo en la vista de detalle (usamos esto para saber si es seguro
+        // auto-refrescar sin pisarle al técnico algo que esté llenando).
+        idLogbookSeleccionado = 0;
 
         MantenimientoDAO dao = new MantenimientoDAO();
         List<ReportePendienteDTO> reportes = dao.obtenerReportesPendientes();
+
+        // Contador del badge rojo: cuántas aeronaves están esperando mantenimiento ahora mismo
+        lblContadorAOG.setText(reportes.size() + " AOG  |  Mant");
 
         if (reportes.isEmpty()) {
             // Si no hay reportes, mostramos el panel vacío
@@ -1525,6 +1585,15 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 // ===========================================================================
 // HISTORIAL DE MANTENIMIENTO: CARGA DESDE BD + FILTROS EN MEMORIA
 // ===========================================================================
+    private String nombreRolLegible(String rolAcceso) {
+        if (rolAcceso == null) return "";
+        switch (rolAcceso.toUpperCase()) {
+            case "OFICIAL": return "Oficial de Operaciones";
+            case "TECNICO": return "Técnico de Mantenimiento";
+            default: return rolAcceso;
+        }
+    }
+
     public void cargarHistorialMantenimiento() {
         MantenimientoDAO dao = new MantenimientoDAO();
         listaHistorialMantenimiento = dao.obtenerHistorialMantenimiento();
@@ -1593,6 +1662,20 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 // ===========================================================================
 // MÉTODO CARGAR LA VISTA DE DETALLE DEL REPORTE AL HACER CLICK A UNA TARJETA
 // ===========================================================================
+    // Le permite a cada tarjeta (TarjetaReporteMant) saber si ELLA es la seleccionada actual,
+    // para pintarse distinto sin que la GUI tenga que guardar una referencia a cada tarjeta.
+    public int getIdLogbookSeleccionado() {
+        return idLogbookSeleccionado;
+    }
+
+    // Deselecciona: se llama cuando el técnico vuelve a pulsar la tarjeta ya abierta.
+    public void cerrarDetalleReporte() {
+        this.idLogbookSeleccionado = 0;
+        java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
+        cl.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
+        pnlTarjetasLleno.repaint();
+    }
+
     public void mostrarDetalleReporte(int idLogbook, String matricula, String modelo, String prioridad, String observaciones) {
         
         this.idLogbookSeleccionado = idLogbook; //Guarda el id del reporte seleccionado
@@ -1625,6 +1708,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         // Cambiamos la baraja del CardLayout al panel lleno
         java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
         cl.show(pnlContenedorDetalleReporte, "pnlDetalleSeleccionado");
+
+        // Repintamos la lista para que la tarjeta recién elegida se resalte
+        // y la que estaba resaltada antes (si había otra) vuelva a la normalidad
+        pnlTarjetasLleno.repaint();
     }  
     
 // ===========================================================================
@@ -1672,6 +1759,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     private javax.swing.JPanel fondoBtnSalir;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel lblContadorAOG;

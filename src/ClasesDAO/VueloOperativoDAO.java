@@ -406,7 +406,9 @@ public class VueloOperativoDAO {
                 
                 lista.add(vo);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            System.out.println("Error al obtener vuelos para Control OOOI: " + e.getMessage());
+        }
         return lista;
     }
 // ===================================================================

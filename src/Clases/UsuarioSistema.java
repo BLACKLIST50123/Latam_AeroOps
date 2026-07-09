@@ -6,6 +6,7 @@ public class UsuarioSistema {
     private String usuario;
     private String contrasena;
     private String rolAcceso;
+    private String nombreCompleto;
     private Empleado empleado;
     public UsuarioSistema() {}
 
@@ -24,6 +25,9 @@ public class UsuarioSistema {
 
     public String getRolAcceso() { return rolAcceso; }
     public void setRolAcceso(String rolAcceso) { this.rolAcceso = rolAcceso; }
+
+    public String getNombreCompleto() { return nombreCompleto; }
+    public void setNombreCompleto(String nombreCompleto) { this.nombreCompleto = nombreCompleto; }
 
     public Empleado getEmpleado() { return empleado; }
     public void setEmpleado(Empleado empleado) { this.empleado = empleado; }

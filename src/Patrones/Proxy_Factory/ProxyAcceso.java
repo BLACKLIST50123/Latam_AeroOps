@@ -16,7 +16,7 @@ public class ProxyAcceso implements IAutenticacion {
         // Objeto temporal para manejar errores
         UsuarioSistema usuarioError = new UsuarioSistema();
         
-        if (user.isEmpty() || pass.isEmpty()) {
+        if (user == null || pass == null || user.trim().isEmpty() || pass.trim().isEmpty()) {
             usuarioError.setRolAcceso("VACIO");
             return usuarioError;
         }

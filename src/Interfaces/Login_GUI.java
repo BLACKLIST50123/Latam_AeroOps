@@ -317,9 +317,9 @@ public class Login_GUI extends javax.swing.JFrame {
         String estado = usuarioLogueado.getRolAcceso();
 
         if (estado.equals("VACIO")) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Complete todos los campos.", "Aviso", javax.swing.JOptionPane.WARNING_MESSAGE);
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Complete todos los campos.", "Aviso");
         } else if (estado.equals("DENEGADO")) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Credenciales incorrectas o acceso bloqueado.", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+            ElementosDiseño.NotificacionDialog.error(this, "Credenciales incorrectas o acceso bloqueado.", "Error");
         } else {
             // LOGIN EXITOSO - Mandamos el objeto completo a la fábrica
             javax.swing.JFrame ventana = Patrones.Proxy_Factory.VentanaFactory.crearVentana(usuarioLogueado);

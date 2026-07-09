@@ -97,7 +97,13 @@ public class TarjetaReporteMant extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                guiPrincipal.mostrarDetalleReporte(idLogbook, matricula, modelo, prioridad, observaciones);
+                // Toggle: si esta misma tarjeta ya estaba seleccionada, se cierra el detalle.
+                // Si no, se abre (y automáticamente "roba" la selección a cualquier otra tarjeta).
+                if (guiPrincipal.getIdLogbookSeleccionado() == idLogbook) {
+                    guiPrincipal.cerrarDetalleReporte();
+                } else {
+                    guiPrincipal.mostrarDetalleReporte(idLogbook, matricula, modelo, prioridad, observaciones);
+                }
             }
 
             @Override
@@ -120,9 +126,13 @@ public class TarjetaReporteMant extends JPanel {
         Graphics2D g2 = (Graphics2D) g.create();
         // Activamos suavizado de pixeles para evitar bordes toscos de Java antiguo
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        boolean seleccionada = guiPrincipal.getIdLogbookSeleccionado() == idLogbook;
         
         // Color de fondo dinámico (Efecto Hover suave)
-        if (mouseEncima) {
+        if (seleccionada) {
+            g2.setColor(new Color(30, 58, 74)); // Azul-cyan oscuro: distinto del hover, se nota "activa"
+        } else if (mouseEncima) {
             g2.setColor(new Color(30, 41, 59)); // Slate-800 (#1e293b) al pasar el mouse
         } else {
             g2.setColor(new Color(15, 23, 42)); // Slate-900 (#0f172a) color por defecto
@@ -131,9 +141,15 @@ public class TarjetaReporteMant extends JPanel {
         // Rellenar rectángulo redondeado de la tarjeta (radio de esquina de 12px)
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
         
-        // Línea del borde ultrafina (Gris Slate-700, #334155)
-        g2.setColor(new Color(51, 65, 85));
-        g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+        // Borde: acento cyan y más grueso si está seleccionada, línea sutil si no
+        if (seleccionada) {
+            g2.setColor(new Color(34, 211, 238)); // Cyan-400 (#22d3ee)
+            g2.setStroke(new BasicStroke(2f));
+            g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 12, 12);
+        } else {
+            g2.setColor(new Color(51, 65, 85)); // Gris Slate-700 (#334155)
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
+        }
         
         g2.dispose();
         super.paintComponent(g);
