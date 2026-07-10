@@ -1,5 +1,4 @@
 package ClasesDAO;
-
 import BaseDeDatos.ConexionBD;
 import Clases.TripulanteVuelo;
 import Clases.TripulanteCabina;

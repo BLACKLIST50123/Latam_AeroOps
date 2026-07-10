@@ -183,10 +183,10 @@ public class VueloOperativoDAO {
         return lista;
     }
 
-// ====================================================================
-// 4. MÉTODO PARA CANCELAR UN VUELO Y LIBERAR A LA TRIPULACIÓN
-// ====================================================================
-    public boolean cancelarVueloOperativo(String codVuelo) {
+// ===============================================================================
+// 4. MÉTODOS PARA LIBERAR TRIPULACION Y ACTUALIZAR ESTADO VUELO (CANCELAR VUELO)
+// ===============================================================================
+    public boolean liberarTripulacion(String codVuelo) {
         String sqlCancelarVuelo = "UPDATE vuelos_operativos SET estado_vuelo = 'CANCELADO' WHERE cod_vuelo = ?";
         
         // Subconsulta potente: Actualiza a DISPONIBLE solo a los empleados que estaban en este vuelo

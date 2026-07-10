@@ -131,7 +131,7 @@ public class TarjetaReporteMant extends JPanel {
         
         // Color de fondo dinámico (Efecto Hover suave)
         if (seleccionada) {
-            g2.setColor(new Color(30, 58, 74)); // Azul-cyan oscuro: distinto del hover, se nota "activa"
+            g2.setColor(new Color(45, 10, 30)); // Rojiso oscuro: distinto del hover, se nota "activa"
         } else if (mouseEncima) {
             g2.setColor(new Color(30, 41, 59)); // Slate-800 (#1e293b) al pasar el mouse
         } else {
@@ -143,7 +143,7 @@ public class TarjetaReporteMant extends JPanel {
         
         // Borde: acento cyan y más grueso si está seleccionada, línea sutil si no
         if (seleccionada) {
-            g2.setColor(new Color(34, 211, 238)); // Cyan-400 (#22d3ee)
+            g2.setColor(new Color(221, 29, 71)); // Borde rojiso mas claro
             g2.setStroke(new BasicStroke(2f));
             g2.drawRoundRect(1, 1, getWidth() - 3, getHeight() - 3, 12, 12);
         } else {

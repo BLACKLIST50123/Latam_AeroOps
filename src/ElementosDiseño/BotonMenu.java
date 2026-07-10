@@ -46,7 +46,12 @@ public class BotonMenu extends JPanel {
         }
         repaint(); // Vuelve a dibujar el fondo
     }
-
+    
+    // Método para saber si el botón ya está seleccionado/activo
+    public boolean isActivo() {
+        return this.activo;
+    }
+    
     // Aquí dibujamos el fondo curvo y la línea roja a mano
     @Override
     protected void paintComponent(Graphics g) {

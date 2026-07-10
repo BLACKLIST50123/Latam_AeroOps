@@ -1,15 +1,30 @@
 package Interfaces;
 import java.awt.Color;
 import javax.swing.JFrame;
+import static javax.swing.UIManager.put;
 
 public class Login_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Login_GUI.class.getName());
+        private boolean cargandoLogin = false;  // variable para evitar enter y click al mismo tiempo en login
 
     public Login_GUI() {
         initComponents();
         this.setExtendedState(JFrame.MAXIMIZED_BOTH); //Esto expande a FullScreen al iniciar
         BaseDeDatos.ConexionBD.getInstancia().getConexion();
+    // =========================================================================
+    // MAPEO DE LA TECLA ENTER CUANDO EL BOTÓN ES UN JLABEL
+    // =========================================================================
+        javax.swing.JRootPane root = this.getRootPane();
+        root.getInputMap(javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW)
+            .put(javax.swing.KeyStroke.getKeyStroke("ENTER"), "presionarEnter");
+
+        root.getActionMap().put("presionarEnter", new javax.swing.AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                iniciarSesionProceso(); // <-- Llamamos al método unificado
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")
@@ -305,29 +320,7 @@ public class Login_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBtnSalirMouseExited
 
     private void btnIniciarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarSesionMouseClicked
-        String user = campoUsuario.getText().trim();
-        String pass = new String(campoContraseña.getPassword());
-
-        Patrones.Proxy_Factory.ProxyAcceso proxy = new Patrones.Proxy_Factory.ProxyAcceso();
-        
-        // 1. Obtenemos el objeto desde el Proxy
-        Clases.UsuarioSistema usuarioLogueado = proxy.hacerLogin(user, pass);
-        
-        // 2. Revisamos el rol que devolvió
-        String estado = usuarioLogueado.getRolAcceso();
-
-        if (estado.equals("VACIO")) {
-            ElementosDiseño.NotificacionDialog.advertencia(this, "Complete todos los campos.", "Aviso");
-        } else if (estado.equals("DENEGADO")) {
-            ElementosDiseño.NotificacionDialog.error(this, "Credenciales incorrectas o acceso bloqueado.", "Error");
-        } else {
-            // LOGIN EXITOSO - Mandamos el objeto completo a la fábrica
-            javax.swing.JFrame ventana = Patrones.Proxy_Factory.VentanaFactory.crearVentana(usuarioLogueado);
-            if (ventana != null) {
-                ventana.setVisible(true);
-                this.dispose(); // Cerramos el login
-            }
-        }
+            iniciarSesionProceso(); //METODO DE INICIO DE SESIO ABAJO
     }//GEN-LAST:event_btnIniciarSesionMouseClicked
 
     /**
@@ -353,6 +346,48 @@ public class Login_GUI extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new Login_GUI().setVisible(true));
+    }
+    
+    
+// =========================================================================
+// MÉTODO UNIFICADO: Aquí se procesa el Login real
+// =========================================================================
+    private void iniciarSesionProceso() {
+        // Si ya se está procesando un intento, ignoramos por completo el segundo disparo
+        if (cargandoLogin) {
+            return; 
+        }
+
+        try {
+            cargandoLogin = true; // Bloqueamos la entrada inmediatamente
+            
+            String user = campoUsuario.getText().trim();
+            String pass = new String(campoContraseña.getPassword());
+            // Instanciamos el ProxyAcceso
+            Patrones.Proxy_Factory.ProxyAcceso proxy = new Patrones.Proxy_Factory.ProxyAcceso();
+
+            // Obtenemos el objeto desde el Proxy
+            Clases.UsuarioSistema usuarioLogueado = proxy.hacerLogin(user, pass);
+
+            // Revisamos el rol que devolvió
+            String estado = usuarioLogueado.getRolAcceso();
+
+            if (estado.equals("VACIO")) {
+                ElementosDiseño.NotificacionDialog.advertencia(this, "Complete todos los campos.", "Aviso");
+            } else if (estado.equals("DENEGADO")) {
+                ElementosDiseño.NotificacionDialog.error(this, "Credenciales incorrectas o acceso bloqueado.", "Error");
+            } else {
+                // LOGIN EXITOSO - Mandamos el objeto completo a la fábrica
+                javax.swing.JFrame ventana = Patrones.Proxy_Factory.VentanaFactory.crearVentana(usuarioLogueado);
+                if (ventana != null) {
+                    ventana.setVisible(true);
+                    this.dispose(); // Cerramos el login
+                }
+            }
+        } finally {
+            // Al terminar (con éxito o error), liberamos el bloqueo para futuros intentos
+            cargandoLogin = false; 
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

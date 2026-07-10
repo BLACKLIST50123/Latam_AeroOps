@@ -19,10 +19,12 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     // Variables globales de la clase para recordar quién está operando
         private String usuarioLogueado;
         private String rolLogueado;
+        private String nombreTecnico;
         private int idTecnicoLogueado;
         private int idLogbookSeleccionado;
         private javax.swing.Timer timerRefrescoReportes;
-
+        // Diccionario temporal para guardar lo que el técnico escribe en la acción de mantenimiento antes de cambiar de tarjeta
+        private java.util.Map<Integer, String> borradoresMantenimiento = new java.util.HashMap<>();
         // Cache en memoria del historial completo: los combos de filtro trabajan
         // sobre esta lista sin volver a golpear la BD en cada cambio de filtro.
         private java.util.List<ClasesDTO.RegistroMantenimientoDTO> listaHistorialMantenimiento = new java.util.ArrayList<>();
@@ -31,6 +33,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         this.idTecnicoLogueado = idEmpleado;
         this.usuarioLogueado = nombreUsuario;
         this.rolLogueado = rol;
+        this.nombreTecnico = nombreCompleto;
         
         initComponents();
         // Pintamos el nombre real del empleado y su rol en la barra lateral
@@ -1101,23 +1104,33 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_txtBtnSalirMouseExited
 
     private void btnReportesMantenimientoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnReportesMantenimientoMouseClicked
-    // 1. Apagamos TODOS los botones
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnReportesMantenimiento.isActivo()) {
+            return;
+        }
+        // 1. Apagamos TODOS los botones
         btnReportesMantenimiento.setActivo(false);
         btnHistorialLogbook.setActivo(false);
-    // 2. Encendemos SOLO el que acabamos de cliquear
+        // 2. Encendemos SOLO el que acabamos de cliquear
         btnReportesMantenimiento.setActivo(true);
-    // 3. Cambiamos la pantalla del medio usando tu CardLayout
-    // Esto permitira intercambiar paneles de forma rapida como si fueran barajas, poniendo la que se usa encima de la anterior
+        // 3. Cambiamos la pantalla del medio usando tu CardLayout
+        // Esto permitira intercambiar paneles de forma rapida como si fueran barajas, poniendo la que se usa encima de la anterior
         java.awt.CardLayout carta = (java.awt.CardLayout) pnlContenedorPrincipal.getLayout();
         carta.show(pnlContenedorPrincipal, "pnlReportesMantenimiento"); // Aca va el nombre del panel
 
-    // 4. Reactividad: solo refrescamos si no hay un reporte a medio llenar
+        // 4. Reactividad: solo refrescamos si no hay un reporte a medio llenar
         if (idLogbookSeleccionado <= 0) {
             cargarReportesPendientes();
         }
     }//GEN-LAST:event_btnReportesMantenimientoMouseClicked
 
     private void btnHistorialLogbookMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnHistorialLogbookMouseClicked
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnHistorialLogbook.isActivo()) {
+            return;
+        }
         // Apagas todos
         btnReportesMantenimiento.setActivo(false);
         btnHistorialLogbook.setActivo(false);
@@ -1144,6 +1157,15 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cbxFiltroEstadoActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
+        // Confirmación visual 
+        boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
+            "¿Desea cerrar sesión?", 
+            "Cerrar Sesión");
+
+        if (!confirmar) {
+            return; // No se cierra sesion si se pulsa NO
+        }//SI PULSA SI
+        
         if (timerRefrescoReportes != null) {
             timerRefrescoReportes.stop();
         }
@@ -1164,8 +1186,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
         // 2. Confirmación visual estilo bitácora aeronáutica
         boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
-            "¿Confirmar liberación a servicio firmada por " + usuarioLogueado + "?", 
-            "Confirmación de Firma Electrónica");
+            "¿Confirmar liberación de la aeronave "+lblMatriculaAeronave.getText()+" a servicio?", 
+            "Confirmación de Liberacion a Servicio");
 
         if (!confirmar) {
             return; // Cancela el flujo si el técnico presiona NO
@@ -1190,7 +1212,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
             // Limpiamos la caja de texto editable
             txtAreaRegistroAcciones.setText("");
-
+            // Limpiamos el borrador ya que fue guardado en la Base de Datos con éxito
+            borradoresMantenimiento.remove(idLogbookSeleccionado);
             // Recargamos la lista de la izquierda
             cargarReportesPendientes();
 
@@ -1670,6 +1693,12 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
     // Deselecciona: se llama cuando el técnico vuelve a pulsar la tarjeta ya abierta.
     public void cerrarDetalleReporte() {
+        // --- ANTES DE CERRAR: Guardamos lo que haya escrito en el JTextArea por si acaso ---
+        if (this.idLogbookSeleccionado != 0) {
+            String textoEscrito = txtAreaRegistroAcciones.getText(); // Tu caja de texto de acciones
+            borradoresMantenimiento.put(this.idLogbookSeleccionado, textoEscrito);
+        }
+        
         this.idLogbookSeleccionado = 0;
         java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
         cl.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
@@ -1677,7 +1706,14 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     }
 
     public void mostrarDetalleReporte(int idLogbook, String matricula, String modelo, String prioridad, String observaciones) {
-        
+        // --- SALVAGUARDAR ANTES DE CAMBIAR DE TARJETA ---
+        // Si ya había una tarjeta seleccionada previamente, capturamos su texto actual y lo guardamos
+        if (this.idLogbookSeleccionado != 0) {
+            String textoPrevio = txtAreaRegistroAcciones.getText();
+            borradoresMantenimiento.put(this.idLogbookSeleccionado, textoPrevio);
+        }
+        // -------------------------------------------------
+
         this.idLogbookSeleccionado = idLogbook; //Guarda el id del reporte seleccionado
         // Llenamos las etiquetas con la info base
         lblMatriculaAeronave.setText(matricula);
@@ -1688,8 +1724,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         // --- PALETA DE COLORES ULTRA-ESTILIZADA (Fondo vs Texto) ---
         switch (prioridad.toUpperCase()) {
             case "ALTA":
-                pnlPrioridadMant.setBackground(new Color(64, 15, 27));     // Fondo Guinda profundo (#400f1b)
-                lblPrioridadMant.setForeground(new Color(251, 113, 133)); // Texto Rosa/Rojo Neón (#f77185)
+                pnlPrioridadMant.setBackground(new Color(76, 5, 25));     // Fondo Guinda profundo (#400f1b)
+                lblPrioridadMant.setForeground(new Color(251, 111, 114)); // Texto Rosa/Rojo Neón (#f77185)
                 break;
             case "MEDIA":
                 pnlPrioridadMant.setBackground(new Color(66, 32, 6));      // Fondo Marrón Quemado (#422006)
@@ -1705,6 +1741,17 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlPrioridadMant.revalidate();
         pnlPrioridadMant.repaint();
 
+        // --- RESTAURAR O LIMPIAR LA CAJA DE TEXTO DEL REPORTE ---
+        // Verificamos si esta nueva tarjeta ya tenía un borrador en memoria
+        if (borradoresMantenimiento.containsKey(idLogbook)) {
+            // Si el técnico ya había estado escribiendo aquí, le devolvemos su texto
+            txtAreaRegistroAcciones.setText(borradoresMantenimiento.get(idLogbook));
+        } else {
+            // Si es la primera vez que la abre, la caja técnica nace limpia y vacía
+            txtAreaRegistroAcciones.setText("");
+        }
+        // --------------------------------------------------------
+
         // Cambiamos la baraja del CardLayout al panel lleno
         java.awt.CardLayout cl = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
         cl.show(pnlContenedorDetalleReporte, "pnlDetalleSeleccionado");
@@ -1719,7 +1766,7 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 // ===========================================================================
     private void configurarFirmaTecnica() {
         // 1. Formateamos el texto de la firma automatizada (Ejemplo: "Frank Montero [TÉCNICO]")
-        txtFirmaTecnica.setText(usuarioLogueado + " [" + rolLogueado.toUpperCase() + "]");
+        txtFirmaTecnica.setText(nombreTecnico + " [" + nombreRolLegible(rolLogueado).toUpperCase() + "]");
 
         // 2. Hacemos que sea estrictamente de SOLO LECTURA
         txtFirmaTecnica.setEditable(false);

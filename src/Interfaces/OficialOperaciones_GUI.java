@@ -21,11 +21,15 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         private String rolLogueado;
         private int idOficialLogueado;
         
+        
     // Cache en memoria: se traen una vez desde la BD y los combos de filtro
     // trabajan sobre esta lista (los volúmenes de una aerolínea regional chica
     // no justifican reconsultar la BD por cada cambio de filtro).
     private java.util.List<Clases.VueloOperativo> listaHistorialCompleta = new java.util.ArrayList<>();
     private java.util.List<Clases.Aeronave> listaFlotaCompleta = new java.util.ArrayList<>();
+    // Diccionario temporal para guardar borradores de despacho: [0]=METAR, [1]=Pasajeros, [2]=Equipaje, [3]=Carga, [4]=CombRuta, [5]=CombReserva
+    private java.util.Map<String, String[]> borradoresDespacho = new java.util.HashMap<>();
+    private String vueloDespachoSeleccionado = ""; // Para saber de qué vuelo guardar el borrador antes de cambiar
     
     public OficialOperaciones_GUI(int idEmpleado, String nombreUsuario, String rol, String nombreCompleto) {
         this.idOficialLogueado = idEmpleado;
@@ -116,8 +120,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         cargarVuelosEnControlOOOI();
     // Cargamos los vuelos que ya llegaron (IN) para poder cerrar su Logbook
         cargarComboBoxVuelosLogbook();
-    
-    
     // Fuerza el color gris claro (puedes ajustar los valores RGB)
         txtAreaClima.setForeground(new java.awt.Color(204,204,204));
     // Forzamos el color del perfil
@@ -265,8 +267,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblIN = new javax.swing.JLabel();
         lblGateArrival = new javax.swing.JLabel();
         lblTiempoIN = new javax.swing.JLabel();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel12 = new javax.swing.JLabel();
+        panelFondoAvisoOOOI = new javax.swing.JPanel();
+        lblAvisoOOOI = new javax.swing.JLabel();
         pnlLogBook = new javax.swing.JPanel();
         lblCreacionAsignacionVuelo2 = new javax.swing.JLabel();
         lblVueloProgramado1 = new javax.swing.JLabel();
@@ -277,7 +279,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         rbtnPrioridadMedia = new javax.swing.JRadioButton();
         rbtnPrioridadAlta = new javax.swing.JRadioButton();
         txtCombustibleRestante = new javax.swing.JTextField();
-        lblVueloProgramado4 = new javax.swing.JLabel();
+        lblObservacionesTecnicas = new javax.swing.JLabel();
         ScrollTxtReporteFallas = new javax.swing.JScrollPane();
         txtReporteFallas = new javax.swing.JTextArea();
         fondoBtnCancelarVuelo3 = new javax.swing.JPanel();
@@ -347,6 +349,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         fondoBtnCancelarVuelo = new javax.swing.JPanel();
         btnCancelarVuelo = new javax.swing.JLabel();
         cbxVuelosDespacho = new javax.swing.JComboBox<>();
+        fondoFondoBtnActualizarMETAR = new javax.swing.JPanel();
+        fondoBtnActualizarMETAR = new javax.swing.JPanel();
+        btnActualizarMETAR = new javax.swing.JLabel();
         fondoContadores1 = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
         pnlContadorPendientesDemora1 = new javax.swing.JPanel();
@@ -467,7 +472,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addComponent(pnlFondoLogoBorde, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 996, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 1003, Short.MAX_VALUE)
                 .addComponent(fondoBtnSalir, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         bordeSuperiorLayout.setVerticalGroup(
@@ -519,7 +524,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         fondoBtnCerrarSesion.setBackground(new java.awt.Color(15, 23, 43));
 
-        btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/exit (2).png"))); // NOI18N
+        btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png"))); // NOI18N
         btnCerrarSesion.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -541,7 +546,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         );
         fondoBtnCerrarSesionLayout.setVerticalGroup(
             fondoBtnCerrarSesionLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(btnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
         );
 
         pnlFondoSistemaOnline.setBackground(new java.awt.Color(5, 46, 22));
@@ -635,25 +640,29 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGap(22, 22, 22)
                 .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
-                .addComponent(lblModulos)
-                .addGap(18, 18, 18)
-                .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnGestionFlota, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 556, Short.MAX_VALUE)
-                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                        .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblRolSistema))
-                    .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(31, 31, 31)
+                        .addComponent(lblModulos)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnGestionFlota, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 556, Short.MAX_VALUE)
+                        .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                                .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblRolSistema))
+                            .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(24, 24, 24))
         );
 
@@ -1102,6 +1111,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         pnlPendientesDespacho.setBackground(new java.awt.Color(30, 41, 59));
         pnlPendientesDespacho.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        pnlPendientesDespacho.setMaximumSize(new java.awt.Dimension(282, 361));
+        pnlPendientesDespacho.setMinimumSize(new java.awt.Dimension(282, 361));
 
         lblDespachoTecnico3.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblDespachoTecnico3.setForeground(new java.awt.Color(203, 213, 225));
@@ -1123,7 +1134,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             .addGroup(pnlPendientesVacioLayout.createSequentialGroup()
                 .addGap(147, 147, 147)
                 .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(136, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pnlPendientesVacioLayout.setVerticalGroup(
             pnlPendientesVacioLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1139,9 +1150,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         pnlPendientesLleno.setLayout(new java.awt.BorderLayout());
 
         ScrollPendientesDespacho.setBorder(null);
+        ScrollPendientesDespacho.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         pnlListaItemsVuelo.setBackground(new java.awt.Color(30, 41, 59));
-        pnlListaItemsVuelo.setLayout(new javax.swing.BoxLayout(pnlListaItemsVuelo, javax.swing.BoxLayout.LINE_AXIS));
+        pnlListaItemsVuelo.setLayout(new javax.swing.BoxLayout(pnlListaItemsVuelo, javax.swing.BoxLayout.Y_AXIS));
         ScrollPendientesDespacho.setViewportView(pnlListaItemsVuelo);
 
         pnlPendientesLleno.add(ScrollPendientesDespacho, java.awt.BorderLayout.CENTER);
@@ -1374,22 +1386,22 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
-        jPanel1.setBackground(new java.awt.Color(66, 32, 6));
-        jPanel1.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(146, 64, 14), 1, true));
+        panelFondoAvisoOOOI.setBackground(new java.awt.Color(66, 32, 6));
+        panelFondoAvisoOOOI.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(146, 64, 14), 1, true));
 
-        jLabel12.setForeground(new java.awt.Color(252, 211, 77));
-        jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-        jLabel12.setText("   ⚠  Módulo de Control OOOI inhabilitado debido a la ausencia de operaciones de vuelo activas.");
+        lblAvisoOOOI.setForeground(new java.awt.Color(252, 211, 77));
+        lblAvisoOOOI.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblAvisoOOOI.setText("   ⚠  Módulo de Control OOOI inhabilitado debido a la ausencia de operaciones de vuelo activas.");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        javax.swing.GroupLayout panelFondoAvisoOOOILayout = new javax.swing.GroupLayout(panelFondoAvisoOOOI);
+        panelFondoAvisoOOOI.setLayout(panelFondoAvisoOOOILayout);
+        panelFondoAvisoOOOILayout.setHorizontalGroup(
+            panelFondoAvisoOOOILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lblAvisoOOOI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
+        panelFondoAvisoOOOILayout.setVerticalGroup(
+            panelFondoAvisoOOOILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(lblAvisoOOOI, javax.swing.GroupLayout.DEFAULT_SIZE, 35, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout pnlControlOOOILayout = new javax.swing.GroupLayout(pnlControlOOOI);
@@ -1399,7 +1411,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             .addGroup(pnlControlOOOILayout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addGroup(pnlControlOOOILayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(panelFondoAvisoOOOI, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlControlOOOILayout.createSequentialGroup()
                         .addComponent(btnON, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -1430,7 +1442,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                     .addComponent(btnON, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnIN, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(panelFondoAvisoOOOI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
@@ -1480,10 +1492,15 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtCombustibleRestante.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         txtCombustibleRestante.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
         txtCombustibleRestante.addActionListener(this::txtCombustibleRestanteActionPerformed);
+        txtCombustibleRestante.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtCombustibleRestanteKeyTyped(evt);
+            }
+        });
 
-        lblVueloProgramado4.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
-        lblVueloProgramado4.setForeground(new java.awt.Color(203, 213, 225));
-        lblVueloProgramado4.setText("FALLAS REPORTADAS");
+        lblObservacionesTecnicas.setFont(new java.awt.Font("Segoe UI", 1, 11)); // NOI18N
+        lblObservacionesTecnicas.setForeground(new java.awt.Color(203, 213, 225));
+        lblObservacionesTecnicas.setText("OBSERVACIONES TECNICAS");
 
         txtReporteFallas.setBackground(new java.awt.Color(15, 23, 42));
         txtReporteFallas.setColumns(20);
@@ -1557,7 +1574,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                                                 .addComponent(rbtnPrioridadMedia)
                                                 .addGap(18, 18, 18)
                                                 .addComponent(rbtnPrioridadAlta))
-                                            .addComponent(lblVueloProgramado4, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                            .addComponent(lblObservacionesTecnicas, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                                 .addGroup(pnlLogBookLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addComponent(lblVueloProgramado2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1587,7 +1604,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                     .addComponent(rbtnPrioridadAlta)
                     .addComponent(rbtnSinFallas))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(lblVueloProgramado4)
+                .addComponent(lblObservacionesTecnicas)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(ScrollTxtReporteFallas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -1638,7 +1655,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         pnlAsignacionCuerpoLayout.setHorizontalGroup(
             pnlAsignacionCuerpoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(panelEncabezado3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-            .addComponent(ScrollAsignacionVuelos, javax.swing.GroupLayout.DEFAULT_SIZE, 1100, Short.MAX_VALUE)
+            .addComponent(ScrollAsignacionVuelos, javax.swing.GroupLayout.DEFAULT_SIZE, 1107, Short.MAX_VALUE)
         );
         pnlAsignacionCuerpoLayout.setVerticalGroup(
             pnlAsignacionCuerpoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2026,8 +2043,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         lblRequerimientosTecnicos.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblRequerimientosTecnicos.setForeground(new java.awt.Color(203, 213, 225));
-        lblRequerimientosTecnicos.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblRequerimientosTecnicos.setText("REQUERIMIENTOS TÉCNICOS Y CLIMA");
+        lblRequerimientosTecnicos.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
+        lblRequerimientosTecnicos.setText("COMBUSTIBLE DE VUELO Y CLIMA");
 
         lblCombRuta.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         lblCombRuta.setForeground(new java.awt.Color(203, 213, 225));
@@ -2058,7 +2075,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
         lblClimaDestino.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         lblClimaDestino.setForeground(new java.awt.Color(203, 213, 225));
-        lblClimaDestino.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblClimaDestino.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         lblClimaDestino.setText("Clima Destino (METAR) ");
 
         lblCombReserva.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
@@ -2069,10 +2086,20 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtFieldCombReserva.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldCombReserva.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldCombReserva.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldCombReserva.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldCombReservaKeyTyped(evt);
+            }
+        });
 
         txtFieldEquipaje.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldEquipaje.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldEquipaje.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldEquipaje.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldEquipajeKeyTyped(evt);
+            }
+        });
 
         lblSumatoriaPesos.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblSumatoriaPesos.setForeground(new java.awt.Color(203, 213, 225));
@@ -2087,6 +2114,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtFieldPasajeros.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldPasajeros.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldPasajeros.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldPasajeros.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldPasajerosKeyTyped(evt);
+            }
+        });
 
         lblEquipajeKG.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         lblEquipajeKG.setForeground(new java.awt.Color(203, 213, 225));
@@ -2096,6 +2128,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtFieldCarga.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldCarga.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldCarga.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldCarga.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldCargaKeyTyped(evt);
+            }
+        });
 
         lblCargaKG.setFont(new java.awt.Font("Segoe UI", 1, 13)); // NOI18N
         lblCargaKG.setForeground(new java.awt.Color(203, 213, 225));
@@ -2111,10 +2148,20 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         txtFieldCombustible.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldCombustible.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldCombustible.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldCombustible.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldCombustibleKeyTyped(evt);
+            }
+        });
 
         txtFieldCombRuta.setBackground(new java.awt.Color(15, 23, 42));
         txtFieldCombRuta.setForeground(new java.awt.Color(255, 255, 255));
         txtFieldCombRuta.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 65, 85), 1, true));
+        txtFieldCombRuta.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtFieldCombRutaKeyTyped(evt);
+            }
+        });
 
         pnlFondoCalculoMTOW.setBackground(new java.awt.Color(15, 23, 42));
 
@@ -2164,11 +2211,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGroup(pnlFondoCalculoMTOWLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(barraMTOW, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlFondoCalculoMTOWLayout.createSequentialGroup()
-                        .addComponent(lblSumaTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 81, Short.MAX_VALUE)
+                        .addComponent(lblSumaTotal, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblSlash, javax.swing.GroupLayout.DEFAULT_SIZE, 27, Short.MAX_VALUE)
+                        .addComponent(lblSlash, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblPesoMaximo, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                        .addComponent(lblPesoMaximo, javax.swing.GroupLayout.DEFAULT_SIZE, 68, Short.MAX_VALUE)
                         .addGap(116, 116, 116)
                         .addComponent(pnlFondoAprobado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(pnlFondoCalculoMTOWLayout.createSequentialGroup()
@@ -2273,6 +2320,46 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         cbxVuelosDespacho.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         cbxVuelosDespacho.addActionListener(this::cbxVuelosDespachoActionPerformed);
 
+        fondoFondoBtnActualizarMETAR.setBackground(new java.awt.Color(30, 41, 59));
+        fondoFondoBtnActualizarMETAR.setMaximumSize(new java.awt.Dimension(100, 29));
+        fondoFondoBtnActualizarMETAR.setMinimumSize(new java.awt.Dimension(100, 29));
+        fondoFondoBtnActualizarMETAR.setOpaque(false);
+
+        fondoBtnActualizarMETAR.setBackground(new java.awt.Color(5, 46, 22));
+
+        btnActualizarMETAR.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        btnActualizarMETAR.setForeground(new java.awt.Color(34, 197, 94));
+        btnActualizarMETAR.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        btnActualizarMETAR.setText("ACTUALIZAR");
+        btnActualizarMETAR.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnActualizarMETAR.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                btnActualizarMETARMouseClicked(evt);
+            }
+        });
+
+        javax.swing.GroupLayout fondoBtnActualizarMETARLayout = new javax.swing.GroupLayout(fondoBtnActualizarMETAR);
+        fondoBtnActualizarMETAR.setLayout(fondoBtnActualizarMETARLayout);
+        fondoBtnActualizarMETARLayout.setHorizontalGroup(
+            fondoBtnActualizarMETARLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnActualizarMETAR, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 108, Short.MAX_VALUE)
+        );
+        fondoBtnActualizarMETARLayout.setVerticalGroup(
+            fondoBtnActualizarMETARLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(btnActualizarMETAR, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout fondoFondoBtnActualizarMETARLayout = new javax.swing.GroupLayout(fondoFondoBtnActualizarMETAR);
+        fondoFondoBtnActualizarMETAR.setLayout(fondoFondoBtnActualizarMETARLayout);
+        fondoFondoBtnActualizarMETARLayout.setHorizontalGroup(
+            fondoFondoBtnActualizarMETARLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(fondoBtnActualizarMETAR, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+        fondoFondoBtnActualizarMETARLayout.setVerticalGroup(
+            fondoFondoBtnActualizarMETARLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(fondoBtnActualizarMETAR, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+        );
+
         javax.swing.GroupLayout pnlContenidoDespachoLayout = new javax.swing.GroupLayout(pnlContenidoDespacho);
         pnlContenidoDespacho.setLayout(pnlContenidoDespachoLayout);
         pnlContenidoDespachoLayout.setHorizontalGroup(
@@ -2281,35 +2368,37 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGap(22, 22, 22)
                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                        .addComponent(lblDespachoTecnico, javax.swing.GroupLayout.DEFAULT_SIZE, 298, Short.MAX_VALUE)
+                        .addComponent(lblDespachoTecnico, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
                         .addGap(504, 504, 504)
                         .addComponent(cbxVuelosDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 230, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(pnlFondoResumenRuta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(pnlFondoTxtArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                                .addComponent(lblRequerimientosTecnicos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(277, 277, 277))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
-                                .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
+                                        .addComponent(txtFieldCombRuta)
+                                        .addGap(100, 100, 100))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
+                                        .addComponent(lblCombRuta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(185, 185, 185)))
+                                .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
+                                        .addComponent(lblCombReserva, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(64, 64, 64))
+                                    .addComponent(txtFieldCombReserva)))
+                            .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
+                                .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
+                                        .addComponent(lblRequerimientosTecnicos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(124, 124, 124))
                                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                                         .addComponent(lblClimaDestino, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                                        .addGap(321, 321, 321))
-                                    .addComponent(pnlFondoTxtArea, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
-                                                .addComponent(txtFieldCombRuta)
-                                                .addGap(100, 100, 100))
-                                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlContenidoDespachoLayout.createSequentialGroup()
-                                                .addComponent(lblCombRuta, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addGap(185, 185, 185)))
-                                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                                                .addComponent(lblCombReserva, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                                .addGap(64, 64, 64))
-                                            .addComponent(txtFieldCombReserva))))
-                                .addGap(27, 27, 27)))
+                                        .addGap(195, 195, 195)))
+                                .addComponent(fondoFondoBtnActualizarMETAR, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
+                        .addGap(27, 27, 27)
                         .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
                                 .addComponent(lblCargaKG, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -2358,9 +2447,14 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGap(18, 18, 18)
                 .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
-                        .addComponent(lblRequerimientosTecnicos)
-                        .addGap(12, 12, 12)
-                        .addComponent(lblClimaDestino)
+                        .addGroup(pnlContenidoDespachoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
+                                .addComponent(lblRequerimientosTecnicos)
+                                .addGap(12, 12, 12)
+                                .addComponent(lblClimaDestino))
+                            .addGroup(pnlContenidoDespachoLayout.createSequentialGroup()
+                                .addGap(9, 9, 9)
+                                .addComponent(fondoFondoBtnActualizarMETAR, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(pnlFondoTxtArea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
@@ -2651,7 +2745,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGroup(panelEncabezado4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
                     .addComponent(jLabel6))
-                .addContainerGap(933, Short.MAX_VALUE))
+                .addContainerGap(940, Short.MAX_VALUE))
         );
         panelEncabezado4Layout.setVerticalGroup(
             panelEncabezado4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2723,7 +2817,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGroup(panelEncabezado5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel9)
                     .addComponent(jLabel8))
-                .addContainerGap(935, Short.MAX_VALUE))
+                .addContainerGap(942, Short.MAX_VALUE))
         );
         panelEncabezado5Layout.setVerticalGroup(
             panelEncabezado5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2947,7 +3041,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGroup(panelEncabezado6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel13)
                     .addComponent(jLabel10))
-                .addContainerGap(935, Short.MAX_VALUE))
+                .addContainerGap(942, Short.MAX_VALUE))
         );
         panelEncabezado6Layout.setVerticalGroup(
             panelEncabezado6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -3355,6 +3449,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_txtBtnSalirMouseExited
 
     private void btnAsigancionVuelosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAsigancionVuelosMouseClicked
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnAsigancionVuelos.isActivo()) {
+            return;
+        }
+
     // 1. Apagamos TODOS los botones
         btnAsigancionVuelos.setActivo(false);
         btnAutorizarDespacho.setActivo(false);
@@ -3376,6 +3476,16 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_btnAsigancionVuelosMouseClicked
 
     private void btnAutorizarDespachoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAutorizarDespachoMouseClicked
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnAutorizarDespacho.isActivo()) {
+            return;
+        }
+
+        // --- RESPALDO DE MEMORIA DE SELECCIÓN ---
+        // Guardamos una copia local del vuelo seleccionado antes de que la recarga limpie el combo
+        String vueloARestaurar = vueloDespachoSeleccionado;
+
         // Apagas todos
         btnAsigancionVuelos.setActivo(false);
         btnAutorizarDespacho.setActivo(false);
@@ -3389,9 +3499,30 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         
         //Sincroniza y voltea el panel si hay vuelos nuevos
         cargarVuelosEnDespacho();
+
+        // --- RESTAURACIÓN AUTOMÁTICA DE SELECCIÓN ---
+        // Si había un vuelo seleccionado antes de cambiar de módulo, lo volvemos a buscar en el combo
+        if (!vueloARestaurar.isEmpty()) {
+            for (int i = 1; i < cbxVuelosDespacho.getItemCount(); i++) {
+                Object item = cbxVuelosDespacho.getModel().getElementAt(i);
+                if (item instanceof Clases.VueloOperativo) {
+                    Clases.VueloOperativo voCombo = (Clases.VueloOperativo) item;
+                    if (voCombo.getCodVuelo().equals(vueloARestaurar)) {
+                        cbxVuelosDespacho.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+        }
     }//GEN-LAST:event_btnAutorizarDespachoMouseClicked
 
     private void btnHistorialVuelosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnHistorialVuelosMouseClicked
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnHistorialVuelos.isActivo()) {
+            return;
+        }
+
         // Apagas todos
         btnAsigancionVuelos.setActivo(false);
         btnAutorizarDespacho.setActivo(false);
@@ -3408,6 +3539,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_btnHistorialVuelosMouseClicked
 
     private void btnGestionFlotaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnGestionFlotaMouseClicked
+        // --- BLOQUEO ANTI-DOBLE CLIC ---
+        // Si el botón ya está activo (ya estamos aquí), evitamos recargar innecesariamente
+        if (btnGestionFlota.isActivo()) {
+            return;
+        }       
+        
         // Apagas todos
         btnAsigancionVuelos.setActivo(false);
         btnAutorizarDespacho.setActivo(false);
@@ -3448,6 +3585,15 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_cbxFiltroEstadoAeronaveActionPerformed
 
     private void btnCerrarSesionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseClicked
+        // Confirmación visual 
+        boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
+            "¿Desea cerrar sesión?", 
+            "Cerrar Sesión");
+
+        if (!confirmar) {
+            return; // No se cierra sesion si se pulsa NO
+        }//SI PULSA SI
+        
         // Nos damos de baja del Observer: si no, cada vuelta de logout/login
         // dejaría una ventana ya cerrada "escuchando" liberaciones de aeronaves.
         Patrones.Facade_Observer.MantenimientoPublisher.getInstancia().desuscribir(this);
@@ -3455,6 +3601,9 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         Login_GUI login = new Login_GUI();
         login.setVisible(true);
         this.dispose();
+        
+        
+        
     }//GEN-LAST:event_btnCerrarSesionMouseClicked
 
     private void btnLimpiarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarMouseClicked
@@ -3524,43 +3673,73 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_btnCrearVueloMouseClicked
 
     private void cbxVuelosDespachoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxVuelosDespachoActionPerformed
+        // --- A. GUARDAR EL BORRADOR DEL VUELO ANTERIOR ANTES DE LIMPIAR ---
+        if (!vueloDespachoSeleccionado.isEmpty()) {
+            String[] datosBorrador = new String[6];
+            datosBorrador[0] = txtAreaClima.getText();
+            datosBorrador[1] = txtFieldPasajeros.getText();
+            datosBorrador[2] = txtFieldEquipaje.getText();
+            datosBorrador[3] = txtFieldCarga.getText();
+            datosBorrador[4] = txtFieldCombRuta.getText();
+            datosBorrador[5] = txtFieldCombReserva.getText();
+            
+            borradoresDespacho.put(vueloDespachoSeleccionado, datosBorrador);
+        }
+        
         // 1. LIMPIAR TODO ANTES DE HACER NADA
         limpiarCampos();
 
         // 2. Si el usuario seleccionó la opción por defecto (índice 0)
         if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
+            vueloDespachoSeleccionado = ""; // Ya no hay vuelo seleccionado
             lblResumenRuta.setText("<html><font color='#94a3b8'>Seleccione un vuelo operativo para cargar los requerimientos de despacho.</font></html>");
+            fondoBtnActualizarMETAR.setVisible(false);
             return;
         }
 
         // 3. Cargamos el nuevo objeto vuelo
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+        vueloDespachoSeleccionado = voSel.getCodVuelo(); // Actualizamos la variable de seguimiento
+        
         // ENCENDEMOS LOS CAMPOS AL SELECCIONAR UN VUELO
+        fondoBtnActualizarMETAR.setVisible(true); //Muestra el boton actualizar METAR
         java.awt.Color colorActivo = new java.awt.Color(15, 23, 42); // Color de los campos
 
         txtAreaClima.setEditable(true);
         txtAreaClima.setFocusable(true);
         txtAreaClima.setBackground(colorActivo);
-
         txtFieldPasajeros.setEditable(true);
         txtFieldPasajeros.setFocusable(true);
         txtFieldPasajeros.setBackground(colorActivo);
-
         txtFieldEquipaje.setEditable(true);
         txtFieldEquipaje.setFocusable(true);
         txtFieldEquipaje.setBackground(colorActivo);
-
         txtFieldCarga.setEditable(true);
         txtFieldCarga.setFocusable(true);
         txtFieldCarga.setBackground(colorActivo);
-
         txtFieldCombRuta.setEditable(true);
         txtFieldCombRuta.setFocusable(true);
         txtFieldCombRuta.setBackground(colorActivo);
-
         txtFieldCombReserva.setEditable(true);
         txtFieldCombReserva.setFocusable(true);
         txtFieldCombReserva.setBackground(colorActivo);
+
+        // --- B. RESTAURAR BORRADOR O CARGAR DEFAULT ---
+        if (borradoresDespacho.containsKey(vueloDespachoSeleccionado)) {
+            // Si el Oficial ya había empezado a llenar este vuelo, restauramos sus datos
+            String[] borradorGuardado = borradoresDespacho.get(vueloDespachoSeleccionado);
+            txtAreaClima.setText(borradorGuardado[0]);
+            txtFieldPasajeros.setText(borradorGuardado[1]);
+            txtFieldEquipaje.setText(borradorGuardado[2]);
+            txtFieldCarga.setText(borradorGuardado[3]);
+            txtFieldCombRuta.setText(borradorGuardado[4]);
+            txtFieldCombReserva.setText(borradorGuardado[5]);
+        } else {
+            // Si es un vuelo nuevo que recién toca, le inyectamos el METAR automático por defecto
+            String rutaVuelo = voSel.getVueloBase().getOrigenDestino().toUpperCase();
+            String climaInicial = obtenerMetarSimulado(rutaVuelo, false);
+            txtAreaClima.setText(climaInicial);
+        }
         
         // 4. Actualizamos el MTOW dinámico (Modelo -> VueloProgramado -> Aeronave)
         this.mtowActual = voSel.getVueloBase().getPesoMaximoDespegue();
@@ -3573,14 +3752,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblResumenRuta.setText("<html><font color='#94a3b8'>Ruta:</font> <font color='#ffffff'><b>" + voSel.getVueloBase().getOrigenDestino() + 
                                "</b></font>  <font color='#94a3b8'>Aeronave:</font> <font color='#ffffff'><b>" + voSel.getVueloBase().getMatricula() + "</b></font> " +
                                " <font color='#94a3b8'>CAP:</font> <font color='#ffffff'><b>Cdt. " + capName + "</b></font>  <font color='#94a3b8'>TCP Jefe:</font> <font color='#ffffff'><b>" + jefeName + "</b></font></html>");
-
-
     }//GEN-LAST:event_cbxVuelosDespachoActionPerformed
 
     private void btnCancelarVueloMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCancelarVueloMouseClicked
         // 1. Validamos que haya un vuelo seleccionado
         if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
-            ElementosDiseño.NotificacionDialog.advertencia(this, "Seleccione un vuelo operativo para cancelar.", "Aviso");
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Seleccione un vuelo operativo para cancelar el vuelo.", "Aviso");
             return;
         }
 
@@ -3599,7 +3776,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
             ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
 
             // 4. ACTUALIZACIÓN EN BASE DE DATOS: Pasamos el código de vuelo y el nuevo String del estado del objeto
-            if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
+            if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo()) && dao.liberarTripulacion(voSel.getCodVuelo())) {
 
                 // Mensaje de éxito profesional
                 ElementosDiseño.NotificacionDialog.exito(this, "Vuelo Cancelado. Se ha liberado la aeronave y la tripulación asignada.");
@@ -3607,7 +3784,8 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 // 5. LIMPIEZA Y PARPADEO VISUAL DE LA INTERFAZ (Del código largo)
                 limpiarCampos(); 
                 cargarComboBoxesDespacho(); // O usa cargarVuelosEnDespacho() según se llame tu método actual de recarga de combo
-
+                // 6. Refrescamos el panel
+                cargarVuelosEnDespacho();
                 // REFRESCO VISUAL DE LAS TARJETAS (PANEL DERECHO)
                 cargarVuelosPendientesDespacho(); 
                 cargarHistorialVuelos();
@@ -3626,8 +3804,20 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_btnCancelarVueloMouseClicked
 
     private void btnAprobarPlanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseClicked
-        if (cbxVuelosDespacho.getSelectedIndex() <= 0) return;
+        // 1. Validamos que haya un vuelo seleccionado
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Seleccione un vuelo operativo para empezar con el despacho.", "Aviso");
+            return;
+        }
+        
+        // Confirmación visual 
+        boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
+            "¿Desea aprobar el despacho del vuelo?", 
+            "Aprobar Despacho");
 
+        if (!confirmar) {
+            return; // No se cierra sesion si se pulsa NO
+        }//SI PULSA SI
         // ==============================================================
         // 1. VALIDACIÓN DE CAMPOS VACÍOS (Asegura completitud de datos)
         // ==============================================================
@@ -3709,8 +3899,21 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }//GEN-LAST:event_btnAprobarPlanMouseClicked
 
     private void btnDeclararDemoraMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnDeclararDemoraMouseClicked
-        if (cbxVuelosDespacho.getSelectedIndex() <= 0) return;
+        // 1. Validamos que haya un vuelo seleccionado
+        if (cbxVuelosDespacho.getSelectedIndex() <= 0) {
+            ElementosDiseño.NotificacionDialog.advertencia(this, "Seleccione un vuelo operativo para declarar el vuelo en demora.", "Aviso");
+            return;
+        }
+        
+        // Confirmación visual 
+        boolean confirmar = ElementosDiseño.NotificacionDialog.confirmar(this, 
+            "¿Desea declarar el vuelo como EN DEMORA?", 
+            "Declarar Vuelo En Demora");
 
+        if (!confirmar) {
+            return; // No se procede si se pulsa NO
+        }//SI PULSA SI
+        
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
         voSel.procesarDemora(); // El State cambia el comportamiento a EstadoEnDemora
 
@@ -3718,7 +3921,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         if (dao.actualizarEstadoVuelo(voSel.getCodVuelo(), voSel.getEstadoVuelo())) {
             ElementosDiseño.NotificacionDialog.advertencia(this, "El vuelo " + voSel.getCodVuelo() + " ha sido retenido en rampa (EN_DEMORA).");
 
-            cargarVuelosEnDespacho();
             cargarHistorialVuelos();
         }
     }//GEN-LAST:event_btnDeclararDemoraMouseClicked
@@ -3832,11 +4034,48 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 "Vuelo " + vueloSeleccionado.getCodVuelo() + " cerrado y Logbook registrado exitosamente.", 
                 "Cierre Operacional Completado");
             
-            // Refrescamos la lista para que el vuelo recién cerrado desaparezca del combo
+            // --- GUARDAMOS EL VUELO SELECCIONADO PARA NO BORRAR SU VISTA ---
+            String vueloOOOIMemoria = "";
+            if (cbxVuelosOOOI.getSelectedIndex() > 0 && cbxVuelosOOOI.getSelectedItem() instanceof Clases.VueloOperativo) {
+                Clases.VueloOperativo vueloActualOOOI = (Clases.VueloOperativo) cbxVuelosOOOI.getSelectedItem();
+                vueloOOOIMemoria = vueloActualOOOI.getCodVuelo();
+            }
+            // ------------------------------------------------
+
+            // Refrescamos la lista para que el vuelo recién cerrado desaparezca de los combos
             cargarComboBoxVuelosLogbook();
+            cargarVuelosEnControlOOOI();
             cargarHistorialVuelos();
             cargarFlota(); // por si la prioridad reportada mandó la aeronave a MANTENIMIENTO
             
+            // --- RESTAURAR SELECCIÓN OOOI ---
+            if (!vueloOOOIMemoria.isEmpty()) {
+                boolean encontrado = false;
+                for (int i = 1; i < cbxVuelosOOOI.getItemCount(); i++) {
+                    
+                    // Extraemos el item como Object usando el Modelo del ComboBox para evitar el error de String
+                    Object item = cbxVuelosOOOI.getModel().getElementAt(i);
+                    
+                    // Verificamos que realmente sea un objeto VueloOperativo antes de castear
+                    if (item instanceof Clases.VueloOperativo) {
+                        Clases.VueloOperativo voCombo = (Clases.VueloOperativo) item;
+                        
+                        if (voCombo.getCodVuelo().equals(vueloOOOIMemoria)) {
+                            cbxVuelosOOOI.setSelectedIndex(i);
+                            encontrado = true;
+                            break;
+                        }
+                    }
+                }
+                
+                // Si el vuelo que estábamos viendo era precisamente el que acabamos de cerrar, 
+                // ya no estará en el combo, así que lo mandamos al index 0 (vacío) por seguridad.
+                if (!encontrado && cbxVuelosOOOI.getItemCount() > 0) {
+                    cbxVuelosOOOI.setSelectedIndex(0);
+                }
+            }
+            // ------------------------------------------------
+
             // Limpiamos y bloqueamos el panel hasta que seleccione un nuevo vuelo
             habilitarPanelLogbook(false); 
             
@@ -3868,6 +4107,97 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private void btnCerrarSesionMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseExited
             btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png")));
     }//GEN-LAST:event_btnCerrarSesionMouseExited
+
+    private void btnActualizarMETARMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnActualizarMETARMouseClicked
+        // Evitar que haga algo si por alguna razón está oculto pero recibe clic
+        if (!btnActualizarMETAR.isVisible()) return;
+
+        // Obtenemos el vuelo actual del ComboBox
+        Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
+        
+        if (voSel != null) {
+            String rutaVuelo = voSel.getVueloBase().getOrigenDestino().toUpperCase();
+            
+            // ¡Aquí ocurre la magia! Le pasamos true para forzar el METAR BUENO
+            String climaBueno = obtenerMetarSimulado(rutaVuelo, true);
+            
+            // Cambiamos el texto en la interfaz
+            txtAreaClima.setText(climaBueno);
+            
+            // Tu DocumentListener detectará el setText, llamará a tu validador,
+            // la barra se pintará de verde y el panel se ocultará solo :)
+        }
+    }//GEN-LAST:event_btnActualizarMETARMouseClicked
+
+    private void txtFieldPasajerosKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldPasajerosKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldPasajerosKeyTyped
+
+    private void txtFieldCombRutaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldCombRutaKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldCombRutaKeyTyped
+
+    private void txtFieldCombReservaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldCombReservaKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldCombReservaKeyTyped
+
+    private void txtFieldEquipajeKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldEquipajeKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldEquipajeKeyTyped
+
+    private void txtFieldCargaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldCargaKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldCargaKeyTyped
+
+    private void txtFieldCombustibleKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFieldCombustibleKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtFieldCombustibleKeyTyped
+
+    private void txtCombustibleRestanteKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtCombustibleRestanteKeyTyped
+        // Obtenemos el carácter que el usuario acaba de presionar
+        char c = evt.getKeyChar();
+        
+        // Si el carácter NO es un número (dígito), consumimos el evento (lo cancelamos)
+        if (!Character.isDigit(c)) {
+            evt.consume(); 
+        }
+    }//GEN-LAST:event_txtCombustibleRestanteKeyTyped
 
     /**
 //     * @param args the command line arguments
@@ -4561,9 +4891,14 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private void cargarVuelosPendientesDespacho() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         java.util.List<Clases.VueloOperativo> pendientes = dao.obtenerVuelosPendientesDespacho();
-
+        
         // Limpiamos el panel contenedor
         pnlListaItemsVuelo.removeAll();
+        // [LOGICA CLAVE]: Forzamos al panel interno a resetear sus tamaños 
+        // para que el JScrollPane calcule el scroll real según las tarjetas.
+        pnlListaItemsVuelo.setPreferredSize(null);
+        pnlListaItemsVuelo.setMinimumSize(null);
+        pnlListaItemsVuelo.setMaximumSize(null);
 
         // Cambiamos dinámicamente a BoxLayout Vertical para no estirar las tarjetas
         pnlListaItemsVuelo.setLayout(new javax.swing.BoxLayout(pnlListaItemsVuelo, javax.swing.BoxLayout.Y_AXIS));
@@ -4580,7 +4915,6 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 String mat = vo.getVueloBase().getMatricula();
 
                 ElementosDiseño.TarjetaVueloPendiente tarjeta = new ElementosDiseño.TarjetaVueloPendiente(cod, ruta, mat);
-
                 // Alineamos la tarjeta a la izquierda para que el BoxLayout no la centre raro
                 tarjeta.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
@@ -4595,7 +4929,25 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         // Refrescamos la pantalla
         pnlListaItemsVuelo.revalidate();
         pnlListaItemsVuelo.repaint();
-    }
+        // 1. Forzamos a que el panel interno le diga al scroll EXACTAMENTE cuánto mide de ancho 
+        // y que su alto sea el tamaño calculado dinámicamente por las tarjetas que metiste
+        pnlListaItemsVuelo.setPreferredSize(new java.awt.Dimension(
+            pnlListaItemsVuelo.getWidth(), 
+            pnlListaItemsVuelo.getPreferredSize().height
+        ));
+
+        // 2. CAMBIA 'tuJScrollPane' POR EL NOMBRE REAL DE TU SCROLL EN EL DISEÑADOR:
+        // Esto congela el tamaño visual del scroll para que NUNCA se estire hacia abajo
+        ScrollPendientesDespacho.setPreferredSize(new java.awt.Dimension(ScrollPendientesDespacho.getWidth(), 300)); // Prueba con 450 o el alto que quieras fijo
+        ScrollPendientesDespacho.setMinimumSize(new java.awt.Dimension(ScrollPendientesDespacho.getWidth(), 300));
+        ScrollPendientesDespacho.setMaximumSize(new java.awt.Dimension(ScrollPendientesDespacho.getWidth(), 300));
+
+        // 3. Forzamos el refresco del scroll principal y del contenedor de la carta
+        ScrollPendientesDespacho.revalidate();
+        ScrollPendientesDespacho.repaint();
+        pnlBasePendientes.revalidate();
+        pnlBasePendientes.repaint();
+    } 
     
 // ==============================================================
 // MÉTODO PARA MAPEAR LOS CAMPOS DE COMBUSTIBLE DEL FORMULARIO A UN OBJETO DE DOMINIO
@@ -4632,12 +4984,20 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private boolean metarCorrespondeADestino(String codigoMetar, Clases.VueloOperativo voSel) {
         String ruta = voSel.getVueloBase().getOrigenDestino().toUpperCase();
 
-        // Diccionario de aeropuertos LATAM AeroOps
+        // Diccionario de aeropuertos LATAM AeroOps (Nacionales e Internacionales)
         String icaoDestino = "";
+        
+        // --- Destinos Nacionales ---
         if (ruta.contains("CUSCO") || ruta.contains("CUZ")) icaoDestino = "SPZO";
         else if (ruta.contains("CHIMBOTE") || ruta.contains("CHM")) icaoDestino = "SPHZ";
         else if (ruta.contains("AREQUIPA") || ruta.contains("AQP")) icaoDestino = "SPQU";
         else if (ruta.contains("JULIACA") || ruta.contains("JUL")) icaoDestino = "SPJL";
+        
+        // --- Destinos Internacionales ---
+        else if (ruta.contains("SANTIAGO") || ruta.contains("SCL")) icaoDestino = "SCEL";
+        else if (ruta.contains("BOGOTA") || ruta.contains("BOG")) icaoDestino = "SKBO";
+        else if (ruta.contains("MIAMI") || ruta.contains("MIA")) icaoDestino = "KMIA";
+        else if (ruta.contains("MADRID") || ruta.contains("MAD")) icaoDestino = "LEMD";
 
         // Si el METAR no contiene el código de destino correcto, se marca como inválido
         if (!icaoDestino.isEmpty() && !codigoMetar.contains(icaoDestino) && !codigoMetar.trim().isEmpty()) {
@@ -4646,6 +5006,40 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         return true;
     }
 
+// ==============================================================
+// SIMULADOR DE CLIMA METAR
+// ==============================================================
+    private String obtenerMetarSimulado(String ruta, boolean forzarBueno) {
+        // Rutas Nacionales
+        if (ruta.contains("CUSCO") || ruta.contains("CUZ")) {
+            return forzarBueno ? "METAR SPZO 091700Z VRB03KT 9999 NSC 18/02 Q1031 NOSIG=" 
+                               : "METAR SPZO 091700Z 12015KT 0800 FG BKN008 12/10 Q1025="; // Malo inicial
+        }
+        else if (ruta.contains("CHIMBOTE") || ruta.contains("CHM")) {
+            return "METAR SPHZ 111200Z 18005KT 9999 SCT020 20/15 Q1013 NOSIG="; // Siempre bueno
+        }
+        else if (ruta.contains("AREQUIPA") || ruta.contains("AQP")) {
+            return forzarBueno ? "METAR SPQU 101400Z 21008KT 9999 FEW030 22/10 Q1015 NOSIG=" 
+                               : "METAR SPQU 101400Z 25020G30KT 3000 TSRA OVC005 15/13 Q1010="; // Malo inicial (Tormenta)
+        }
+        // Rutas Internacionales
+        else if (ruta.contains("SANTIAGO") || ruta.contains("SCL")) {
+            return "METAR SCEL 121000Z 18010KT 9999 CAVOK 15/05 Q1020 NOSIG="; // Siempre bueno
+        }
+        else if (ruta.contains("BOGOTA") || ruta.contains("BOG")) {
+            return forzarBueno ? "METAR SKBO 131500Z 11005KT 9999 SCT030 19/12 Q1025 NOSIG=" 
+                               : "METAR SKBO 131500Z 27015KT 2500 TS BKN008 14/13 Q1020="; // Malo inicial
+        }
+        else if (ruta.contains("MIAMI") || ruta.contains("MIA")) {
+            return forzarBueno ? "METAR KMIA 142000Z 09012KT 9999 FEW025 30/24 Q1015 NOSIG=" 
+                               : "METAR KMIA 142000Z 15040G60KT 1000 +RA BKN000 25/24 Q0998="; // Malo inicial (Huracán)
+        }
+        else if (ruta.contains("MADRID") || ruta.contains("MAD")) {
+            return "METAR LEMD 150800Z 35006KT 9999 CAVOK 12/04 Q1024 NOSIG="; // Siempre bueno
+        }
+        return ""; // Por defecto vacío
+    }
+    
 // ==============================================================
 // MÉTODO PARA CALCULAR LOS PESOS Y METAR CON FILTRO DE SEDE EN VIVO
 // ==============================================================
@@ -4725,7 +5119,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                         barraMTOW.setForeground(ambar);
                         lblAprobado.setText("APROBADO");
                         lblAprobado.setForeground(ambar);
-                        pnlFondoAprobado.setBackground(new java.awt.Color(66, 32, 6));
+                        pnlFondoAprobado.setBackground(new java.awt.Color(66, 32, 6));                       
                         btnAprobarPlan.setEnabled(true);
                     } else {
                         // Falla meteorológica o de sede estando pesado: Cambia a rojo y bloquea el botón
@@ -4735,7 +5129,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                         btnAprobarPlan.setEnabled(false);
                         
                         if (!metarCorresponde) {
-                            lblAprobado.setText("METAR INVÁLIDO");
+                            lblAprobado.setText("METAR INVÁLIDO");                          
                         } else {
                             lblAprobado.setText("ALERTA CLIMA");
                         }
@@ -5075,6 +5469,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JTable TblHistorialVuelo;
     private javax.swing.JProgressBar barraMTOW;
     private javax.swing.JPanel bordeSuperior;
+    private javax.swing.JLabel btnActualizarMETAR;
     private javax.swing.JLabel btnAprobarPlan;
     private ElementosDiseño.BotonMenu btnAsigancionVuelos;
     private ElementosDiseño.BotonMenu btnAutorizarDespacho;
@@ -5105,6 +5500,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JComboBox cbxVuelosLogbook;
     private javax.swing.JComboBox<String> cbxVuelosOOOI;
     private javax.swing.JPanel fondoBarraLateral;
+    private javax.swing.JPanel fondoBtnActualizarMETAR;
     private javax.swing.JPanel fondoBtnAprobarPlan;
     private javax.swing.JPanel fondoBtnCancelarVuelo;
     private javax.swing.JPanel fondoBtnCancelarVuelo3;
@@ -5118,11 +5514,11 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JPanel fondoContadores;
     private javax.swing.JPanel fondoContadores1;
     private javax.swing.JPanel fondoContadores2;
+    private javax.swing.JPanel fondoFondoBtnActualizarMETAR;
     private javax.swing.ButtonGroup grupoPrioridadFallas;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -5132,7 +5528,6 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JLabel lblAeronavesAptas;
@@ -5140,6 +5535,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JLabel lblAprobados;
     private javax.swing.JLabel lblAprobados1;
     private javax.swing.JLabel lblAsignacionVuelos;
+    private javax.swing.JLabel lblAvisoOOOI;
     private javax.swing.JLabel lblCancelados;
     private javax.swing.JLabel lblCancelados1;
     private javax.swing.JLabel lblCapitan;
@@ -5183,6 +5579,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JLabel lblOFF;
     private javax.swing.JLabel lblON;
     private javax.swing.JLabel lblOUT;
+    private javax.swing.JLabel lblObservacionesTecnicas;
     private javax.swing.JLabel lblPasajerosKG;
     private javax.swing.JLabel lblPendientesDemora;
     private javax.swing.JLabel lblPendientesDemora1;
@@ -5213,7 +5610,6 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JLabel lblVueloProgramado1;
     private javax.swing.JLabel lblVueloProgramado2;
     private javax.swing.JLabel lblVueloProgramado3;
-    private javax.swing.JLabel lblVueloProgramado4;
     private javax.swing.JLabel lblVuelosActivos;
     private javax.swing.JLabel logo;
     private javax.swing.JLabel logoBorde;
@@ -5222,6 +5618,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JPanel panelEncabezado4;
     private javax.swing.JPanel panelEncabezado5;
     private javax.swing.JPanel panelEncabezado6;
+    private javax.swing.JPanel panelFondoAvisoOOOI;
     private javax.swing.JPanel pnlAsignacion;
     private javax.swing.JPanel pnlAsignacionCuerpo;
     private javax.swing.JPanel pnlBasePendientes;
