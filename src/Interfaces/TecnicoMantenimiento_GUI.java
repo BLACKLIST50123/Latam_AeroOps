@@ -23,6 +23,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         private int idTecnicoLogueado;
         private int idLogbookSeleccionado;
         private javax.swing.Timer timerRefrescoReportes;
+        // Reutilizamos una única instancia del Facade en vez de crear una nueva
+        // por cada clic (mismo criterio aplicado en OficialOperaciones_GUI para
+        // sus servicios).
+        private final Patrones.Facade_Observer.MantenimientoFacade mantenimientoFacade = new Patrones.Facade_Observer.MantenimientoFacade();
         // Diccionario temporal para guardar lo que el técnico escribe en la acción de mantenimiento antes de cambiar de tarjeta
         private java.util.Map<Integer, String> borradoresMantenimiento = new java.util.HashMap<>();
         // Cache en memoria del historial completo: los combos de filtro trabajan
@@ -702,6 +706,18 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnAprobarPlanMouseClicked(evt);
             }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                btnAprobarPlanMouseReleased(evt);
+            }
         });
 
         javax.swing.GroupLayout fondoBtnAprobarPlanLayout = new javax.swing.GroupLayout(fondoBtnAprobarPlan);
@@ -923,6 +939,20 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         btnLimpiarFiltros.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         btnLimpiarFiltros.setText("LIMPIAR");
         btnLimpiarFiltros.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnLimpiarFiltros.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnLimpiarFiltrosMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnLimpiarFiltrosMouseExited(evt);
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                btnLimpiarFiltrosMousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                btnLimpiarFiltrosMouseReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout fondoBtnLimpiarFiltrosLayout = new javax.swing.GroupLayout(fondoBtnLimpiarFiltros);
         fondoBtnLimpiarFiltros.setLayout(fondoBtnLimpiarFiltrosLayout);
@@ -1194,11 +1224,9 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         }
 
         // 3. Ejecutar a través de tu Fachada (Pasando el ID transaccional real)
-        Patrones.Facade_Observer.MantenimientoFacade facade = new Patrones.Facade_Observer.MantenimientoFacade();
-
         // Usamos las variables globales de sesión e interfaz
         setCursor(new java.awt.Cursor(java.awt.Cursor.WAIT_CURSOR));
-        boolean exito = facade.liberarAeronaveAServicio(
+        boolean exito = mantenimientoFacade.liberarAeronaveAServicio(
             idLogbookSeleccionado, 
             lblMatriculaAeronave.getText(), 
             idTecnicoLogueado, // Inyecta directo el ID de la sesión segura
@@ -1231,6 +1259,48 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     private void btnCerrarSesionMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnCerrarSesionMouseExited
             btnCerrarSesion.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/CerrarSesion_Blanco.png")));
     }//GEN-LAST:event_btnCerrarSesionMouseExited
+
+    private void btnAprobarPlanMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseEntered
+        fondoBtnAprobarPlan.setBackground(new Color(21, 128, 61));
+    }//GEN-LAST:event_btnAprobarPlanMouseEntered
+
+    private void btnAprobarPlanMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseExited
+        fondoBtnAprobarPlan.setBackground(new Color(22, 101, 52));
+    }//GEN-LAST:event_btnAprobarPlanMouseExited
+
+    private void btnAprobarPlanMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMousePressed
+        fondoBtnAprobarPlan.setBackground(new Color(22, 163, 74));
+    }//GEN-LAST:event_btnAprobarPlanMousePressed
+
+    private void btnAprobarPlanMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAprobarPlanMouseReleased
+        // Al soltar el clic, regresa al estado Hover si el mouse sigue encima
+        if (fondoBtnAprobarPlan.getBounds().contains(evt.getPoint())) {
+            fondoBtnAprobarPlan.setBackground(new java.awt.Color(21, 128, 61));
+        } else {
+            fondoBtnAprobarPlan.setBackground(new java.awt.Color(22, 101, 52));
+        }
+    }//GEN-LAST:event_btnAprobarPlanMouseReleased
+
+    private void btnLimpiarFiltrosMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarFiltrosMouseEntered
+        fondoBtnLimpiarFiltros.setBackground(new Color(21, 128, 61));
+    }//GEN-LAST:event_btnLimpiarFiltrosMouseEntered
+
+    private void btnLimpiarFiltrosMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarFiltrosMouseExited
+        fondoBtnLimpiarFiltros.setBackground(new Color(22, 101, 52));
+    }//GEN-LAST:event_btnLimpiarFiltrosMouseExited
+
+    private void btnLimpiarFiltrosMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarFiltrosMousePressed
+        fondoBtnLimpiarFiltros.setBackground(new Color(22, 163, 74));
+    }//GEN-LAST:event_btnLimpiarFiltrosMousePressed
+
+    private void btnLimpiarFiltrosMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnLimpiarFiltrosMouseReleased
+        // Al soltar el clic, regresa al estado Hover si el mouse sigue encima
+        if (fondoBtnLimpiarFiltros.getBounds().contains(evt.getPoint())) {
+            fondoBtnLimpiarFiltros.setBackground(new java.awt.Color(21, 128, 61));
+        } else {
+            fondoBtnLimpiarFiltros.setBackground(new java.awt.Color(22, 101, 52));
+        }
+    }//GEN-LAST:event_btnLimpiarFiltrosMouseReleased
 
 //    /**
 //     * @param args the command line arguments
@@ -1604,10 +1674,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         java.awt.CardLayout clDetalle = (java.awt.CardLayout) pnlContenedorDetalleReporte.getLayout();
         clDetalle.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
     }
-
-// ===========================================================================
-// HISTORIAL DE MANTENIMIENTO: CARGA DESDE BD + FILTROS EN MEMORIA
-// ===========================================================================
+    
+// ==================================
+// METODO PARA HACER LEGIBLE EL ROL
+// ==================================
     private String nombreRolLegible(String rolAcceso) {
         if (rolAcceso == null) return "";
         switch (rolAcceso.toUpperCase()) {
@@ -1616,7 +1686,10 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
             default: return rolAcceso;
         }
     }
-
+    
+// ===========================================================================
+// HISTORIAL DE MANTENIMIENTO: CARGA DESDE BD + FILTROS EN MEMORIA
+// ===========================================================================
     public void cargarHistorialMantenimiento() {
         MantenimientoDAO dao = new MantenimientoDAO();
         listaHistorialMantenimiento = dao.obtenerHistorialMantenimiento();
@@ -1645,6 +1718,8 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         for (String e : estados) cbxFiltroEstado.addItem(e);
 
         aplicarFiltrosHistorialMantenimiento();
+        // --- AQUÍ LLAMAS AL PINTOR DE LA TABLA ---
+        configurarColoresPrioridadTabla();
     }
 
     public void aplicarFiltrosHistorialMantenimiento() {
@@ -1780,6 +1855,58 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 
         // Le ponemos un borde sutil para que no desentone
         txtFirmaTecnica.setBorder(BorderFactory.createLineBorder(new Color(51, 65, 85), 1)); 
+    }
+    
+// ==============================================================
+// MÉTODO PARA PINTAR LAS CELDAS DE PRIORIDAD EN LA TABLA
+// ==============================================================
+    private void configurarColoresPrioridadTabla() {
+        // La columna "Prioridad" es el índice 4 en tu modelo.addRow
+        TblHistorialLogBook.getColumnModel().getColumn(4).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(javax.swing.JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                // Obtenemos la celda base
+                javax.swing.JLabel celda = (javax.swing.JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                // Centramos el texto y hacemos que el fondo sea pintable
+                celda.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+                celda.setOpaque(true);
+
+                if (value != null) {
+                    String prioridad = value.toString().toUpperCase();
+                    
+                    // Aplicamos tu paleta ultra-estilizada
+                    switch (prioridad) {
+                        case "ALTA":
+                            celda.setBackground(new java.awt.Color(64, 15, 27));     // Fondo Guinda profundo
+                            celda.setForeground(new java.awt.Color(251, 113, 133)); // Texto Rosa/Rojo Neón
+                            break;
+                        case "MEDIA":
+                            celda.setBackground(new java.awt.Color(66, 32, 6));      // Fondo Marrón Quemado
+                            celda.setForeground(new java.awt.Color(251, 191, 36));   // Texto Ámbar brillante
+                            break;
+                        case "BAJA":
+                            celda.setBackground(new java.awt.Color(5, 46, 22));      // Fondo Verde Bosque
+                            celda.setForeground(new java.awt.Color(74, 222, 128));   // Texto Verde Esmeralda
+                            break;
+                        default: // SIN FALLAS o cualquier otro
+                            celda.setBackground(new java.awt.Color(30, 41, 59));     // Gris Slate-800
+                            celda.setForeground(new java.awt.Color(148, 163, 184));  // Gris Slate-400
+                            break;
+                    }
+                }
+                
+                // Si la fila entera está seleccionada, forzamos que nuestra celda de prioridad 
+                // mantenga su color de "badge" para que no se pierda el diseño visual
+                if (isSelected) {
+                    celda.setBorder(javax.swing.BorderFactory.createLineBorder(java.awt.Color.WHITE, 1));
+                } else {
+                    celda.setBorder(javax.swing.BorderFactory.createEmptyBorder(2, 5, 2, 5));
+                }
+
+                return celda;
+            }
+        });
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

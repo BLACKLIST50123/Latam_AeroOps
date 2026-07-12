@@ -1,6 +1,7 @@
 package ClasesDAO;
 
 import BaseDeDatos.ConexionBD;
+import BaseDeDatos.ConexionBDException;
 import ClasesDTO.ReportePendienteDTO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,10 +9,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MantenimientoDAO {
 
-   // ===================================================================
+    private static final Logger LOG = Logger.getLogger(MantenimientoDAO.class.getName());
+
+    // ===================================================================
     // MÉTODO PARA OBTENER LOS REPORTES PENDIENTES (TARJETAS REPORTES)
     // ===================================================================
     public List<ReportePendienteDTO> obtenerReportesPendientes() {
@@ -46,8 +51,8 @@ public class MantenimientoDAO {
                 
                 listaReportes.add(reporte);
             }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener reportes pendientes: " + e.getMessage());
+        } catch (SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error al obtener reportes pendientes", e);
         } finally {
             try {
                 if (rs != null) rs.close();
@@ -99,8 +104,8 @@ public class MantenimientoDAO {
                 r.setEstadoRegistro(rs.getString("estado_registro"));
                 lista.add(r);
             }
-        } catch (SQLException e) {
-            System.err.println("Error al obtener historial de mantenimiento: " + e.getMessage());
+        } catch (SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error al obtener historial de mantenimiento", e);
         } finally {
             try {
                 if (rs != null) rs.close();
@@ -153,19 +158,17 @@ public class MantenimientoDAO {
             conn.commit();
             return true;
 
-        } catch (SQLException e) {
-            // Esto nos dirá exactamente QUÉ columna falla y POR QUÉ
-            System.err.println("--- ERROR SQL DETALLADO ---");
-            System.err.println("Mensaje: " + e.getMessage());
-            System.err.println("Estado SQL: " + e.getSQLState());
-            System.err.println("Código Error: " + e.getErrorCode());
+        } catch (SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error en transacción de liberación de aeronave (logbook={0}, matricula={1})",
+                    new Object[]{idLogbook, matricula});
+            LOG.log(Level.SEVERE, "Detalle de la excepción", e);
 
             if (conn != null) {
                 try {
                     conn.rollback();
-                    System.out.println("Rollback exitoso.");
+                    LOG.info("Rollback exitoso.");
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    LOG.log(Level.SEVERE, "Error en rollback", ex);
                 }
             }
             return false;

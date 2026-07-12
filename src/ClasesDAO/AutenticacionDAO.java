@@ -1,14 +1,19 @@
 package ClasesDAO;
 
 import BaseDeDatos.ConexionBD;
+import BaseDeDatos.ConexionBDException;
 import Clases.UsuarioSistema;
 import Patrones.Proxy_Factory.IAutenticacion;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AutenticacionDAO implements IAutenticacion {
+
+    private static final Logger LOG = Logger.getLogger(AutenticacionDAO.class.getName());
 
     @Override
     public UsuarioSistema hacerLogin(String user, String pass) {
@@ -37,8 +42,8 @@ public class AutenticacionDAO implements IAutenticacion {
                 // 3. Retornamos EL OBJETO COMPLETO, no solo el String
                 return usuarioLogueado;
             }
-        } catch (SQLException e) {
-            System.out.println("Error en la autenticación: " + e.getMessage());
+        } catch (SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error en la autenticación", e);
         }
         
         // Si falla, retornamos nulo

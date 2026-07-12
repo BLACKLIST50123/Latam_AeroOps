@@ -1,13 +1,18 @@
 package ClasesDAO;
 import BaseDeDatos.ConexionBD;
+import BaseDeDatos.ConexionBDException;
 import Clases.VueloOperativo;
 import Clases.TripulanteCabina;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class VueloOperativoDAO {
+
+    private static final Logger LOG = Logger.getLogger(VueloOperativoDAO.class.getName());
 // ===============================
 // 1. METODO PARA REGISTRAR UN VUELO   
 // ===============================
@@ -76,7 +81,7 @@ public class VueloOperativoDAO {
             con.commit(); // Si todo sale bien, guarda los INSERTS y los UPDATES juntos
             return true;
         } catch (Exception e) {
-            System.out.println("Error de transacción: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error de transacción", e);
             try {
                 if (con != null) con.rollback(); 
             } catch (Exception ex) {}
@@ -118,7 +123,7 @@ public class VueloOperativoDAO {
                 lista.add(vo);
             }
         } catch (Exception e) {
-            System.out.println("Error al cargar pendientes: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al cargar pendientes", e);
         }
         return lista;
     }
@@ -178,7 +183,7 @@ public class VueloOperativoDAO {
                 lista.add(vo);
             }
         } catch (Exception e) {
-            System.out.println("Error al recuperar detalle de despacho: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al recuperar detalle de despacho", e);
         }
         return lista;
     }
@@ -213,7 +218,7 @@ public class VueloOperativoDAO {
             return true;
 
         } catch (Exception e) {
-            System.out.println("Error crítico al cancelar vuelo: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error crítico al cancelar vuelo", e);
             try { if (con != null) con.rollback(); } catch (Exception ex) {} // Deshacemos todo si falla
             return false;
         } finally {
@@ -230,7 +235,7 @@ public class VueloOperativoDAO {
             ps.setString(2, codVuelo);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("Error al actualizar estado en BD: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al actualizar estado en BD", e);
             return false;
         }
     }
@@ -296,7 +301,7 @@ public class VueloOperativoDAO {
             con.commit();
             return true;
         } catch (Exception e) {
-            System.out.println("Error de transacción al aprobar despacho con datos operativos: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error de transacción al aprobar despacho con datos operativos", e);
             try { if (con != null) con.rollback(); } catch (Exception ex) {}
             return false;
         } finally {
@@ -368,7 +373,7 @@ public class VueloOperativoDAO {
                 lista.add(vo);
             }
         } catch (Exception e) {
-            System.out.println("Error al obtener historial de vuelos: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al obtener historial de vuelos", e);
         }
         return lista;
     }
@@ -407,7 +412,7 @@ public class VueloOperativoDAO {
                 lista.add(vo);
             }
         } catch (Exception e) {
-            System.out.println("Error al obtener vuelos para Control OOOI: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al obtener vuelos para Control OOOI", e);
         }
         return lista;
     }
@@ -426,7 +431,7 @@ public class VueloOperativoDAO {
             ps.setString(3, codVuelo);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
-            System.out.println("Error al registrar OOOI: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al registrar OOOI", e);
             return false;
         }
     }
@@ -444,26 +449,28 @@ public class VueloOperativoDAO {
                      "INNER JOIN aeronaves a ON vp.id_aeronave = a.id_aeronave " +
                      "WHERE vo.estado_oooi = 'IN' AND vo.estado_vuelo != 'COMPLETADO'";
 
-        java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
-        try (java.sql.PreparedStatement ps = con.prepareStatement(sql);
-             java.sql.ResultSet rs = ps.executeQuery()) {
+        try {
+            java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+            try (java.sql.PreparedStatement ps = con.prepareStatement(sql);
+                 java.sql.ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                Clases.VueloOperativo vo = new Clases.VueloOperativo();
-                vo.setIdVueloOperativo(rs.getInt("id_vuelo_operativo"));
-                vo.setCodVuelo(rs.getString("cod_vuelo"));
-                vo.setEstadoVuelo(rs.getString("estado_vuelo"));
+                while (rs.next()) {
+                    Clases.VueloOperativo vo = new Clases.VueloOperativo();
+                    vo.setIdVueloOperativo(rs.getInt("id_vuelo_operativo"));
+                    vo.setCodVuelo(rs.getString("cod_vuelo"));
+                    vo.setEstadoVuelo(rs.getString("estado_vuelo"));
 
-                // 2. ¡EL TRUCO PARA QUE TU TOSTRING NO EXPLOTE!
-                // Instanciamos el vueloBase y le seteamos la matrícula
-                Clases.VueloProgramado vueloBase = new Clases.VueloProgramado();
-                vueloBase.setMatricula(rs.getString("matricula")); // Ajusta el setter si se llama distinto
-                vo.setVueloBase(vueloBase); 
+                    // 2. ¡EL TRUCO PARA QUE TU TOSTRING NO EXPLOTE!
+                    // Instanciamos el vueloBase y le seteamos la matrícula
+                    Clases.VueloProgramado vueloBase = new Clases.VueloProgramado();
+                    vueloBase.setMatricula(rs.getString("matricula")); // Ajusta el setter si se llama distinto
+                    vo.setVueloBase(vueloBase);
 
-                lista.add(vo);
+                    lista.add(vo);
+                }
             }
-        } catch (java.sql.SQLException e) {
-            System.out.println("Error al obtener vuelos Logbook: " + e.getMessage());
+        } catch (java.sql.SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error al obtener vuelos Logbook", e);
         }
         return lista;
     }
@@ -504,8 +511,8 @@ public class VueloOperativoDAO {
                 psTrip.executeUpdate();
             }
 
-            // 4. (Opcional - Nivel Dios) Si la prioridad es ALTA o MEDIA, mandar el avión a MANTENIMIENTO
-            if (!logbook.getPrioridad().name().equals("SIN_FALLAS") && !logbook.getPrioridad().name().equals("BAJA")) {
+            // 4. Si se reportó CUALQUIER falla (ALTA, MEDIA o BAJA), mandar el avión a MANTENIMIENTO
+            if (!logbook.getPrioridad().name().equals("SIN_FALLAS")) {
                 String sqlAeronave = "UPDATE aeronaves SET estado_tecnico = 'MANTENIMIENTO' WHERE id_aeronave = (SELECT id_aeronave FROM vuelos_programados vp INNER JOIN vuelos_operativos vo ON vp.id_programacion = vo.id_programacion WHERE vo.id_vuelo_operativo = ?)";
                 try (java.sql.PreparedStatement psAeronave = con.prepareStatement(sqlAeronave)) {
                     psAeronave.setInt(1, logbook.getIdVueloOperativo());
@@ -516,13 +523,13 @@ public class VueloOperativoDAO {
             con.commit(); // ✅ SI TODO SALIÓ BIEN, SE GUARDA TODO
             exito = true;
             
-        } catch (java.sql.SQLException e) {
-            System.out.println("Error en transacción Cierre Vuelo: " + e.getMessage());
+        } catch (java.sql.SQLException | ConexionBDException e) {
+            LOG.log(Level.SEVERE, "Error en transacción Cierre Vuelo", e);
             if (con != null) {
                 try {
                     con.rollback(); // ❌ SI ALGO FALLÓ, SE DESHACE TODO
                 } catch (java.sql.SQLException ex) {
-                    System.out.println("Error en Rollback: " + ex.getMessage());
+                    LOG.log(Level.SEVERE, "Error en Rollback", ex);
                 }
             }
         } finally {
@@ -530,11 +537,71 @@ public class VueloOperativoDAO {
                 try {
                     con.setAutoCommit(true); // Restaurar autocommit
                 } catch (java.sql.SQLException e) {
-                    System.out.println("Error restaurando AutoCommit: " + e.getMessage());
+                    LOG.log(Level.SEVERE, "Error restaurando AutoCommit", e);
                 }
             }
         }
         
         return exito;
     }
+    
+    
+// ==================================================================================
+// MÉTODO PARA REINICIAR LA BASE DE DATOS DURANTE LAS PRUEBAS DE DESARROLLO
+// ==================================================================================
+    public boolean reiniciarDatosPrueba() throws ConexionBDException {
+        // Definimos las 3 consultas SQL
+        String sqlTruncate = "TRUNCATE TABLE registros_mantenimiento, reportes_logbook, hojas_carga, "
+                           + "manifiestos_combustible, reportes_meteorologicos, tripulacion_asignada, "
+                           + "vuelos_operativos RESTART IDENTITY CASCADE";
+
+        String sqlUpdateEmpleados = "UPDATE empleados SET estado_asignacion = 'DISPONIBLE'";
+        String sqlUpdateAeronaves = "UPDATE aeronaves SET estado_tecnico = 'APTO'";
+
+        java.sql.Connection con = BaseDeDatos.ConexionBD.getInstancia().getConexion();
+
+        try {
+            // 1. Iniciamos la transacción manual para asegurar que se ejecute TODO o NADA
+            con.setAutoCommit(false);
+
+            // 2. Ejecutamos el TRUNCATE CASCADE
+            try (java.sql.PreparedStatement psTruncate = con.prepareStatement(sqlTruncate)) {
+                psTruncate.executeUpdate();
+            }
+
+            // 3. Ejecutamos el UPDATE de empleados
+            try (java.sql.PreparedStatement psEmpleados = con.prepareStatement(sqlUpdateEmpleados)) {
+                psEmpleados.executeUpdate();
+            }
+
+            // 4. Ejecutamos el UPDATE de aeronaves
+            try (java.sql.PreparedStatement psAeronaves = con.prepareStatement(sqlUpdateAeronaves)) {
+                psAeronaves.executeUpdate();
+            }
+
+            // 5. Si todo salió bien, guardamos definitivamente los cambios en PostgreSQL
+            con.commit();
+            System.out.println("La base de datos ha sido restablecida con éxito");
+            return true; // Éxito total
+
+        } catch (java.sql.SQLException e) {
+            // Si algo falla, cancelamos todo para no dejar la BD a medias o corrupta
+            try {
+                if (con != null) con.rollback();
+            } catch (java.sql.SQLException ex) {
+                System.out.println("Error en Rollback: " + ex.getMessage());
+            }
+            System.out.println("Error al reiniciar datos de prueba: " + e.getMessage());
+            return false; // Falló el reinicio
+
+        } finally {
+            // Devolvemos la conexión a su estado por defecto
+            try {
+                if (con != null) con.setAutoCommit(true);
+            } catch (java.sql.SQLException ex) {
+                System.out.println("Error al restaurar autoCommit: " + ex.getMessage());
+            }
+        }
+    }
+
 }

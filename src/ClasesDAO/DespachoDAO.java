@@ -8,8 +8,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DespachoDAO {
+
+    private static final Logger LOG = Logger.getLogger(DespachoDAO.class.getName());
     
     public List<VueloProgramado> obtenerVuelosDisponibles() {
         List<VueloProgramado> lista = new ArrayList<>();
@@ -38,7 +42,7 @@ public class DespachoDAO {
                 lista.add(vp);
             }
         } catch (Exception e) {
-            e.printStackTrace(); // Recomiendo no dejar el catch vacío para poder detectar errores de sintaxis
+            LOG.log(Level.SEVERE, "Error en DespachoDAO", e);
         }
         return lista;
     }
@@ -65,7 +69,7 @@ public class DespachoDAO {
                 lista.add(tv);
             }
         } catch (Exception e) {
-            System.out.println("Error al obtener pilotos habilitados: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al obtener pilotos habilitados", e);
         }
         return lista;
     }
@@ -87,7 +91,7 @@ public class DespachoDAO {
                 lista.add(tcp);
             }
         } catch (Exception e) {
-            System.out.println("Error al obtener TCPs habilitados: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al obtener TCPs habilitados", e);
         }
         return lista;
     }
@@ -105,7 +109,7 @@ public class DespachoDAO {
                 return rs.getInt(1);
             }
         } catch (Exception e) {
-            System.out.println("Error al contar personal disponible: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al contar personal disponible", e);
         }
         return 0;
     }

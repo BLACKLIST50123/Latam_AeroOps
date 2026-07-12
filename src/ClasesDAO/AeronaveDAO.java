@@ -8,8 +8,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AeronaveDAO {
+
+    private static final Logger LOG = Logger.getLogger(AeronaveDAO.class.getName());
 
     // ===================================================================
     // MÉTODO PARA LISTAR TODA LA FLOTA (pantalla Gestión de Flota)
@@ -34,7 +38,7 @@ public class AeronaveDAO {
                 lista.add(a);
             }
         } catch (Exception e) {
-            System.out.println("Error al obtener la flota: " + e.getMessage());
+            LOG.log(Level.SEVERE, "Error al obtener la flota", e);
         }
         return lista;
     }
