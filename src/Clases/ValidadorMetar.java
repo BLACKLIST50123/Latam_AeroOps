@@ -1,7 +1,15 @@
 package Clases;
 
+/* ¿Para qué sirve?: Esta clase revisa el código METAR (el reporte del clima de un aeropuerto) y decide si las condiciones son seguras para operar un vuelo
+   Clases que la utilizan: ClimaAeropuertoService, DespachoService, OficialOperaciones_GUI
+   Índice de Métodos: esClimaApto */
 public class ValidadorMetar {
 
+    // ==========================================
+    // MÉTODO PARA REVISAR SI EL CLIMA ES SEGURO
+    // ==========================================
+    // Descripción: Revisa el texto del reporte METAR buscando señales de mal clima, como tormentas, niebla, ceniza volcánica, lluvia fuerte, poca visibilidad o nubes muy bajas. Si encuentra alguna de estas señales, dice que el clima no es apto para volar; si no encuentra ninguna, dice que el clima está bien
+    // Clases que lo usan: ClimaAeropuertoService, DespachoService, OficialOperaciones_GUI
     public static boolean esClimaApto(String metar) {
         if (metar == null || metar.trim().isEmpty()) {
             return false;

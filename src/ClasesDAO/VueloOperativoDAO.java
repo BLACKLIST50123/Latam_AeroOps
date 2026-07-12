@@ -10,12 +10,17 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* ¿Para qué sirve?: Esta es la clase más grande de la capa de datos. Se encarga de todo el ciclo de vida de un vuelo operativo dentro de la base de datos: registrarlo cuando se despacha, consultarlo en sus distintas etapas (pendiente, en control OOOI, en historial), aprobar su despacho con los datos de peso y clima, actualizar sus fases de vuelo, cerrarlo con el Logbook y hasta reiniciar los datos de prueba durante el desarrollo
+   Clases que la utilizan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
+   Índice de Métodos: registrarVueloOperativo, obtenerVuelosPendientesDespacho, obtenerVuelosDetalladosParaDespacho, liberarTripulacion, actualizarEstadoVuelo, aprobarDespachoConDatosOperativos, obtenerHistorialVuelos, obtenerVuelosParaControlOOOI, registrarFaseOOOI, obtenerVuelosParaLogbook, cerrarVueloConLogbook, reiniciarDatosPrueba */
 public class VueloOperativoDAO {
 
     private static final Logger LOG = Logger.getLogger(VueloOperativoDAO.class.getName());
-// ===============================
-// 1. METODO PARA REGISTRAR UN VUELO   
-// ===============================
+    // ==========================================
+    // MÉTODO PARA REGISTRAR UN VUELO
+    // ==========================================
+    // Descripción: Guarda en la base de datos un nuevo vuelo operativo junto con toda su tripulación (capitán, primer oficial y tripulantes de cabina), y cambia el estado de cada uno de esos empleados a ASIGNADO. Todo esto se hace como una sola transacción: si algo sale mal en el camino, se deshace todo para no dejar datos a medias
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean registrarVueloOperativo(VueloOperativo vo) {
         String sqlVuelo = "INSERT INTO vuelos_operativos (cod_vuelo, id_programacion, fecha_operacion, estado_oooi, estado_vuelo) VALUES (?, ?, ?, ?, ?)";
         String sqlTrip = "INSERT INTO tripulacion_asignada (id_vuelo_operativo, id_empleado, rol_en_vuelo) VALUES (?, ?, ?)";
@@ -93,9 +98,11 @@ public class VueloOperativoDAO {
         }
     }
 
-// =============================================================================    
-// 2. MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN PENDIENTES A DESPACHO TÉCNICO (W&B)
-// =============================================================================
+    // ==========================================
+    // MÉTODO PARA OBTENER LOS VUELOS PENDIENTES A DESPACHO TÉCNICO
+    // ==========================================
+    // Descripción: Busca en la base de datos los vuelos que todavía están esperando ser despachados o que están en demora, junto con la ruta y la aeronave asignada, y arma la lista que se usa en el panel de despacho
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public java.util.List<VueloOperativo> obtenerVuelosPendientesDespacho() {
         java.util.List<VueloOperativo> lista = new java.util.ArrayList<>();
         String sql = "SELECT vo.cod_vuelo, vo.estado_vuelo, r.origen_destino, a.matricula " +
@@ -127,9 +134,11 @@ public class VueloOperativoDAO {
         }
         return lista;
     }
-// ====================================================================
-// 3. MÉTODO PARA OBTENER LOS VUELOS DETALLADOS PARA LA VISTA DE DESPACHO
-// ====================================================================
+    // ==========================================
+    // MÉTODO PARA OBTENER LOS VUELOS DETALLADOS PARA LA VISTA DE DESPACHO
+    // ==========================================
+    // Descripción: Busca en la base de datos los vuelos pendientes de despacho con todos sus detalles (ruta, aeronave, capacidad, peso máximo) y además el nombre del capitán asignado a cada uno, para mostrarlos completos en la pantalla de despacho
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public java.util.List<Clases.VueloOperativo> obtenerVuelosDetalladosParaDespacho() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
         String sql = "SELECT vo.id_vuelo_operativo, vo.cod_vuelo, vo.estado_vuelo, r.origen_destino, a.matricula, a.modelo, a.capacidad_asientos, a.peso_maximo_despegue " +
@@ -188,9 +197,11 @@ public class VueloOperativoDAO {
         return lista;
     }
 
-// ===============================================================================
-// 4. MÉTODOS PARA LIBERAR TRIPULACION Y ACTUALIZAR ESTADO VUELO (CANCELAR VUELO)
-// ===============================================================================
+    // ==========================================
+    // MÉTODO PARA CANCELAR UN VUELO Y LIBERAR SU TRIPULACIÓN
+    // ==========================================
+    // Descripción: Cambia el estado del vuelo a CANCELADO y devuelve a toda su tripulación asignada al estado DISPONIBLE, para que puedan ser asignados a otro vuelo
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean liberarTripulacion(String codVuelo) {
         String sqlCancelarVuelo = "UPDATE vuelos_operativos SET estado_vuelo = 'CANCELADO' WHERE cod_vuelo = ?";
         
@@ -226,6 +237,11 @@ public class VueloOperativoDAO {
         }
     }
 
+    // ==========================================
+    // MÉTODO PARA ACTUALIZAR EL ESTADO DE UN VUELO
+    // ==========================================
+    // Descripción: Cambia en la base de datos el estado de un vuelo operativo por el nuevo estado indicado (por ejemplo, de PENDIENTE_DESPACHO a APROBADO)
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean actualizarEstadoVuelo(String codVuelo, String nuevoEstado) {
         String sql = "UPDATE vuelos_operativos SET estado_vuelo = ? WHERE cod_vuelo = ?";
         try {
@@ -239,12 +255,14 @@ public class VueloOperativoDAO {
             return false;
         }
     }
-// ====================================================================================
-// 5. MÉTODO TRANSACCIONAL: PERSISTE HOJA DE CARGA + MANIFIESTO + CLIMA Y APRUEBA EL DESPACHO
-// ====================================================================================
 // ON CONFLICT: si el vuelo ya tenía datos de un intento previo (ej. volvió de EN_DEMORA
 // y se vuelve a calcular el W&B), actualizamos en vez de fallar por la restricción UNIQUE
 // sobre id_vuelo_operativo.
+    // ==========================================
+    // MÉTODO PARA APROBAR EL DESPACHO DE UN VUELO
+    // ==========================================
+    // Descripción: Guarda en la base de datos, como una sola transacción, todos los datos operativos necesarios para aprobar el despacho de un vuelo: la hoja de carga con los pesos, el manifiesto de combustible y el reporte del clima; y además cambia el estado del vuelo a APROBADO o a EN_DEMORA según corresponda
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean aprobarDespachoConDatosOperativos(Clases.VueloOperativo vo) {
         String sqlHoja =
             "INSERT INTO hojas_carga (id_vuelo_operativo, peso_pasajeros, peso_equipaje, peso_carga, peso_combustible) " +
@@ -312,9 +330,11 @@ public class VueloOperativoDAO {
 //----------------------
 // PARA EL CONTROL OOOI
 //----------------------
-// ===================================================================
-// 6. MÉTODO PARA EL HISTORIAL COMPLETO DE VUELOS (pantalla Historial de Vuelos)
-// ===================================================================
+    // ==========================================
+    // MÉTODO PARA EL HISTORIAL COMPLETO DE VUELOS
+    // ==========================================
+    // Descripción: Busca en la base de datos todos los vuelos operativos que ya se completaron o cancelaron, junto con sus datos principales, para mostrarlos en la pantalla de historial de vuelos
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public java.util.List<VueloOperativo> obtenerHistorialVuelos() {
         java.util.List<VueloOperativo> lista = new ArrayList<>();
 
@@ -377,9 +397,11 @@ public class VueloOperativoDAO {
         }
         return lista;
     }
-// ===================================================================================================
-// 7. MÉTODO PARA OBTENER LOS VUELOS QUE ESTAN LISTOS PARA CONTROL OOOI (Aprobados, En Vuelo o En Tierra)
-// ===================================================================================================
+    // ==========================================
+    // MÉTODO PARA OBTENER LOS VUELOS LISTOS PARA CONTROL OOOI
+    // ==========================================
+    // Descripción: Busca en la base de datos los vuelos que ya están aprobados, en vuelo o en tierra, es decir, los que están en alguna etapa donde se necesita registrar sus tiempos OOOI (salida, despegue, aterrizaje o llegada)
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public java.util.List<Clases.VueloOperativo> obtenerVuelosParaControlOOOI() {
         java.util.List<Clases.VueloOperativo> lista = new java.util.ArrayList<>();
         String sql = "SELECT vo.*, r.origen_destino, a.matricula " +
@@ -416,9 +438,11 @@ public class VueloOperativoDAO {
         }
         return lista;
     }
-// ===================================================================
-// 8. MÉTODO DINÁMICO PARA GUARDAR LA HORA Y LA FASE EN LA BASE DE DATOS
-// ===================================================================
+    // ==========================================
+    // MÉTODO PARA GUARDAR UNA FASE DEL CONTROL OOOI
+    // ==========================================
+    // Descripción: Guarda en la base de datos la hora en que ocurrió una fase específica del control OOOI (por ejemplo la hora de despegue) para el vuelo indicado
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean registrarFaseOOOI(String codVuelo, String fase, String horaZulu) {
         // Armamos la consulta dinámica según el botón que presionen
         String columnaHora = "hora_" + fase.toLowerCase(); // Se vuelve hora_out, hora_off, etc.
@@ -436,9 +460,11 @@ public class VueloOperativoDAO {
         }
     }
 
-// ===================================================================
-// 9. MÉTODO PARA CARGAR LOS VUELOS EN EL LOGBOOK
-// ===================================================================       
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS VUELOS PARA EL LOGBOOK
+    // ==========================================
+    // Descripción: Busca en la base de datos los vuelos que ya están listos para que el capitán cierre su Logbook, junto con la matrícula de la aeronave, y arma la lista que se muestra en esa pantalla
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public ArrayList<Clases.VueloOperativo> obtenerVuelosParaLogbook() {
         ArrayList<Clases.VueloOperativo> lista = new ArrayList<>();
 
@@ -475,9 +501,11 @@ public class VueloOperativoDAO {
         return lista;
     }
 
-// ===================================================================
-// 10. MÉTODO PARA EL LLENADO DE LA TABLA REPORTES_LOGBOOK
-// ===================================================================    
+    // ==========================================
+    // MÉTODO PARA CERRAR UN VUELO CON SU LOGBOOK
+    // ==========================================
+    // Descripción: Guarda en la base de datos el reporte final del Logbook de un vuelo, cambia el estado del vuelo a COMPLETADO, libera a toda su tripulación dejándola DISPONIBLE de nuevo, y si se reportó alguna falla, manda la aeronave a MANTENIMIENTO. Todo esto se hace como una sola transacción
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean cerrarVueloConLogbook(Clases.ReporteLogbook logbook) {
         boolean exito = false;
         java.sql.Connection con = null;
@@ -546,9 +574,11 @@ public class VueloOperativoDAO {
     }
     
     
-// ==================================================================================
-// MÉTODO PARA REINICIAR LA BASE DE DATOS DURANTE LAS PRUEBAS DE DESARROLLO
-// ==================================================================================
+    // ==========================================
+    // MÉTODO PARA REINICIAR LOS DATOS DE PRUEBA
+    // ==========================================
+    // Descripción: Borra todos los datos operativos de prueba (vuelos, tripulación asignada, hojas de carga, manifiestos, reportes) y deja a todos los empleados y aeronaves en su estado inicial disponible/apto. Este método está pensado solamente para usarse durante el desarrollo, no en un ambiente real de producción
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder, DespachoService, ControlOOOIService
     public boolean reiniciarDatosPrueba() throws ConexionBDException {
         // Definimos las 3 consultas SQL
         String sqlTruncate = "TRUNCATE TABLE registros_mantenimiento, reportes_logbook, hojas_carga, "

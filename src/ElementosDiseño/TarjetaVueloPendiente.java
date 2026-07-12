@@ -10,11 +10,19 @@ import java.awt.RenderingHints;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/* ¿Para qué sirve?: Esta es una tarjeta reutilizable que muestra en resumen los datos de un vuelo pendiente de despacho (código, ruta y matrícula), junto con una pequeña etiqueta que indica que ese vuelo requiere el proceso de Peso y Balance (W&B)
+   Clases que la utilizan: OficialOperaciones_GUI
+   Índice de Métodos: TarjetaVueloPendiente, paintComponent */
 public class TarjetaVueloPendiente extends JPanel {
     private String codVuelo;
     private String ruta;
     private String matricula;
 
+    // ==========================================
+    // MÉTODO CONSTRUCTOR
+    // ==========================================
+    // Descripción: Prepara una tarjeta nueva con el código del vuelo, la ruta y la matrícula recibidos, y arma los textos que se muestran dentro de la tarjeta
+    // Clases que lo usan: OficialOperaciones_GUI
     public TarjetaVueloPendiente(String codVuelo, String ruta, String matricula) {
         this.codVuelo = codVuelo;
         this.ruta = ruta;
@@ -40,6 +48,11 @@ public class TarjetaVueloPendiente extends JPanel {
         add(lblDetalle);
     }
 
+    // ==========================================
+    // MÉTODO PARA DIBUJAR LA TARJETA
+    // ==========================================
+    // Descripción: Dibuja a mano el fondo de la tarjeta con esquinas redondeadas, su borde sutil, y la pequeña píldora de color que dice 'Req. W&B'
+    // Clases que lo usan: OficialOperaciones_GUI
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

@@ -4,51 +4,87 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.LineBorder;
 
-/**
- * Reemplazo visual de JOptionPane con el mismo tema oscuro del resto de la app
- * (misma paleta que ya usan TarjetaReporteMant y las píldoras de prioridad:
- * Slate-900 de fondo, y acentos verde/rojo/ámbar/cyan según el tipo de aviso).
- *
- * Uso típico:
- *   NotificacionDialog.exito(this, "Vuelo asignado con éxito.");
- *   NotificacionDialog.error(this, "No se pudo guardar.", "Error crítico");
- *   if (NotificacionDialog.confirmar(this, "¿Seguro que desea cancelar el vuelo?", "Confirmar cancelación")) { ... }
- */
+/* ¿Para qué sirve?: Esta clase reemplaza las ventanas emergentes estándar de Java (JOptionPane) por ventanas propias con el mismo estilo oscuro del resto de la aplicación. Sirve para mostrar mensajes de éxito, error, advertencia, información, y también para pedir una confirmación al usuario antes de hacer algo importante
+   Clases que la utilizan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
+   Índice de Métodos: exito, error, advertencia, info, confirmar, colorFondoBadge, colorAcento, icono, construirYMostrar, crearBoton, paintComponent, mouseEntered, mouseExited, mousePressed, mouseReleased */
 public class NotificacionDialog {
 
     public enum Tipo { EXITO, ERROR, ADVERTENCIA, INFO }
 
-    // ------------------------------------------------------------------
-    // API pública (pensada para sustituir 1 a 1 los JOptionPane existentes)
-    // ------------------------------------------------------------------
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ÉXITO
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color verde indicando que una operación se completó correctamente. Existen dos versiones: una con título por defecto ('Operación exitosa') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void exito(Component parent, String mensaje) { exito(parent, mensaje, "Operación exitosa"); }
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ÉXITO
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color verde indicando que una operación se completó correctamente. Existen dos versiones: una con título por defecto ('Operación exitosa') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void exito(Component parent, String mensaje, String titulo) {
         construirYMostrar(parent, mensaje, titulo, Tipo.EXITO, false);
     }
 
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ERROR
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color rojo indicando que algo salió mal. Existen dos versiones: una con título por defecto ('Error') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void error(Component parent, String mensaje) { error(parent, mensaje, "Error"); }
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ERROR
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color rojo indicando que algo salió mal. Existen dos versiones: una con título por defecto ('Error') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void error(Component parent, String mensaje, String titulo) {
         construirYMostrar(parent, mensaje, titulo, Tipo.ERROR, false);
     }
 
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ADVERTENCIA
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color ámbar avisando de algo que el usuario debe tener en cuenta. Existen dos versiones: una con título por defecto ('Aviso') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void advertencia(Component parent, String mensaje) { advertencia(parent, mensaje, "Aviso"); }
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE DE ADVERTENCIA
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color ámbar avisando de algo que el usuario debe tener en cuenta. Existen dos versiones: una con título por defecto ('Aviso') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void advertencia(Component parent, String mensaje, String titulo) {
         construirYMostrar(parent, mensaje, titulo, Tipo.ADVERTENCIA, false);
     }
 
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE INFORMATIVO
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color cyan con información general para el usuario. Existen dos versiones: una con título por defecto ('Información') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void info(Component parent, String mensaje) { info(parent, mensaje, "Información"); }
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN MENSAJE INFORMATIVO
+    // ==========================================
+    // Descripción: Muestra una ventana emergente de color cyan con información general para el usuario. Existen dos versiones: una con título por defecto ('Información') y otra que permite escribir un título propio
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static void info(Component parent, String mensaje, String titulo) {
         construirYMostrar(parent, mensaje, titulo, Tipo.INFO, false);
     }
 
-    /** Reemplaza JOptionPane.showConfirmDialog: devuelve true si el usuario confirmó. */
+    // ==========================================
+    // MÉTODO PARA PEDIR UNA CONFIRMACIÓN
+    // ==========================================
+    // Descripción: Muestra una ventana emergente con dos botones (Cancelar y Confirmar) y espera a que el usuario elija. Entrega verdadero si el usuario presionó Confirmar, o falso si canceló
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     public static boolean confirmar(Component parent, String mensaje, String titulo) {
         return construirYMostrar(parent, mensaje, titulo, Tipo.ADVERTENCIA, true);
     }
 
-    // ------------------------------------------------------------------
-    // Paleta (idéntica a la que ya usa TarjetaReporteMant para las píldoras)
-    // ------------------------------------------------------------------
+    // ==========================================
+    // MÉTODO PARA ELEGIR EL COLOR DE FONDO DEL ÍCONO
+    // ==========================================
+    // Descripción: Entrega el color de fondo que le corresponde al ícono de la ventana, según el tipo de aviso (éxito, error, advertencia o información)
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     private static Color colorFondoBadge(Tipo tipo) {
         switch (tipo) {
             case EXITO: return new Color(5, 46, 22);      // Verde bosque
@@ -58,6 +94,11 @@ public class NotificacionDialog {
         }
     }
 
+    // ==========================================
+    // MÉTODO PARA ELEGIR EL COLOR DE ACENTO
+    // ==========================================
+    // Descripción: Entrega el color principal que le corresponde a la ventana (la barra superior y el ícono), según el tipo de aviso
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     private static Color colorAcento(Tipo tipo) {
         switch (tipo) {
             case EXITO: return new Color(34, 197, 94);      // Verde esmeralda 74, 222, 128
@@ -67,6 +108,11 @@ public class NotificacionDialog {
         }
     }
 
+    // ==========================================
+    // MÉTODO PARA ELEGIR EL SÍMBOLO DEL ÍCONO
+    // ==========================================
+    // Descripción: Entrega el símbolo de texto que se muestra como ícono (un check, una equis, un signo de alerta o una letra i), según el tipo de aviso
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     private static String icono(Tipo tipo) {
         switch (tipo) {
             case EXITO: return "\u2714"; // Símbolo de verificación (✔)
@@ -76,9 +122,11 @@ public class NotificacionDialog {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Construcción del diálogo
-    // ------------------------------------------------------------------
+    // ==========================================
+    // MÉTODO PARA ARMAR Y MOSTRAR LA VENTANA
+    // ==========================================
+    // Descripción: Arma toda la ventana emergente desde cero: la barra de color, el ícono, el título, el mensaje y los botones, y la deja visible en el centro de la pantalla hasta que el usuario la cierre. Si es una confirmación, entrega verdadero o falso según el botón que haya presionado el usuario
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     private static boolean construirYMostrar(Component parent, String mensaje, String titulo, Tipo tipo, boolean esConfirmacion) {
         Window owner = parent != null ? SwingUtilities.getWindowAncestor(parent) : null;
         JDialog dialog = new JDialog(owner, titulo, Dialog.ModalityType.APPLICATION_MODAL);
@@ -177,8 +225,18 @@ public class NotificacionDialog {
         return resultado[0];
     }
 
+    // ==========================================
+    // MÉTODO PARA CREAR UN BOTÓN CON ESTILO PROPIO
+    // ==========================================
+    // Descripción: Arma un botón redondeado con el texto, el color de fondo y el color de texto indicados, y le agrega los efectos de mouse (se aclara al pasar por encima, se oscurece al presionarlo)
+    // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
     private static JButton crearBoton(String texto, Color fondoNormal, Color colorTexto) {
         JButton btn = new JButton(texto) {
+            // ==========================================
+            // MÉTODO PAINTCOMPONENT
+            // ==========================================
+            // Descripción: Método propio de la clase NotificacionDialog
+            // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -209,21 +267,41 @@ public class NotificacionDialog {
 
         // Eventos del Mouse para la interactividad
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
+            // ==========================================
+            // MÉTODO PARA CUANDO EL MOUSE ENTRA AL BOTÓN
+            // ==========================================
+            // Descripción: Aclara el color de fondo del botón mientras el mouse está encima
+            // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btn.setBackground(fondoHover);
             }
 
+            // ==========================================
+            // MÉTODO PARA CUANDO EL MOUSE SALE DEL BOTÓN
+            // ==========================================
+            // Descripción: Devuelve el botón a su color de fondo normal cuando el mouse ya no está encima
+            // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btn.setBackground(fondoNormal);
             }
 
+            // ==========================================
+            // MÉTODO PARA CUANDO SE PRESIONA EL BOTÓN
+            // ==========================================
+            // Descripción: Oscurece el color de fondo del botón mientras se mantiene presionado
+            // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
             @Override
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 btn.setBackground(fondoPresionado);
             }
 
+            // ==========================================
+            // MÉTODO PARA CUANDO SE SUELTA EL BOTÓN
+            // ==========================================
+            // Descripción: Devuelve el botón al color de fondo aclarado (hover), ya que normalmente el mouse todavía sigue encima al soltar
+            // Clases que lo usan: Login_GUI, OficialOperaciones_GUI, TecnicoMantenimiento_GUI, BaseDeDatos (a través de otras clases de arranque)
             @Override
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 btn.setBackground(fondoHover); // Al soltar, vuelve al hover si el mouse sigue ahí

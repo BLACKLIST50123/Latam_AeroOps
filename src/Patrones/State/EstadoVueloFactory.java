@@ -2,23 +2,16 @@ package Patrones.State;
 
 import Enumeradores.EstadoVuelo;
 
-/**
- * Cada vez que un VueloOperativo se carga desde la base de datos (cualquier
- * combo, tabla o tarjeta de cualquier pantalla), Java crea un objeto nuevo
- * con "new VueloOperativo()", y ese constructor por defecto siempre arranca
- * en EstadoPendienteDespacho. Eso significa que un vuelo que en la BD está,
- * por ejemplo, EN_DEMORA, se reconstruía en memoria como si estuviera recién
- * creado — el objeto de estado (IEstadoVuelo) quedaba desincronizado del
- * campo estadoVuelo (String).
- *
- * Esta fábrica resuelve eso: dado el texto guardado en la columna
- * estado_vuelo, devuelve la instancia de IEstadoVuelo que le corresponde.
- * VueloOperativo.setEstadoVuelo() la usa automáticamente, así que cualquier
- * DAO que llame a ese setter con el valor real de la BD queda sincronizado
- * sin tener que tocar cada punto de carga uno por uno.
- */
+/* ¿Para qué sirve?: Esta es una fábrica (patrón Factory) que, dado el texto del estado guardado en la base de datos, entrega el objeto de estado (IEstadoVuelo) que le corresponde. Esto es necesario porque cuando un vuelo se carga desde la base de datos, Java lo crea con el constructor por defecto, que siempre empieza en EstadoPendienteDespacho; esta fábrica corrige eso y deja el objeto de estado sincronizado con el texto real guardado en la base de datos
+   Clases que la utilizan: VueloOperativo
+   Índice de Métodos: crear */
 public class EstadoVueloFactory {
 
+    // ==========================================
+    // MÉTODO PARA CREAR EL ESTADO CORRESPONDIENTE
+    // ==========================================
+    // Descripción: Recibe el texto del estado del vuelo guardado en la base de datos y entrega el objeto de estado (IEstadoVuelo) que le corresponde. Si el texto es vacío o no coincide con ningún estado conocido, entrega por defecto el estado Pendiente de Despacho
+    // Clases que lo usan: VueloOperativo
     public static IEstadoVuelo crear(String estadoVuelo) {
         if (estadoVuelo == null) {
             return new EstadoPendienteDespacho();

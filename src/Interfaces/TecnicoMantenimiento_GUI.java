@@ -13,6 +13,7 @@ import ClasesDTO.ReportePendienteDTO;
 import java.util.List;
 import javax.swing.BorderFactory;
 
+/* ¿Para qué sirve esta pantalla?: Esta es la pantalla principal del Técnico de Mantenimiento. Aquí el técnico puede ver, como tarjetas, todos los reportes de fallas pendientes que dejaron los Oficiales de Operaciones en el Logbook de cada vuelo. Al hacer clic en una tarjeta, se abre el detalle de esa falla, donde el técnico escribe la acción que tomó y su firma, y puede aprobar el plan para liberar la aeronave de vuelta a servicio. También tiene una segunda sección con el historial completo de mantenimiento ya realizado, con filtros por matrícula, prioridad, estado y fecha */
 public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(TecnicoMantenimiento_GUI.class.getName());
@@ -33,6 +34,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         // sobre esta lista sin volver a golpear la BD en cada cambio de filtro.
         private java.util.List<ClasesDTO.RegistroMantenimientoDTO> listaHistorialMantenimiento = new java.util.ArrayList<>();
         
+    // ==========================================
+    // MÉTODO CONSTRUCTOR DE LA PANTALLA
+    // ==========================================
+    // Descripción: Guarda los datos del técnico que inició sesión, arma todos los elementos visuales de la pantalla (con initComponents, generado por el diseñador), aplica el tema oscuro a los combos, los scrolls y la tabla, carga los reportes pendientes y el historial de mantenimiento, configura el filtro de fecha, el botón de limpiar filtros y la firma técnica automática, y deja un temporizador que revisa cada 20 segundos si llegaron reportes nuevos
+    // Qué otros métodos la activan: Se ejecuta automáticamente cuando VentanaFactory crea esta pantalla después de un login exitoso
     public TecnicoMantenimiento_GUI(int idEmpleado, String nombreUsuario, String rol, String nombreCompleto) {
         this.idTecnicoLogueado = idEmpleado;
         this.usuarioLogueado = nombreUsuario;
@@ -1327,7 +1333,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
 //        java.awt.EventQueue.invokeLater(() -> new TecnicoMantenimiento_GUI().setVisible(true));
 //    }
     
-//##### ESTE METODO ES PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX #####
+    // ==========================================
+    // MÉTODO PARA APLICAR EL TEMA OSCURO A UN COMBO
+    // ==========================================
+    // Descripción: Cambia el diseño de un JComboBox para que se vea con los colores oscuros del resto de la aplicación, en vez del estilo blanco por defecto de Java: le cambia la flecha, el fondo, los colores de la lista desplegable y el borde
+    // Qué otros métodos la activan: Se llama desde el constructor, una vez por cada combo de filtro de la pantalla
     private void aplicarTemaOscuro(javax.swing.JComboBox combo) {
     // 1. ACHICAR FLECHA Y MATAR EL FONDO BLANCO DE RAÍZ
     combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
@@ -1390,7 +1400,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
     combo.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 65, 85), 1));
     }
     
-//##### METODO PARA CAMBIAR EL DISEÑO DEL SCROLL #####
+    // ==========================================
+    // MÉTODO PARA APLICAR EL SCROLL MODERNO
+    // ==========================================
+    // Descripción: Cambia el diseño de una barra de desplazamiento (scroll) para que se vea delgada y moderna, sin las flechas de subir/bajar y con colores acordes al tema oscuro de la aplicación
+    // Qué otros métodos la activan: Se llama desde el constructor, una vez por cada panel con scroll de la pantalla
     private void aplicarScrollModerno(javax.swing.JScrollPane scroll) {
         scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder()); // Quita el borde exterior
 
@@ -1431,7 +1445,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         });
     }
 
-// #### METODOS PARA CAMBIAR DISEÑO DE LA TABLA ####
+    // ==========================================
+    // MÉTODO PARA APLICAR EL TEMA A UNA TABLA
+    // ==========================================
+    // Descripción: Cambia el diseño de una tabla para que combine con el resto de la aplicación: le pone fondo y letras oscuras, le agranda las filas, le personaliza la cabecera y le da un color especial a las celdas de Estado y Prioridad según su valor. También hace que la tabla se deseleccione si el usuario hace clic fuera de ella
+    // Qué otros métodos la activan: Se llama desde el constructor, para la tabla del historial de mantenimiento
     private void aplicarTemaTabla(javax.swing.JTable tabla) {
         // 1. Fondo, color de letra y líneas de la tabla
         tabla.setBackground(new java.awt.Color(30, 41, 59)); // Azul oscuro del fondo (#0f172a)
@@ -1566,7 +1584,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         }, java.awt.AWTEvent.MOUSE_EVENT_MASK);
     }
     
-// Este método va a contar cuántas filas tienes y decidirá si agranda la caja o si le activa el scroll
+    // ==========================================
+    // MÉTODO PARA AJUSTAR LA ALTURA DE LA TABLA
+    // ==========================================
+    // Descripción: Calcula cuánto espacio necesita la tabla según la cantidad de filas que tenga en ese momento, y ajusta su altura y la del panel que la contiene. Si hay demasiadas filas, deja un tamaño máximo fijo y activa el scroll en vez de seguir creciendo
+    // Qué otros métodos la activan: Se llama desde el constructor y desde aplicarFiltrosHistorialMantenimiento, cada vez que cambia la cantidad de filas visibles en la tabla
     private void ajustarAlturaDinamica(javax.swing.JTable tabla, javax.swing.JScrollPane scroll) {
         // ¡EL TRUCO SENIOR! Le decimos a Java: "Espera a que la interfaz termine de cargar"
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -1621,9 +1643,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         });
     }
     
-// ===========================================
-// MÉTODO PARA CARGAR LOS REPORTES PENDIENTES
-// ===========================================    
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS REPORTES PENDIENTES
+    // ==========================================
+    // Descripción: Pide al DAO de mantenimiento la lista de reportes de fallas pendientes, actualiza el contador de aeronaves en tierra por mantenimiento (AOG), y arma una tarjeta visual por cada reporte para mostrarla en la lista. Si no hay ningún reporte pendiente, muestra un panel vacío en su lugar
+    // Qué otros métodos la activan: Se llama desde el constructor, desde el temporizador de refresco automático cada 20 segundos, y también se puede llamar desde otras clases que estén suscritas al Observer de mantenimiento
     public void cargarReportesPendientes() {
         pnlTarjetasLleno.removeAll();
         // Se recarga la lista completa: ya no hay ningún reporte "seleccionado"
@@ -1675,9 +1699,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         clDetalle.show(pnlContenedorDetalleReporte, "pnlDetalleVacio");
     }
     
-// ==================================
-// METODO PARA HACER LEGIBLE EL ROL
-// ==================================
+    // ==========================================
+    // MÉTODO PARA MOSTRAR EL ROL DE FORMA LEGIBLE
+    // ==========================================
+    // Descripción: Convierte el código interno del rol (por ejemplo OFICIAL o TECNICO) en un texto más amigable para mostrar en pantalla, como 'Oficial de Operaciones' o 'Técnico de Mantenimiento'
+    // Qué otros métodos la activan: Se llama desde el constructor para mostrar el rol en la barra lateral, y desde configurarFirmaTecnica para armar el texto de la firma
     private String nombreRolLegible(String rolAcceso) {
         if (rolAcceso == null) return "";
         switch (rolAcceso.toUpperCase()) {
@@ -1687,9 +1713,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         }
     }
     
-// ===========================================================================
-// HISTORIAL DE MANTENIMIENTO: CARGA DESDE BD + FILTROS EN MEMORIA
-// ===========================================================================
+    // ==========================================
+    // MÉTODO PARA CARGAR EL HISTORIAL DE MANTENIMIENTO
+    // ==========================================
+    // Descripción: Pide al DAO de mantenimiento todo el historial de reparaciones ya hechas y lo guarda en memoria. Con esos datos, llena los combos de filtro (matrícula, prioridad y estado) con los valores que realmente existen, aplica los filtros actuales sobre la tabla, y activa los colores de prioridad en la tabla
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     public void cargarHistorialMantenimiento() {
         MantenimientoDAO dao = new MantenimientoDAO();
         listaHistorialMantenimiento = dao.obtenerHistorialMantenimiento();
@@ -1722,6 +1750,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         configurarColoresPrioridadTabla();
     }
 
+    // ==========================================
+    // MÉTODO PARA APLICAR LOS FILTROS DEL HISTORIAL
+    // ==========================================
+    // Descripción: Revisa los filtros de matrícula, prioridad, estado y fecha que el técnico haya elegido, y vuelve a llenar la tabla del historial mostrando solamente los registros que cumplen con todos esos filtros al mismo tiempo. Al final, vuelve a ajustar la altura de la tabla según cuántas filas quedaron visibles
+    // Qué otros métodos la activan: Se llama desde cargarHistorialMantenimiento, desde el botón de Limpiar Filtros, y cada vez que el técnico cambia alguno de los combos de filtro o termina de escribir la fecha
     public void aplicarFiltrosHistorialMantenimiento() {
         String filtroMatricula = (String) cbxFiltroMatrícula.getSelectedItem();
         String filtroPrioridad = (String) cbxFiltroPrioridad.getSelectedItem();
@@ -1757,16 +1790,20 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         }
         ajustarAlturaDinamica(TblHistorialLogBook, ScrollTablaHistorialLogBook);
     }
-// ===========================================================================
-// MÉTODO CARGAR LA VISTA DE DETALLE DEL REPORTE AL HACER CLICK A UNA TARJETA
-// ===========================================================================
-    // Le permite a cada tarjeta (TarjetaReporteMant) saber si ELLA es la seleccionada actual,
-    // para pintarse distinto sin que la GUI tenga que guardar una referencia a cada tarjeta.
+    // ==========================================
+    // MÉTODO PARA CONSULTAR EL REPORTE SELECCIONADO
+    // ==========================================
+    // Descripción: Entrega el identificador del reporte de Logbook que está actualmente abierto en el panel de detalle. Le permite a cada tarjeta saber si ella misma es la que está seleccionada, para pintarse de un color distinto, sin que la pantalla tenga que guardar una referencia a cada tarjeta por separado
+    // Qué otros métodos la activan: Lo consulta TarjetaReporteMant cada vez que se dibuja o se hace clic en una tarjeta
     public int getIdLogbookSeleccionado() {
         return idLogbookSeleccionado;
     }
 
-    // Deselecciona: se llama cuando el técnico vuelve a pulsar la tarjeta ya abierta.
+    // ==========================================
+    // MÉTODO PARA CERRAR EL DETALLE DEL REPORTE
+    // ==========================================
+    // Descripción: Guarda en un mapa temporal lo que el técnico haya escrito hasta ese momento en la caja de acciones (por si vuelve a abrir ese mismo reporte más tarde), y cierra el panel de detalle dejando la pantalla en su estado vacío
+    // Qué otros métodos la activan: Lo llama TarjetaReporteMant cuando el técnico vuelve a hacer clic en una tarjeta que ya estaba abierta
     public void cerrarDetalleReporte() {
         // --- ANTES DE CERRAR: Guardamos lo que haya escrito en el JTextArea por si acaso ---
         if (this.idLogbookSeleccionado != 0) {
@@ -1780,6 +1817,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlTarjetasLleno.repaint();
     }
 
+    // ==========================================
+    // MÉTODO PARA MOSTRAR EL DETALLE DE UN REPORTE
+    // ==========================================
+    // Descripción: Guarda lo que el técnico tenía escrito en la tarjeta anterior (si había alguna abierta), y luego llena el panel de detalle con los datos de la nueva tarjeta seleccionada: matrícula, modelo, prioridad con su color correspondiente, y las observaciones del reporte. Si el técnico ya había escrito algo antes para este mismo reporte, se lo devuelve; si no, deja la caja de texto vacía
+    // Qué otros métodos la activan: Lo llama TarjetaReporteMant cuando el técnico hace clic en una tarjeta que todavía no estaba abierta
     public void mostrarDetalleReporte(int idLogbook, String matricula, String modelo, String prioridad, String observaciones) {
         // --- SALVAGUARDAR ANTES DE CAMBIAR DE TARJETA ---
         // Si ya había una tarjeta seleccionada previamente, capturamos su texto actual y lo guardamos
@@ -1836,9 +1878,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         pnlTarjetasLleno.repaint();
     }  
     
-// ===========================================================================
-// MÉTODO CARGAR LA FIRMA DIGITAL DEL TECNICO
-// ===========================================================================
+    // ==========================================
+    // MÉTODO PARA CONFIGURAR LA FIRMA TÉCNICA
+    // ==========================================
+    // Descripción: Arma automáticamente el texto de la firma del técnico, juntando su nombre con su rol (por ejemplo 'Frank Montero [TÉCNICO]'), y deja ese campo de solo lectura para que no se pueda editar a mano
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     private void configurarFirmaTecnica() {
         // 1. Formateamos el texto de la firma automatizada (Ejemplo: "Frank Montero [TÉCNICO]")
         txtFirmaTecnica.setText(nombreTecnico + " [" + nombreRolLegible(rolLogueado).toUpperCase() + "]");
@@ -1857,9 +1901,11 @@ public class TecnicoMantenimiento_GUI extends javax.swing.JFrame {
         txtFirmaTecnica.setBorder(BorderFactory.createLineBorder(new Color(51, 65, 85), 1)); 
     }
     
-// ==============================================================
-// MÉTODO PARA PINTAR LAS CELDAS DE PRIORIDAD EN LA TABLA
-// ==============================================================
+    // ==========================================
+    // MÉTODO PARA PINTAR LOS COLORES DE PRIORIDAD EN LA TABLA
+    // ==========================================
+    // Descripción: Le da un color de fondo y de texto distinto a la columna de Prioridad de la tabla de historial, según el nivel de la falla (alta, media o baja), para que se note de un vistazo qué tan grave fue cada caso
+    // Qué otros métodos la activan: Se llama desde cargarHistorialMantenimiento, una sola vez al cargar el historial
     private void configurarColoresPrioridadTabla() {
         // La columna "Prioridad" es el índice 4 en tu modelo.addRow
         TblHistorialLogBook.getColumnModel().getColumn(4).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {

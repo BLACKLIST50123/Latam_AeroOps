@@ -11,13 +11,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* ¿Para qué sirve?: Esta clase se encarga de traer desde la base de datos la información de todas las aeronaves de la flota
+   Clases que la utilizan: OficialOperaciones_GUI, TecnicoMantenimiento_GUI, VueloOperativoBuilder
+   Índice de Métodos: obtenerFlota */
 public class AeronaveDAO {
 
     private static final Logger LOG = Logger.getLogger(AeronaveDAO.class.getName());
 
-    // ===================================================================
-    // MÉTODO PARA LISTAR TODA LA FLOTA (pantalla Gestión de Flota)
-    // ===================================================================
+    // ==========================================
+    // MÉTODO PARA LISTAR TODA LA FLOTA
+    // ==========================================
+    // Descripción: Consulta en la base de datos todas las aeronaves registradas, con su modelo, estado técnico, capacidad de asientos, peso máximo de despegue y autonomía, y arma una lista de objetos Aeronave con esos datos. Esta lista es la que se usa, por ejemplo, en la pantalla de Gestión de Flota
+    // Clases que lo usan: OficialOperaciones_GUI, TecnicoMantenimiento_GUI, VueloOperativoBuilder
     public List<Aeronave> obtenerFlota() {
         List<Aeronave> lista = new ArrayList<>();
         String sql = "SELECT matricula, modelo, estado_tecnico, capacidad_asientos, peso_maximo_despegue, autonomia_maxima_km " +

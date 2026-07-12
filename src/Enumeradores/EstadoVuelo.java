@@ -1,5 +1,9 @@
 package Enumeradores;
 
+/* ¿Para qué sirve?: Este enumerador guarda todos los estados posibles por los que puede pasar un vuelo, desde que se crea hasta que termina o se cancela
+   Clases que la utilizan: Todas las clases del paquete Patrones/State, VueloOperativoBuilder, VueloOperativoDAO, ControlOOOIService, DespachoService, VueloOperativo, OficialOperaciones_GUI
+   Índice de Métodos: No aplica, este archivo solo enumera valores fijos y no tiene métodos propios */
+
 public enum EstadoVuelo {
 	PENDIENTE_DESPACHO, //Ocupa este estado cuando el Oficial asigna el Vuelo + Tripulación
 	EN_DEMORA,          //Se activa si el clima está mal (METAR en amarillo/rojo) o hay sobrepeso y el Oficial decide posponerlo. 

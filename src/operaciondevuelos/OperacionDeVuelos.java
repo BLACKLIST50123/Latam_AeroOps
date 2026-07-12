@@ -1,22 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package operaciondevuelos;
 
-/**
- *
- * @author erick
- */
+/* ¿Para qué sirve?: Esta es la clase con el método principal (main) del proyecto, la que Java ejecuta primero al arrancar la aplicación. En este proyecto el arranque real ocurre desde Login_GUI (así está configurado en las propiedades del proyecto), pero esta clase se deja funcionando por si alguien decide ejecutar el programa directamente desde aquí
+   Clases que la utilizan: Punto de entrada de la aplicación (no es llamada por ninguna otra clase, es la que arranca todo)
+   Índice de Métodos: main */
 public class OperacionDeVuelos {
 
-    /**
-     * Punto de entrada de respaldo del proyecto.
-     * El arranque real vive en Interfaces.Login_GUI (configurado como
-     * Main Class en nbproject/project.properties), pero se deja este
-     * método funcional por si el proyecto se ejecuta desde aquí.
-     * @param args the command line arguments
-     */
+    // ==========================================
+    // MÉTODO PRINCIPAL (PUNTO DE ENTRADA)
+    // ==========================================
+    // Descripción: Abre la pantalla de inicio de sesión (Login_GUI) y la deja visible, arrancando así toda la aplicación
+    // Clases que lo usan: Punto de entrada de la aplicación
     public static void main(String[] args) {
         java.awt.EventQueue.invokeLater(() -> new Interfaces.Login_GUI().setVisible(true));
     }

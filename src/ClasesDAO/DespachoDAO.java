@@ -11,10 +11,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* ¿Para qué sirve?: Esta clase se encarga de traer desde la base de datos toda la información que necesita el Oficial de Operaciones para armar el despacho de un vuelo: los vuelos programados disponibles, los pilotos y tripulantes de cabina habilitados para cada modelo de avión, y el conteo de personal disponible
+   Clases que la utilizan: OficialOperaciones_GUI, VueloOperativoBuilder
+   Índice de Métodos: obtenerVuelosDisponibles, obtenerPilotosHabilitados, obtenerTCPsHabilitados, contarPersonalDisponible */
 public class DespachoDAO {
 
     private static final Logger LOG = Logger.getLogger(DespachoDAO.class.getName());
     
+    // ==========================================
+    // MÉTODO PARA LISTAR LOS VUELOS DISPONIBLES
+    // ==========================================
+    // Descripción: Consulta en la base de datos los vuelos programados que todavía no han sido convertidos en un vuelo operativo (es decir, que aún no fueron despachados) y que están programados desde hoy en adelante. Junta los datos de la ruta y de la aeronave asignada, y arma una lista de objetos VueloProgramado con toda esa información
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder
     public List<VueloProgramado> obtenerVuelosDisponibles() {
         List<VueloProgramado> lista = new ArrayList<>();
 
@@ -48,7 +56,11 @@ public class DespachoDAO {
     }
 
 
-    // AHORA FILTRA POR MODELO DE AVION (JOIN con habilitaciones)
+    // ==========================================
+    // MÉTODO PARA LISTAR PILOTOS HABILITADOS
+    // ==========================================
+    // Descripción: Busca en la base de datos los tripulantes de vuelo que están disponibles y que además están habilitados para volar el modelo de avión indicado, filtrando también por el cargo que se busca (por ejemplo Capitán o Primer Oficial). Devuelve la lista de tripulantes que cumplen esas condiciones
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder
     public List<TripulanteVuelo> obtenerPilotosHabilitados(String cargoBuscado, String modeloAvion) {
         List<TripulanteVuelo> lista = new ArrayList<>();
         String sql = "SELECT e.id_empleado, e.cod_empleado, e.nombre, e.cargo_base FROM empleados e " +
@@ -74,6 +86,11 @@ public class DespachoDAO {
         return lista;
     }
 
+    // ==========================================
+    // MÉTODO PARA LISTAR TRIPULANTES DE CABINA HABILITADOS
+    // ==========================================
+    // Descripción: Busca en la base de datos los tripulantes de cabina que están disponibles y que están habilitados para el modelo de avión indicado, y devuelve la lista de quienes cumplen esas condiciones
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder
     public List<TripulanteCabina> obtenerTCPsHabilitados(String modeloAvion) {
         List<TripulanteCabina> lista = new ArrayList<>();
         String sql = "SELECT e.id_empleado, e.cod_empleado, e.nombre FROM empleados e " +
@@ -96,9 +113,11 @@ public class DespachoDAO {
         return lista;
     }
 
-    // ===================================================================
-    // CONTADOR PARA EL DASHBOARD DEL OFICIAL: personal libre en este momento
-    // ===================================================================
+    // ==========================================
+    // MÉTODO PARA CONTAR EL PERSONAL DISPONIBLE
+    // ==========================================
+    // Descripción: Cuenta cuántos empleados están en estado disponible en este momento, dato que se muestra como indicador en el tablero principal del Oficial de Operaciones
+    // Clases que lo usan: OficialOperaciones_GUI, VueloOperativoBuilder
     public int contarPersonalDisponible() {
         String sql = "SELECT COUNT(*) FROM empleados WHERE estado_asignacion = 'DISPONIBLE'";
         try {

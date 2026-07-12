@@ -5,33 +5,29 @@ import ClasesDAO.AutenticacionDAO;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Proxy de acceso: intercepta el login para aplicar validaciones previas
- * (campos vacíos, patrones de inyección SQL básicos) antes de delegar al
- * DAO real.
- *
- * REFACTOR: hacerLogin() ahora respeta el mismo contrato que ya usaba
- * AutenticacionDAO (implementación real de IAutenticacion): devuelve
- * UsuarioSistema o null si el login falla, en vez de un "objeto sentinela"
- * con un String mágico en rolAcceso. Para la GUI, que sí necesita distinguir
- * "campos vacíos" de "credenciales inválidas" (dos mensajes distintos), se
- * expone intentarLogin(), que devuelve un ResultadoLogin explícito.
- */
+/* ¿Para qué sirve?: Esta clase actúa como un intermediario (patrón Proxy) delante de AutenticacionDAO. Antes de dejar pasar un intento de login hacia la base de datos, revisa que los campos no estén vacíos y que no parezca un intento de ataque por inyección SQL. Así, la validación de seguridad queda separada de la consulta real a la base de datos
+   Clases que la utilizan: Login_GUI, VentanaFactory
+   Índice de Métodos: ProxyAcceso, hacerLogin, intentarLogin */
 public class ProxyAcceso implements IAutenticacion {
 
     private static final Logger LOG = Logger.getLogger(ProxyAcceso.class.getName());
 
     private final AutenticacionDAO autenticacionReal;
 
+    // ==========================================
+    // MÉTODO CONSTRUCTOR
+    // ==========================================
+    // Descripción: Prepara el proxy de acceso, creando por dentro el AutenticacionDAO real al que le va a delegar los logins válidos
+    // Clases que lo usan: Login_GUI, VentanaFactory
     public ProxyAcceso() {
         this.autenticacionReal = new AutenticacionDAO();
     }
 
-    /**
-     * Cumple el contrato de IAutenticacion: UsuarioSistema si el login es
-     * válido, null en cualquier otro caso (campos vacíos, inyección
-     * detectada, o credenciales incorrectas).
-     */
+    // ==========================================
+    // MÉTODO PARA INICIAR SESIÓN DE FORMA SEGURA
+    // ==========================================
+    // Descripción: Revisa que el usuario y la contraseña no estén vacíos y que no contengan símbolos sospechosos de un ataque de inyección SQL. Si todo está bien, delega el login al AutenticacionDAO real; si algo falla en las validaciones, entrega un valor vacío (nulo) sin siquiera consultar la base de datos
+    // Clases que lo usan: Login_GUI, VentanaFactory
     @Override
     public UsuarioSistema hacerLogin(String user, String pass) {
         if (user == null || pass == null || user.trim().isEmpty() || pass.trim().isEmpty()) {
@@ -44,10 +40,11 @@ public class ProxyAcceso implements IAutenticacion {
         return autenticacionReal.hacerLogin(user, pass);
     }
 
-    /**
-     * Versión enriquecida para la capa de presentación: distingue el motivo
-     * exacto del fallo, sin recurrir a Strings mágicos.
-     */
+    // ==========================================
+    // MÉTODO PARA INTENTAR EL LOGIN CON DETALLE DEL RESULTADO
+    // ==========================================
+    // Descripción: Hace las mismas validaciones que hacerLogin, pero en vez de solo entregar el usuario o un valor vacío, entrega un objeto ResultadoLogin que indica exactamente el motivo del resultado (campos vacíos, credenciales inválidas, o éxito), para que la pantalla de login pueda mostrar el mensaje correcto
+    // Clases que lo usan: Login_GUI, VentanaFactory
     public ResultadoLogin intentarLogin(String user, String pass) {
         if (user == null || pass == null || user.trim().isEmpty() || pass.trim().isEmpty()) {
             return ResultadoLogin.camposVacios();

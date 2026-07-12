@@ -3,11 +3,18 @@ import java.awt.Color;
 import javax.swing.JFrame;
 import static javax.swing.UIManager.put;
 
+/* ¿Para qué sirve esta pantalla?: Esta es la pantalla de inicio de sesión, la primera que ve cualquier persona al abrir la aplicación. Aquí el usuario escribe su nombre de usuario y su contraseña para entrar al sistema. Según el rol que tenga la cuenta (Oficial de Operaciones o Técnico de Mantenimiento), la aplicación abre automáticamente la pantalla que le corresponde. También tiene un botón para reiniciar los datos de prueba de la base de datos, pensado solamente para usarse durante el desarrollo, y un botón para salir de la aplicación */
+
 public class Login_GUI extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Login_GUI.class.getName());
         private boolean cargandoLogin = false;  // variable para evitar enter y click al mismo tiempo en login
 
+    // ==========================================
+    // MÉTODO CONSTRUCTOR DE LA PANTALLA
+    // ==========================================
+    // Descripción: Arma todos los elementos visuales de la pantalla de login (con initComponents, que es generado por el diseñador), la deja en pantalla completa, revisa que la conexión a la base de datos funcione al arrancar, y configura que la tecla Enter también sirva para iniciar sesión
+    // Qué otros métodos la activan: Se ejecuta automáticamente al crear la pantalla, ya sea desde OperacionDeVuelos o desde el método main() de esta misma clase
     public Login_GUI() {
         initComponents();
         this.setExtendedState(JFrame.MAXIMIZED_BOTH); //Esto expande a FullScreen al iniciar
@@ -480,9 +487,11 @@ public class Login_GUI extends javax.swing.JFrame {
     }
     
     
-// =========================================================================
-// MÉTODO UNIFICADO: Aquí se procesa el Login real
-// =========================================================================
+    // ==========================================
+    // MÉTODO PARA PROCESAR EL INICIO DE SESIÓN
+    // ==========================================
+    // Descripción: Toma el usuario y la contraseña escritos en la pantalla, y le pide al Proxy de acceso que revise si son correctos. Según el resultado, muestra una advertencia si faltan campos, un error si las credenciales están mal, o abre la pantalla que le corresponde al usuario y cierra el login si todo salió bien. Mientras se está procesando un intento, bloquea que se dispare otro intento al mismo tiempo
+    // Qué otros métodos la activan: Se activa al hacer clic en el botón de Iniciar Sesión, o al presionar la tecla Enter
     private void iniciarSesionProceso() {
         // Si ya se está procesando un intento, ignoramos por completo el segundo disparo
         if (cargandoLogin) {

@@ -1,6 +1,9 @@
 package servicios;
 import java.util.Map;
 
+/* ¿Para qué sirve?: Este servicio se encarga de todo lo relacionado con el clima de los aeropuertos. Por un lado revisa que el código METAR ingresado realmente corresponda al aeropuerto de destino del vuelo, y por otro lado, como el sistema no está conectado a un proveedor real de clima, genera códigos METAR simulados para poder probar la aplicación
+   Clases que la utilizan: DespachoService, OficialOperaciones_GUI
+   Índice de Métodos: metarCorrespondeADestino, obtenerMetarSimulado */
 public class ClimaAeropuertoService {
 
     private static final Map<String, String> ICAO_POR_CIUDAD = Map.ofEntries(
@@ -16,15 +19,12 @@ public class ClimaAeropuertoService {
         Map.entry("MADRID", "LEMD"),     Map.entry("MAD", "LEMD")
     );
 
-    
-// =================================================================================
-// MÉTODO PARA VALIDAR QUE EL METAR INGRESADO CORRESPONDA AL AEROPUERTO DE DESTINO
-// =================================================================================
-/**
-    Verifica que el código METAR ingresado corresponda al aeropuerto de
-    destino real de la ruta. Si la ruta no está en el diccionario, o el
-    METAR viene vacío, se considera válido por defecto (no bloquea).
-*/
+
+    // ==========================================
+    // MÉTODO PARA VALIDAR QUE EL METAR CORRESPONDA AL DESTINO
+    // ==========================================
+    // Descripción: Revisa si el código METAR ingresado menciona el aeropuerto correcto para la ruta del vuelo. Si la ruta no está en la lista conocida, o si no se ingresó ningún METAR, se considera válido por defecto para no bloquear la operación
+    // Clases que lo usan: DespachoService, OficialOperaciones_GUI
     public boolean metarCorrespondeADestino(String codigoMetar, String origenDestino) {
         if (origenDestino == null) {
             return true;
@@ -44,13 +44,11 @@ public class ClimaAeropuertoService {
         return metar.contains(icaoEsperado);
     }
 
-// =======================================
-// METODO PARA SIMULAR EL METAR OBTENIDO
-// =======================================
-/**
-    Este metodo genera automaticamente los codigos METAR, 
-    simulando proovedores externos o ingreso del Oficial
-*/    
+    // ==========================================
+    // MÉTODO PARA SIMULAR UN REPORTE METAR
+    // ==========================================
+    // Descripción: Genera un código METAR de ejemplo según la ciudad de destino de la ruta, simulando lo que entregaría un proveedor real de clima. Se puede pedir una versión con buen clima o con mal clima, según el parámetro que se reciba
+    // Clases que lo usan: DespachoService, OficialOperaciones_GUI
     public String obtenerMetarSimulado(String origenDestino, boolean forzarBueno) {
         if (origenDestino == null) {
             return "";

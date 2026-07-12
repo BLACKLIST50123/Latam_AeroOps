@@ -11,10 +11,18 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* ¿Para qué sirve?: Esta clase se encarga de revisar en la base de datos si el usuario y la contraseña que se ingresan en el login son correctos, y de traer los datos del empleado dueño de esa cuenta
+   Clases que la utilizan: ProxyAcceso, Login_GUI
+   Índice de Métodos: hacerLogin */
 public class AutenticacionDAO implements IAutenticacion {
 
     private static final Logger LOG = Logger.getLogger(AutenticacionDAO.class.getName());
 
+    // ==========================================
+    // MÉTODO PARA INICIAR SESIÓN
+    // ==========================================
+    // Descripción: Recibe el usuario y la contraseña escritos en la pantalla de login, y busca en la base de datos si existe una cuenta que coincida con esos datos. Si encuentra la cuenta, arma un objeto UsuarioSistema con el nombre, el rol de acceso y demás datos del empleado, y lo entrega; si no encuentra ninguna coincidencia o si ocurre un error, entrega un valor vacío (nulo)
+    // Clases que lo usan: ProxyAcceso, Login_GUI
     @Override
     public UsuarioSistema hacerLogin(String user, String pass) {
         // JOIN con empleados para traer el nombre real (antes solo se traía el usuario de acceso)

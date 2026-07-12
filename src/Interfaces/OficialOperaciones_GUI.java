@@ -12,6 +12,14 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+/* ¿Para qué sirve esta pantalla?: Esta es la pantalla principal del Oficial de Operaciones, 
+la más completa de todo el sistema. Desde aquí el Oficial puede: asignar la tripulación a un vuelo programado 
+para crear un nuevo vuelo operativo; autorizar el despacho de un vuelo revisando en tiempo real el peso total, 
+el límite MTOW de la aeronave y el clima del aeropuerto de destino; declarar demoras o cancelar vuelos; llevar 
+el control de las fases OOOI de cada vuelo (salida, despegue, aterrizaje y llegada); cerrar el Logbook de un vuelo 
+reportando el combustible sobrante y las fallas técnicas encontradas; revisar el historial completo de vuelos con 
+filtros; y ver el estado de toda la flota de aeronaves. También recibe avisos automáticos cuando el Técnico de 
+Mantenimiento libera una aeronave */
 public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patrones.Facade_Observer.MantenimientoObserver {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(OficialOperaciones_GUI.class.getName());
@@ -45,6 +53,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     private java.util.Map<String, String[]> borradoresLogbook = new java.util.HashMap<>();
     private String vueloLogbookSeleccionado = "";  
     
+    // ==========================================
+    // MÉTODO CONSTRUCTOR DE LA PANTALLA
+    // ==========================================
+    // Descripción: Guarda los datos del oficial que inició sesión, arma todos los elementos visuales de la pantalla (con initComponents, generado por el diseñador), aplica el tema oscuro a los combos, scrolls y tablas, carga el historial de vuelos, la flota, los combos de despacho, los vuelos pendientes, los vuelos de control OOOI y los vuelos disponibles para Logbook. También activa el cálculo de pesos en tiempo real mientras se escribe en el formulario de despacho, deja un temporizador que refresca la lista de pendientes cada 3 segundos, y suscribe esta pantalla para recibir avisos cuando Mantenimiento libera una aeronave
+    // Qué otros métodos la activan: Se ejecuta automáticamente cuando VentanaFactory crea esta pantalla después de un login exitoso
     public OficialOperaciones_GUI(int idEmpleado, String nombreUsuario, String rol, String nombreCompleto) {
         this.idOficialLogueado = idEmpleado;
         this.usuarioLogueado = nombreUsuario;
@@ -213,6 +226,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         btnHistorialVuelos = new ElementosDiseño.BotonMenu();
         btnGestionFlota = new ElementosDiseño.BotonMenu();
         logo = new javax.swing.JLabel();
+        botonMenu1 = new ElementosDiseño.BotonMenu();
         pnlContenedorPrincipal = new javax.swing.JPanel();
         pnlAsignacion = new javax.swing.JPanel();
         pnlAsignacionCuerpo = new javax.swing.JPanel();
@@ -616,20 +630,18 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         logo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/iconos_imagenes/LogoInterfaces.png"))); // NOI18N
         logo.setText("jLabel2");
 
+        botonMenu1.setName(""); // NOI18N
+        botonMenu1.setTexto("Prueba Observer");
+        botonMenu1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                botonMenu1MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout fondoBarraLateralLayout = new javax.swing.GroupLayout(fondoBarraLateral);
         fondoBarraLateral.setLayout(fondoBarraLateralLayout);
         fondoBarraLateralLayout.setHorizontalGroup(
             fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoBarraLateralLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
-                .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lblUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblRolSistema, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(fondoBarraLateralLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -649,6 +661,19 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                             .addComponent(lblModulos))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(botonMenu1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                        .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblRolSistema, javax.swing.GroupLayout.DEFAULT_SIZE, 96, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         fondoBarraLateralLayout.setVerticalGroup(
             fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -656,29 +681,28 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
                 .addGap(22, 22, 22)
                 .addComponent(logo, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(31, 31, 31)
+                .addComponent(lblModulos)
+                .addGap(18, 18, 18)
+                .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(btnGestionFlota, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 467, Short.MAX_VALUE)
+                .addComponent(botonMenu1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(51, 51, 51)
                 .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                        .addComponent(pnlFondoSistemaOnline, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(31, 31, 31)
-                        .addComponent(lblModulos)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnAsigancionVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnAutorizarDespacho, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnHistorialVuelos, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnGestionFlota, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 556, Short.MAX_VALUE)
-                        .addGroup(fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                                .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblRolSistema))
-                            .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(fondoBarraLateralLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, fondoBarraLateralLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(fondoBarraLateralLayout.createSequentialGroup()
+                            .addComponent(lblUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(lblRolSistema))
+                        .addComponent(pnlFondoPerfil, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(fondoBtnCerrarSesion, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(24, 24, 24))
         );
 
@@ -4054,7 +4078,7 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         Clases.VueloOperativo voSel = (Clases.VueloOperativo) cbxVuelosDespacho.getSelectedItem();
 
         // ==============================================================
-        // 2-5. REGLAS DE NEGOCIO + STATE + BUILDER + PERSISTENCIA
+        //    REGLAS DE NEGOCIO + STATE + BUILDER + PERSISTENCIA
         //    Toda esta orquestación fue extraída a servicios.DespachoService.
         //    La GUI ya no valida MTOW/clima/jurisdicción "a mano": solo arma
         //    los objetos desde el formulario y pinta el resultado tipado.
@@ -4550,6 +4574,10 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 
     }//GEN-LAST:event_btnCerrarVueloMousePressed
 
+    private void botonMenu1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_botonMenu1MouseClicked
+        new TecnicoMantenimiento_GUI(002, "fmontero", "Tecnico Mantenimiento", "Frank Montero").setVisible(true);
+    }//GEN-LAST:event_botonMenu1MouseClicked
+
     /**
 //     * @param args the command line arguments
 //     */
@@ -4578,6 +4606,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 // ===================================================================================================
 // MÉTODO PARA LIMPIAR LOS CAMPOS Y DESHABILITARLOS SI NO HAY VUELO SELECCIONADO DE LA VISTA DESPACHO
 // ===================================================================================================
+    // ==========================================
+    // MÉTODO PARA LIMPIAR EL FORMULARIO DE DESPACHO
+    // ==========================================
+    // Descripción: Borra todos los campos del formulario de despacho (clima, pasajeros, equipaje, carga, combustible), los deja bloqueados en gris, esconde la alerta de demora, y resetea el semáforo de aprobación y la barra de MTOW a su estado inicial
+    // Qué otros métodos la activan: Se llama al terminar de crear un vuelo o al cambiar de vuelo seleccionado en el panel de despacho
     private void limpiarCampos() {
         // Limpiamos textos
         txtAreaClima.setText("");
@@ -4626,9 +4659,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         btnAprobarPlan.setEnabled(false);
     }    
 
-// ===============================================================================================
-// MÉTODO PARA VALIDAR EL INGRESO DE SOLO NÚMEROS EN LOS CAMPOS DE CALCULO DE PESO VISTA DESPACHO
-// ===============================================================================================
+    // ==========================================
+    // MÉTODO PARA VALIDAR QUE SOLO SE INGRESEN NÚMEROS
+    // ==========================================
+    // Descripción: Bloquea que se puedan escribir letras u otros símbolos en los campos de peso (pasajeros, equipaje, carga, combustible de ruta y de reserva), dejando pasar únicamente números
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     private void aplicarValidacionNumerica() {
         // Creamos un "escucha" que solo deja pasar números y el punto decimal
         java.awt.event.KeyAdapter validador = new java.awt.event.KeyAdapter() {
@@ -4650,10 +4685,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }
     
 
-// ==================================================
-// MÉTODO PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX
-// ==================================================
-//##### ESTE METODO ES PARA PERSONALIZAR EL DISEÑO DE LOS JCOMBOX #####
+    // ==========================================
+    // MÉTODO PARA APLICAR EL TEMA OSCURO A UN COMBO
+    // ==========================================
+    // Descripción: Cambia el diseño de un JComboBox para que se vea con los colores oscuros del resto de la aplicación, en vez del estilo blanco por defecto de Java: le cambia la flecha, el fondo, los colores de la lista desplegable y el borde
+    // Qué otros métodos la activan: Se llama desde el constructor, una vez por cada combo de la pantalla
     private void aplicarTemaOscuro(javax.swing.JComboBox combo) {
     // 1. ACHICAR FLECHA Y MATAR EL FONDO BLANCO DE RAÍZ
     combo.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
@@ -4719,6 +4755,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 // ==========================================
 // MÉTODO PARA CAMBIAR EL DISEÑO DEL SCROLL
 // ==========================================    
+    // ==========================================
+    // MÉTODO PARA APLICAR EL SCROLL MODERNO
+    // ==========================================
+    // Descripción: Cambia el diseño de una barra de desplazamiento (scroll) para que se vea delgada y moderna, sin las flechas de subir/bajar y con colores acordes al tema oscuro de la aplicación
+    // Qué otros métodos la activan: Se llama desde el constructor, una vez por cada panel con scroll de la pantalla
     private void aplicarScrollModerno(javax.swing.JScrollPane scroll) {
         scroll.setBorder(javax.swing.BorderFactory.createEmptyBorder()); // Quita el borde exterior
 
@@ -4761,6 +4802,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
 // ==========================================
 // MÉTODOS PARA CAMBIAR DISEÑO DE LAS TABLAS
 // ==========================================  
+    // ==========================================
+    // MÉTODO PARA APLICAR EL TEMA A UNA TABLA
+    // ==========================================
+    // Descripción: Cambia el diseño de una tabla para que combine con el resto de la aplicación: le pone fondo y letras oscuras, le agranda las filas, le personaliza la cabecera y le da un color especial a las celdas de Estado y OOOI según su valor. También hace que la tabla se deseleccione si el usuario hace clic fuera de ella
+    // Qué otros métodos la activan: Se llama desde el constructor, para la tabla del historial de vuelos y la tabla de flota
     private void aplicarTemaTabla(javax.swing.JTable tabla) {
         // 1. Fondo, color de letra y líneas de la tabla
         tabla.setBackground(new java.awt.Color(30, 41, 59)); // Azul oscuro del fondo (#0f172a)
@@ -4914,6 +4960,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
     }
     
 // Este método va a contar cuántas filas tienes y decidirá si agranda la caja o si le activa el scroll
+    // ==========================================
+    // MÉTODO PARA AJUSTAR LA ALTURA DE LA TABLA
+    // ==========================================
+    // Descripción: Calcula cuánto espacio necesita una tabla según la cantidad de filas que tenga en ese momento, y ajusta su altura y la del panel que la contiene. Si hay demasiadas filas, deja un tamaño máximo fijo y activa el scroll en vez de seguir creciendo
+    // Qué otros métodos la activan: Se llama desde el constructor y desde aplicarFiltrosHistorial y aplicarFiltrosFlota, cada vez que cambia la cantidad de filas visibles
     private void ajustarAlturaDinamica(javax.swing.JTable tabla, javax.swing.JScrollPane scroll) {
         //  Le decimos a Java: "Espera a que la interfaz termine de cargar"
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -4968,10 +5019,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         });
     }
     
-// ===========================================================
-// CONTADORES DEL DASHBOARD: se recalculan sobre las listas en memoria
-// (listaHistorialCompleta / listaFlotaCompleta) cada vez que cambian
-// ===========================================================
+    // ==========================================
+    // MÉTODO PARA CONFIGURAR LOS TOOLTIPS DE LOS CONTADORES
+    // ==========================================
+    // Descripción: Le pone a cada contador del tablero principal (vuelos activos, pendientes de despacho, aeronaves aptas, personal libre, etc.) un texto de ayuda que aparece al dejar el mouse encima, explicando qué significa exactamente ese número
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     private void configurarTooltipsContadores() {
         lblContadorVuelosActivos.setToolTipText("Vuelos que no han finalizado ni sido cancelados (incluye pendientes, aprobados, en demora, en vuelo y en tierra)");
         lblContadorPendientesDespacho.setToolTipText("Vuelos esperando aprobación de despacho");
@@ -4985,6 +5037,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblContadorCancelados1.setToolTipText("Vuelos cancelados");
     }
 
+    // ==========================================
+    // MÉTODO PARA ACTUALIZAR LOS CONTADORES DEL TABLERO
+    // ==========================================
+    // Descripción: Recorre la lista de vuelos y de aeronaves que están en memoria y cuenta cuántos vuelos están activos, pendientes de despacho, en demora, aprobados o cancelados, cuántas aeronaves están aptas, y cuánto personal está disponible; luego actualiza todos los números que se muestran en el tablero principal
+    // Qué otros métodos la activan: Se llama desde cargarHistorialVuelos y desde cargarFlota, cada vez que se recarga alguna de esas dos listas
     private void actualizarContadoresDashboard() {
         int vuelosActivos = 0, pendientesDespacho = 0, enDemora = 0, aprobados = 0, cancelados = 0;
         for (Clases.VueloOperativo vo : listaHistorialCompleta) {
@@ -5023,9 +5080,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         lblContadorCancelados1.setText(String.valueOf(cancelados));
     }
 
-// ===========================================================
-// HISTORIAL DE VUELOS: CARGA DESDE BD + FILTROS EN MEMORIA
-// ===========================================================
+    // ==========================================
+    // MÉTODO PARA MOSTRAR EL ROL DE FORMA LEGIBLE
+    // ==========================================
+    // Descripción: Convierte el código interno del rol (por ejemplo OFICIAL o TECNICO) en un texto más amigable para mostrar en pantalla, como 'Oficial de Operaciones' o 'Técnico de Mantenimiento'
+    // Qué otros métodos la activan: Se llama desde el constructor, para mostrar el rol en la barra lateral
     private String nombreRolLegible(String rolAcceso) {
         if (rolAcceso == null) return "";
         switch (rolAcceso.toUpperCase()) {
@@ -5035,6 +5094,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         }
     }
 
+    // ==========================================
+    // MÉTODO PARA CARGAR EL HISTORIAL DE VUELOS
+    // ==========================================
+    // Descripción: Pide al DAO de vuelos todo el historial de vuelos operativos y lo guarda en memoria. Con esos datos, llena los combos de filtro (código de vuelo, aeronave y estado) con los valores que realmente existen, aplica los filtros actuales sobre la tabla, y actualiza los contadores del tablero
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     private void cargarHistorialVuelos() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         listaHistorialCompleta = dao.obtenerHistorialVuelos();
@@ -5067,6 +5131,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         actualizarContadoresDashboard();
     }
 
+    // ==========================================
+    // MÉTODO PARA APLICAR LOS FILTROS DEL HISTORIAL
+    // ==========================================
+    // Descripción: Revisa los filtros de vuelo, aeronave y estado que el Oficial haya elegido, y vuelve a llenar la tabla del historial mostrando solamente los vuelos que cumplen con todos esos filtros al mismo tiempo. Al final, vuelve a ajustar la altura de la tabla según cuántas filas quedaron visibles
+    // Qué otros métodos la activan: Se llama desde cargarHistorialVuelos, desde el botón de Limpiar Filtros, y cada vez que el Oficial cambia alguno de los combos de filtro
     private void aplicarFiltrosHistorial() {
         String filtroVuelo = (String) cbxFiltroVuelo.getSelectedItem();
         String filtroAeronave = (String) cbxFiltroAeronave.getSelectedItem();
@@ -5096,13 +5165,20 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         ajustarAlturaDinamica(TblHistorialVuelo, ScrollTablaHistorialVuelos);
     }
 
+    // ==========================================
+    // MÉTODO PARA MOSTRAR UN VALOR O UN TEXTO POR DEFECTO
+    // ==========================================
+    // Descripción: Si el valor recibido está vacío o no existe, entrega el texto '--:--' en su lugar; si tiene contenido, entrega el valor tal cual. Se usa para que las horas OOOI vacías no se muestren en blanco en la tabla
+    // Qué otros métodos la activan: Lo usa aplicarFiltrosHistorial al armar cada fila de la tabla de historial
     private String valorOTexto(String valor) {
         return (valor == null || valor.trim().isEmpty()) ? "--:--" : valor;
     }
 
-// ===========================================================
-// GESTIÓN DE FLOTA: CARGA DESDE BD + FILTROS EN MEMORIA
-// ===========================================================
+    // ==========================================
+    // MÉTODO PARA CARGAR LA FLOTA
+    // ==========================================
+    // Descripción: Pide al DAO de aeronaves la lista completa de la flota y la guarda en memoria. Con esos datos, llena los combos de filtro (matrícula, modelo y estado técnico) con los valores que realmente existen, aplica los filtros actuales sobre la tabla, y actualiza los contadores del tablero
+    // Qué otros métodos la activan: Se llama desde el constructor, y también cuando se recibe el aviso de que una aeronave fue liberada de mantenimiento
     private void cargarFlota() {
         ClasesDAO.AeronaveDAO dao = new ClasesDAO.AeronaveDAO();
         listaFlotaCompleta = dao.obtenerFlota();
@@ -5131,6 +5207,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         actualizarContadoresDashboard();
     }
 
+    // ==========================================
+    // MÉTODO PARA APLICAR LOS FILTROS DE LA FLOTA
+    // ==========================================
+    // Descripción: Revisa los filtros de matrícula, modelo y estado técnico que el Oficial haya elegido, y vuelve a llenar la tabla de flota mostrando solamente las aeronaves que cumplen con todos esos filtros al mismo tiempo. Al final, vuelve a ajustar la altura de la tabla según cuántas filas quedaron visibles
+    // Qué otros métodos la activan: Se llama desde cargarFlota, desde el botón de Limpiar Filtros de Flota, y cada vez que el Oficial cambia alguno de los combos de filtro
     private void aplicarFiltrosFlota() {
         String filtroMatricula = (String) cbxFiltroMatricula.getSelectedItem();
         String filtroModelo = (String) cbxFiltroModelo.getSelectedItem();
@@ -5158,9 +5239,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         ajustarAlturaDinamica(TblFlota, ScrollTablaFlota);
     }
 
-// ===========================================================
-// MÉTODO PARA CARGAR DATOS DE COMBOX PAR ACREACION DE VUELOS
-// ===========================================================   
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS COMBOS DE CREACIÓN DE VUELOS
+    // ==========================================
+    // Descripción: Limpia y vuelve a llenar los combos de selección de vuelo programado, capitán y primer oficial, con los vuelos disponibles que trae el DAO de despacho, dejándolos listos para que el Oficial arme un nuevo vuelo operativo
+    // Qué otros métodos la activan: Se llama desde el constructor, una sola vez al abrir la pantalla
     private void cargarComboBoxesDespacho() {
         ClasesDAO.DespachoDAO dao = new ClasesDAO.DespachoDAO();
 
@@ -5186,9 +5269,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         }
     }
     
-// ==========================================================
-// MOVER A CARPETA ElementosDiseño CLASE PERSONALIZADA PARA LOS CHIPS DE LOS TCP (ESTILO WEB) 
-// ==========================================================
+    // ==========================================
+    // CLASE PROPIA: BOTÓN TIPO CHIP PARA SELECCIONAR TRIPULANTES DE CABINA
+    // ==========================================
+    // Descripción: Este es un botón especial con forma de chip, redondeado, que cambia de color cuando está seleccionado. Se usa para elegir a los tripulantes de cabina (TCP) al momento de armar un vuelo, mostrando cada nombre como una pastilla que se puede activar o desactivar con un clic
+    // Qué otros métodos la activan: Se crea desde el código que arma la lista de tripulantes de cabina disponibles en el formulario de asignación de vuelos
     public class BotonChipTCP extends javax.swing.JToggleButton {
         public BotonChipTCP(String text) {
             super(text);
@@ -5236,9 +5321,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         }
     }
 
-// ==================================================================================
-// MÉTODO PARA CARGAR LOS VUELOS PENDIENTES EN LA LISTA DE PENDIENTES A DESPACHO (W&B)
-// ==================================================================================
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS VUELOS PENDIENTES DE DESPACHO
+    // ==========================================
+    // Descripción: Pide al DAO de vuelos la lista de vuelos que todavía están esperando ser despachados, y arma una tarjeta visual por cada uno para mostrarla en el panel lateral. Si no hay ningún vuelo pendiente, muestra un panel vacío en su lugar, y ajusta el tamaño del scroll para que no se estire de más
+    // Qué otros métodos la activan: Se llama desde el constructor, desde el temporizador de refresco automático cada 3 segundos, y después de crear un nuevo vuelo
     private void cargarVuelosPendientesDespacho() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         java.util.List<Clases.VueloOperativo> pendientes = dao.obtenerVuelosPendientesDespacho();
@@ -5300,9 +5387,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         pnlBasePendientes.repaint();
     } 
     
-// ===================================================================================
-// MÉTODO PARA MAPEAR LOS CAMPOS DE COMBUSTIBLE DEL FORMULARIO A UN OBJETO DE DOMINIO
-// ====================================================================================
+    // ==========================================
+    // MÉTODO PARA ARMAR EL MANIFIESTO DESDE EL FORMULARIO
+    // ==========================================
+    // Descripción: Lee lo que el Oficial escribió en los campos de combustible de ruta y de reserva, y arma con esos datos un objeto ManifiestoCombustible listo para usarse. Si algún campo está vacío, lo toma como cero
+    // Qué otros métodos la activan: Lo usan calcularPesosEnVivo y el botón de Aprobar Plan al momento de guardar el despacho
     private Clases.ManifiestoCombustible construirManifiestoDesdeFormulario() {
         double combRuta = txtFieldCombRuta.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombRuta.getText().trim());
         double combRes = txtFieldCombReserva.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldCombReserva.getText().trim());
@@ -5313,9 +5402,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         return manifiesto;
     }
 
-// ==============================================================
-// MÉTODO PARA MAPEAR LOS CAMPOS DE PESO DEL FORMULARIO A UN OBJETO DE DOMINIO
-// ==============================================================
+    // ==========================================
+    // MÉTODO PARA ARMAR LA HOJA DE CARGA DESDE EL FORMULARIO
+    // ==========================================
+    // Descripción: Lee lo que el Oficial escribió en los campos de pasajeros, equipaje y carga, y arma con esos datos (más el combustible ya calculado del manifiesto) un objeto HojaDeCarga listo para usarse. Si algún campo está vacío, lo toma como cero
+    // Qué otros métodos la activan: Lo usan calcularPesosEnVivo y el botón de Aprobar Plan al momento de guardar el despacho
     private Clases.HojaDeCarga construirHojaDeCargaDesdeFormulario(Clases.ManifiestoCombustible manifiesto) {
         double pas = txtFieldPasajeros.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldPasajeros.getText().trim());
         double eq = txtFieldEquipaje.getText().trim().isEmpty() ? 0 : Double.parseDouble(txtFieldEquipaje.getText().trim());
@@ -5329,23 +5420,29 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         return hoja;
     }
 
-// =========================================================================================
-// MÉTODO PARA VALIDAR QUE EL METAR INGRESADO CORRESPONDA AL AEROPUERTO DE DESTINO (SERVICE)
-// =========================================================================================
+    // ==========================================
+    // MÉTODO PARA VALIDAR QUE EL METAR CORRESPONDA AL DESTINO
+    // ==========================================
+    // Descripción: Le pasa el código METAR y el vuelo seleccionado al servicio de clima, para que revise si ese reporte realmente corresponde al aeropuerto de destino del vuelo
+    // Qué otros métodos la activan: Lo usa calcularPesosEnVivo mientras el Oficial escribe el código METAR
     private boolean metarCorrespondeADestino(String codigoMetar, Clases.VueloOperativo voSel) {
         return climaAeropuertoService.metarCorrespondeADestino(codigoMetar, voSel.getVueloBase().getOrigenDestino());
     }
 
-// ================================================
-// METODO PARA SIMULAR EL METAR OBTENIDO (SERVICE)
-// ================================================
+    // ==========================================
+    // MÉTODO PARA SIMULAR UN REPORTE METAR
+    // ==========================================
+    // Descripción: Le pide al servicio de clima que genere un código METAR de ejemplo para la ruta indicada, ya sea con buen clima o con mal clima
+    // Qué otros métodos la activan: Se llama desde el botón de Actualizar METAR en el panel de despacho
     private String obtenerMetarSimulado(String ruta, boolean forzarBueno) {
         return climaAeropuertoService.obtenerMetarSimulado(ruta, forzarBueno);
     }
     
-// ==================================================================
-// MÉTODO PARA CALCULAR LOS PESOS Y METAR CON FILTRO DE SEDE EN VIVO
-// ==================================================================
+    // ==========================================
+    // MÉTODO PARA CALCULAR LOS PESOS EN TIEMPO REAL
+    // ==========================================
+    // Descripción: Cada vez que el Oficial escribe algo en los campos de peso o de clima, arma el manifiesto y la hoja de carga con lo escrito hasta ese momento, calcula el combustible y el peso total, revisa si el clima es apto y si el METAR corresponde al destino, y evalúa con esos datos si el despacho queda dentro del límite MTOW. Si algo no se puede convertir a número todavía (porque el Oficial sigue escribiendo), simplemente no hace nada y espera al siguiente cambio
+    // Qué otros métodos la activan: Se dispara automáticamente cada vez que cambia el texto en los campos de pasajeros, equipaje, carga, combustible o clima
     private void calcularPesosEnVivo() {
         try {
             // 1. Armamos los objetos de dominio reales a partir del formulario
@@ -5384,9 +5481,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         } 
     }
 
-// ==============================================================
-// MÉTODO PURAMENTE VISUAL: TRADUCE EstadoAprobacionMTOW A COLORES/TEXTOS
-// ==============================================================
+    // ==========================================
+    // MÉTODO PARA PINTAR EL ESTADO DE APROBACIÓN MTOW
+    // ==========================================
+    // Descripción: Toma el resultado de la evaluación de peso y clima, y lo traduce a colores y textos en pantalla: pinta la barra de MTOW, el semáforo de aprobado/rechazado y el porcentaje de peso usado, con los colores verde, ámbar o rojo según qué tan seguro sea el despacho
+    // Qué otros métodos la activan: Lo llama calcularPesosEnVivo cada vez que termina de evaluar los datos del formulario
     private void pintarEstadoAprobacionMTOW(servicios.EstadoAprobacionMTOW estado) {
         // Definición de colores institucionales en formato RGB
         java.awt.Color verde = new java.awt.Color(34, 197, 94);  // Verde #22c55e
@@ -5443,9 +5542,11 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         barraMTOW.repaint();
     }
 
-// ==============================================================
-// MÉTODO PARA CARGAR LOS VUELOS EN LA VISTA DESPACHO
-// ==============================================================    
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS VUELOS EN LA VISTA DE DESPACHO
+    // ==========================================
+    // Descripción: Pide al DAO de vuelos la lista de vuelos operativos pendientes de despacho con todos sus detalles, y llena el combo de selección de vuelo del panel de despacho. Si no hay ningún vuelo, muestra el panel vacío
+    // Qué otros métodos la activan: Se llama después de aprobar un despacho, declarar una demora, cancelar un vuelo, o crear un vuelo nuevo, para refrescar la vista de despacho
     private void cargarVuelosEnDespacho() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         java.util.List<Clases.VueloOperativo> vuelosDespacho = dao.obtenerVuelosDetalladosParaDespacho();
@@ -5471,10 +5572,12 @@ public class OficialOperaciones_GUI extends javax.swing.JFrame implements Patron
         }
     }
     
-// ====================================================================
-// MÉTODO PARA CARGAR LOS VUELOS AL COMBOX DE ELECCION DE CONTROL OOOI
-// ====================================================================
-private void cargarVuelosEnControlOOOI() {
+    // ==========================================
+    // MÉTODO PARA CARGAR LOS VUELOS EN CONTROL OOOI
+    // ==========================================
+    // Descripción: Pide al DAO de vuelos la lista de vuelos que ya están listos para el control OOOI (aprobados, en vuelo o en tierra) y llena el combo de selección. Si no hay ningún vuelo disponible, apaga los botones de control OOOI y muestra un aviso de módulo inhabilitado; si sí hay, muestra el aviso de módulo habilitado
+    // Qué otros métodos la activan: Se llama desde el constructor, y después de aprobar un despacho o de procesar un clic de control OOOI
+    private void cargarVuelosEnControlOOOI() {
     ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
     java.util.List<Clases.VueloOperativo> vuelosOOOI = dao.obtenerVuelosParaControlOOOI();
     
@@ -5502,9 +5605,11 @@ private void cargarVuelosEnControlOOOI() {
     }
 }
 
-// ==============================================================
-// MÉTODO PARA SINCRONIZAR LOS BOTONES DE CONTROL OOOI 
-// ==============================================================    
+    // ==========================================
+    // MÉTODO PARA SINCRONIZAR LOS BOTONES DE CONTROL OOOI
+    // ==========================================
+    // Descripción: Apaga y pone en gris todos los botones OOOI, y luego, según en qué fase esté el vuelo seleccionado (pendiente, OUT, OFF, ON o IN), va encendiendo en cascada los botones que corresponden: los que ya se cumplieron quedan marcados como completados, el siguiente queda habilitado para presionar, y el resto sigue bloqueado
+    // Qué otros métodos la activan: Se llama al elegir un vuelo en el combo de Control OOOI, y después de procesar un clic de control OOOI
     private void sincronizarBotonesOOOI(Clases.VueloOperativo vo) {
         // 1. Por defecto, apagamos y ponemos en gris todos
         aplicarEstiloBotonOOOI(btnOUT, lblOUT, lblPushBack, lblTiempoOUT, "BLOQUEADO");
@@ -5553,9 +5658,11 @@ private void cargarVuelosEnControlOOOI() {
         }
     }
     
-// ==============================================
-// MÉTODO PARA LOS COLORES DE LOS CONTROLES OOOI
-// ==============================================      
+    // ==========================================
+    // MÉTODO PARA PINTAR EL ESTILO DE UN BOTÓN OOOI
+    // ==========================================
+    // Descripción: Le da a un botón de control OOOI (OUT, OFF, ON o IN) el color y el estilo que le corresponde según su estado: bloqueado (gris y apagado), habilitado (con color y activo para hacer clic) o completado (marcado como ya realizado)
+    // Qué otros métodos la activan: Lo usa sincronizarBotonesOOOI, una vez por cada uno de los cuatro botones de control OOOI
     private void aplicarEstiloBotonOOOI(javax.swing.JPanel panel, javax.swing.JLabel lblMain, javax.swing.JLabel lblSub, javax.swing.JLabel lblTime, String estadoEstilo) {
         if (estadoEstilo.equals("COMPLETADO")) {
             // Verde Neón (Ya se pasó por esta fase)
@@ -5589,6 +5696,11 @@ private void cargarVuelosEnControlOOOI() {
 // ========================================
 // MÉTODO PARA EL CLICK A LOS BOTONES OOOI
 // ========================================      
+    // ==========================================
+    // MÉTODO PARA PROCESAR UN CLIC DE CONTROL OOOI
+    // ==========================================
+    // Descripción: Revisa que el botón presionado esté habilitado y que haya un vuelo seleccionado; si todo está bien, le pide al servicio de control OOOI que registre la fase indicada (guardando la hora exacta). Si la fase es IN (llegada), también recarga el combo de vuelos disponibles para Logbook. Al final, vuelve a pintar los botones y recarga el historial
+    // Qué otros métodos la activan: Se llama desde los eventos de clic de los cuatro botones de control OOOI (OUT, OFF, ON, IN)
     private void procesarClicControlOOOI(String faseAvanzar, javax.swing.JPanel panelPulsado) {
         // Candado de seguridad: Si el panel está "apagado", ignoramos el clic
         if (!panelPulsado.isEnabled() || cbxVuelosOOOI.getSelectedIndex() <= 0) return;
@@ -5608,9 +5720,11 @@ private void cargarVuelosEnControlOOOI() {
         }
     }
 
-// ==============================================
-// MÉTODO PARA CARGAR COMBOX VUELOS PARA LOGBOOK
-// ==============================================
+    // ==========================================
+    // MÉTODO PARA CARGAR EL COMBO DE VUELOS PARA LOGBOOK
+    // ==========================================
+    // Descripción: Pide al DAO de vuelos la lista de vuelos que ya llegaron (fase IN) y están listos para que se les cierre el Logbook, y llena el combo de selección con esos vuelos
+    // Qué otros métodos la activan: Se llama desde el constructor, y desde procesarClicControlOOOI cuando un vuelo llega a la fase IN
     private void cargarComboBoxVuelosLogbook() {
         ClasesDAO.VueloOperativoDAO dao = new ClasesDAO.VueloOperativoDAO();
         ArrayList<Clases.VueloOperativo> vuelosIn = dao.obtenerVuelosParaLogbook();
@@ -5623,9 +5737,11 @@ private void cargarVuelosEnControlOOOI() {
         }
     }
     
-// ========================================
-// MÉTODO PARA HABILITAR PANEL LOGBOOK
-// ========================================      
+    // ==========================================
+    // MÉTODO PARA HABILITAR O BLOQUEAR EL PANEL DE LOGBOOK
+    // ==========================================
+    // Descripción: Enciende o apaga todos los campos del panel de cierre de Logbook (combustible restante, prioridad de falla, botón de cerrar vuelo y el área de texto del reporte de fallas), cambiando también sus colores para que se vea claramente cuáles están activos y cuáles bloqueados
+    // Qué otros métodos la activan: Se llama al elegir un vuelo en el combo de Logbook (para habilitar el panel), o al no tener ningún vuelo seleccionado (para bloquearlo)
     private void habilitarPanelLogbook(boolean estado) {
         // Colores personalizados para tu paleta oscura
         java.awt.Color colorFondoDeshabilitado = new java.awt.Color(24, 34, 52);  // #182234 (Azul grisáceo oscuro)
@@ -5709,19 +5825,38 @@ private void cargarVuelosEnControlOOOI() {
         }
     }
     
-// ========================================
-// MÉTODO IMPLEMENTACION OBSERVER
-// ========================================    
+    // ==========================================
+    // MÉTODO DE LA INTERFAZ OBSERVER: AERONAVE LIBERADA
+    // ==========================================
+    // Descripción: Este método se ejecuta automáticamente cuando el Técnico de Mantenimiento libera una aeronave (patrón Observer). Recarga la tabla de flota para reflejar el cambio y le muestra al Oficial una notificación avisándole que esa aeronave ya está lista para programación
+    // Qué otros métodos la activan: Lo llama automáticamente MantenimientoPublisher cada vez que se libera una aeronave; no se llama manualmente desde esta pantalla
     public void onAeronaveLiberada(String matricula) {
         // Este código se ejecuta SOLO cuando el técnico firma un avión
-        System.out.println("¡Aviso Reactivo! El oficial detectó la liberación de: " + matricula);
+        System.out.println("¡Aviso Reactivo! Se inició el timer de 2 segundos para: " + matricula);
+        
+// LE AGREGUE UN TEMPORIZDOR PARA HACER EL CAMBIO DE PANTALLA PERO EN REALIDAD LA NOTIFICACION ES INSTANTANEA
+        // Creamos un Timer de Swing configurado a 5000 milisegundos (5 segundos)
+        javax.swing.Timer timer = new javax.swing.Timer(5000, new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                // Este bloque se ejecutará DESPUÉS de los 5 segundos
 
-        // Refrescamos de verdad la tabla de Flota (antes solo se mostraba el aviso, sin recargar datos)
-        cargarFlota();
+                // 1. Recargamos la tabla de Flota
+                cargarFlota();
 
-        ElementosDiseño.NotificacionDialog.info(this, 
-            "La aeronave con matrícula " + matricula + " ha sido liberada por mantenimiento y está lista para programación.", 
-            "Actualización de Flota");
+                // 2. Lanzamos la alerta visual
+                // Nota: Usamos OficialOperaciones_GUI.this porque estamos dentro de una clase anónima
+                ElementosDiseño.NotificacionDialog.info(OficialOperaciones_GUI.this, 
+                    "La aeronave con matrícula " + matricula + " ha sido liberada por mantenimiento y está lista para programación.", 
+                    "Actualización de Flota");
+            }
+        });
+
+        // Le decimos al timer que solo se ejecute UNA vez (no queremos que suene en bucle)
+        timer.setRepeats(false); 
+
+        // ¡Iniciamos la cuenta regresiva!
+        timer.start();
     }
 
     
@@ -5738,6 +5873,7 @@ private void cargarVuelosEnControlOOOI() {
     private javax.swing.JTable TblHistorialVuelo;
     private javax.swing.JProgressBar barraMTOW;
     private javax.swing.JPanel bordeSuperior;
+    private ElementosDiseño.BotonMenu botonMenu1;
     private javax.swing.JLabel btnActualizarMETAR;
     private javax.swing.JLabel btnAprobarPlan;
     private ElementosDiseño.BotonMenu btnAsigancionVuelos;

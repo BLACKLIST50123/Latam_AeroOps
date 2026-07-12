@@ -5,6 +5,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+/* ¿Para qué sirve?: Esta es una tarjeta reutilizable que muestra en resumen un reporte de falla de mantenimiento pendiente: la matrícula de la aeronave, el modelo, la prioridad de la falla con un color según su nivel, y un adelanto del texto de la observación. Al hacer clic, abre o cierra el detalle de ese reporte en la pantalla del técnico
+   Clases que la utilizan: TecnicoMantenimiento_GUI
+   Índice de Métodos: TarjetaReporteMant, mouseClicked, mouseEntered, mouseExited, paintComponent */
 public class TarjetaReporteMant extends JPanel {
     private int idLogbook;
     private String matricula;
@@ -14,6 +17,11 @@ public class TarjetaReporteMant extends JPanel {
     private Interfaces.TecnicoMantenimiento_GUI guiPrincipal;
     private boolean mouseEncima = false;
 
+    // ==========================================
+    // MÉTODO CONSTRUCTOR
+    // ==========================================
+    // Descripción: Prepara una tarjeta nueva con los datos del reporte recibido (aeronave, modelo, prioridad y observaciones), arma su título, su píldora de colores según la prioridad, el resumen de la falla, y deja lista la reacción al hacer clic o pasar el mouse por encima
+    // Clases que lo usan: TecnicoMantenimiento_GUI
     public TarjetaReporteMant(int idLogbook, String matricula, String modelo, String prioridad, String observaciones, Interfaces.TecnicoMantenimiento_GUI gui) {
         this.idLogbook = idLogbook;
         this.matricula = matricula;
@@ -95,6 +103,11 @@ public class TarjetaReporteMant extends JPanel {
 
         // --- ESCUCHADOR DE EVENTOS (INTERACCIÓN DINÁMICA) ---
         addMouseListener(new MouseAdapter() {
+            // ==========================================
+            // MÉTODO PARA CUANDO SE HACE CLIC EN LA TARJETA
+            // ==========================================
+            // Descripción: Si esta tarjeta ya estaba mostrando su detalle, lo cierra; si no, le pide a la pantalla principal que muestre el detalle completo de este reporte
+            // Clases que lo usan: TecnicoMantenimiento_GUI
             @Override
             public void mouseClicked(MouseEvent e) {
                 // Toggle: si esta misma tarjeta ya estaba seleccionada, se cierra el detalle.
@@ -106,12 +119,22 @@ public class TarjetaReporteMant extends JPanel {
                 }
             }
 
+            // ==========================================
+            // MÉTODO PARA CUANDO EL MOUSE ENTRA A LA TARJETA
+            // ==========================================
+            // Descripción: Marca que el mouse está encima de la tarjeta y vuelve a dibujarla para que se note el cambio de color
+            // Clases que lo usan: TecnicoMantenimiento_GUI
             @Override
             public void mouseEntered(MouseEvent e) {
                 mouseEncima = true;
                 repaint(); // Forzar el cambio de color inmediato
             }
 
+            // ==========================================
+            // MÉTODO PARA CUANDO EL MOUSE SALE DE LA TARJETA
+            // ==========================================
+            // Descripción: Marca que el mouse ya no está encima de la tarjeta y vuelve a dibujarla para que regrese a su color normal
+            // Clases que lo usan: TecnicoMantenimiento_GUI
             @Override
             public void mouseExited(MouseEvent e) {
                 mouseEncima = false;
@@ -121,6 +144,11 @@ public class TarjetaReporteMant extends JPanel {
     }
 
     // --- RENDERIZADO DEL FONDO REDONDEADO ESTILO WEB ---
+    // ==========================================
+    // MÉTODO PARA DIBUJAR LA TARJETA
+    // ==========================================
+    // Descripción: Dibuja a mano el fondo de la tarjeta con esquinas redondeadas, cambiando el color según si la tarjeta está seleccionada, si el mouse está encima, o si está en su estado normal
+    // Clases que lo usan: TecnicoMantenimiento_GUI
     @Override
     protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();

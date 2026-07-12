@@ -12,13 +12,18 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/* ¿Para qué sirve?: Esta clase se encarga de todo lo relacionado con el mantenimiento de las aeronaves en la base de datos: traer los reportes de fallas pendientes, traer el historial completo de reparaciones ya hechas, y registrar cuando un técnico termina de reparar un avión y lo libera para que vuelva a volar
+   Clases que la utilizan: TecnicoMantenimiento_GUI, OficialOperaciones_GUI
+   Índice de Métodos: obtenerReportesPendientes, obtenerHistorialMantenimiento, registrarLiberacionAeronave */
 public class MantenimientoDAO {
 
     private static final Logger LOG = Logger.getLogger(MantenimientoDAO.class.getName());
 
-    // ===================================================================
-    // MÉTODO PARA OBTENER LOS REPORTES PENDIENTES (TARJETAS REPORTES)
-    // ===================================================================
+    // ==========================================
+    // MÉTODO PARA OBTENER LOS REPORTES PENDIENTES
+    // ==========================================
+    // Descripción: Busca en la base de datos las fallas que quedaron reportadas en el Logbook de aviones que están actualmente en mantenimiento, y que todavía no han sido resueltas. Junta los datos de la aeronave con la falla reportada y arma la lista que se muestra como tarjetas en la pantalla de reportes
+    // Clases que lo usan: TecnicoMantenimiento_GUI, OficialOperaciones_GUI
     public List<ReportePendienteDTO> obtenerReportesPendientes() {
         List<ReportePendienteDTO> listaReportes = new ArrayList<>();
         
@@ -67,9 +72,11 @@ public class MantenimientoDAO {
         return listaReportes;
     }
 
-    // ===================================================================
-    // MÉTODO PARA EL HISTORIAL DE MANTENIMIENTO (pantalla Historial LogBook)
-    // ===================================================================
+    // ==========================================
+    // MÉTODO PARA OBTENER EL HISTORIAL DE MANTENIMIENTO
+    // ==========================================
+    // Descripción: Busca en la base de datos todas las reparaciones que ya se hicieron, juntando la fecha, la aeronave, la falla original, la acción que se tomó, el técnico que la resolvió y el estado final del registro. Esta lista es la que se muestra en la pantalla de historial del Logbook
+    // Clases que lo usan: TecnicoMantenimiento_GUI, OficialOperaciones_GUI
     public List<ClasesDTO.RegistroMantenimientoDTO> obtenerHistorialMantenimiento() {
         List<ClasesDTO.RegistroMantenimientoDTO> lista = new ArrayList<>();
 
@@ -118,7 +125,11 @@ public class MantenimientoDAO {
         return lista;
     }
 
-// Método transaccional complejo para liberar el avión
+    // ==========================================
+    // MÉTODO PARA REGISTRAR LA LIBERACIÓN DE UNA AERONAVE
+    // ==========================================
+    // Descripción: Guarda en la base de datos la acción que tomó el técnico para reparar la falla, y cambia el estado de la aeronave de vuelta a APTO para que pueda volver a operar. Este método hace las dos operaciones como una sola transacción: si algo falla en el camino, deshace todo (rollback) para que la base de datos no quede en un estado a medias. Entrega verdadero si todo salió bien, o falso si hubo algún error
+    // Clases que lo usan: TecnicoMantenimiento_GUI, OficialOperaciones_GUI
     public boolean registrarLiberacionAeronave(int idLogbook, String matricula, int idTecnico, String accionTomada, String firmaTecnica) {
         Connection conn = null;
         PreparedStatement psMant = null;
